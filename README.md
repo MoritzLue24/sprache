@@ -1,2 +1,2 @@
 # Sprache
-The grammar file is using EBNF
+The grammar file is in EBNF
