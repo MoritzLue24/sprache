@@ -1,0 +1,20 @@
+<program> ::= <body>
+<body> ::= { <statement> }
+<statement> ::= <assignment> |
+				<conditional> |
+				<loop> |
+				<function_call>
+<assignment> ::= "var" <identifier> "=" <expression>
+<conditional> ::= ("if" | "elif" <expression> "{" <body> "}")
+				 [ "else" "{" <body> "}" ]
+<loop> ::= "while" <expression> "{" <body> "}"
+<function_call> ::= <identifier> "(" <expression> { "," <expression> } ")"
+<expression> ::= <term> { "+" | "-" <term> }
+<term> ::= <factor> { "*" | "/" <factor> }
+<factor> ::= "(" <expression> ")" |
+			 <identifier> |
+	         <number>
+<identifier> ::= <letter> | "_" { <letter> | <digit> | "_" }
+<number> ::= ["-"] <digit> { <digit> }
+<letter> ::= "a" | "b" | ... | "z" | "A" | "B" | ... | "Z"
+<digit> ::= "0" | "1" | ... | "9"
