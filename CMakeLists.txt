@@ -4,5 +4,5 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -target x86_64-w64-mingw32")
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-project(test)
-add_executable(test src/main.c)
+project(sprache)
+add_executable(sprache src/main.c)
