@@ -4,5 +4,5 @@ if (!(Test-Path "build")) {
 
 Set-Location "build"
 cmake -G "MinGW Makefiles" ..
-make
+mingw32-make
 Set-Location ".."
