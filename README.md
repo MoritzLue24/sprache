@@ -2,7 +2,7 @@
 The grammar file is in EBNF
 
 ## CLI usage
-`sprache <command> [<arg>]`
+`sprache <command> [<args>]`
 
 ### Commands
 `sprache help`
