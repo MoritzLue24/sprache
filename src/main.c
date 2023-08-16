@@ -40,12 +40,12 @@ main(int argc, char **argv)
 			struct Token token;
 			struct Error err = lex_next(source, &i, &token);
 
-			if (err.type != ERROR_NONE) {
+			if (err.code != ERROR_NONE) {
 				free((void*)source);
 				return fail(err);
 			}
 
-			printf("%i, %s", token.type, token.value);
+			printf("%i, %s\n", token.type, token.value);
 		}
 
 		free((void*)source);
