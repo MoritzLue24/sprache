@@ -27,9 +27,7 @@ read_file(const char *path)
 bool
 is_digit(char c)
 {
-	// TODO: error occurs here i think
-	printf("%i", (int)c);
-	return (c >= '0' && c <= '9');
+	return c >= '0' && c <= '9';
 }
 
 bool
