@@ -10,20 +10,9 @@ enum TokenType
 	TT_LITERAL,
 };
 
-const char *const keywords[] = {
-	"fn",
-	"return",
-	"int32",
-};
+extern const char *const keywords[3];
 
-const char *const punctuations[] = {
-	"(",
-	")",
-	"{",
-	"}",
-	";",
-	"->",
-};
+extern const char *const punctuations[6];
 
 struct Token
 {

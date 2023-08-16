@@ -16,7 +16,7 @@ find_keyword(const char *keyword)
 int32_t 
 match_punct(const char *source, int32_t i, uint32_t *punct_len)
 {
-	uint32_t punctuations_len = sizeof(keywords) / sizeof(keywords[0]);
+	uint32_t punctuations_len = sizeof(punctuations) / sizeof(punctuations[0]);
 
 	if (punct_len == NULL)
 	{
