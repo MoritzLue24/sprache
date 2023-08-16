@@ -5,6 +5,9 @@
 int32_t
 fail(struct Error error)
 {
-	fprintf(stderr, "%i: '%s'", error.type, error.msg);
-	return error.type;
+	if (error.msg == NULL)
+		fprintf(stderr, "ERROR: code %i", error.code);
+	else 
+		fprintf(stderr, "ERROR: code %i, '%s'", error.code, error.msg);
+	return error.code;
 }

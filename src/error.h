@@ -5,16 +5,17 @@
 
 
 struct Error {
-	enum ErrorType {
+	enum ErrorCode {
 		ERROR_NONE,
+		ERROR_MEMORY_ALLOCATION,
 		ERROR_EOF_REACHED,
 		ERROR_TOKEN_INVALID,
-	} type;
+	} code;
 	const char *msg;
 };
 
 /* Writes the error to `stderr`,
- * returns the error code (its just the `enum ErrorType type`).
+ * returns the error code.
 */
 int
 fail(struct Error error);
