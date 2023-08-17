@@ -48,7 +48,7 @@ match_punct(
  * Args
  * - `source`, the source code
  * - `i`, the index of the character (may get modified)
- * - `token`, token will be written to or NULL if no token
+ * - `token`, token will be written to
  *
  * Returns 
  * - `ERROR_EOF_REACHED`, if `source[*i] == '\0'` / if you're at the eof

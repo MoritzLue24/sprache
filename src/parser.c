@@ -135,8 +135,6 @@ lex_next(const char *source, int32_t *i, struct Token *token)
 		token->value = punctuations[punct_i];
 		return (struct Error){ ERROR_NONE, NULL };
 	}
-	
-	token = NULL;
 	return (struct Error){ ERROR_TOKEN_INVALID, NULL };
 }
 
