@@ -58,19 +58,28 @@ lex_next(const char *source, int32_t *i, struct Token *token)
 	if (source[*i] == '\0')
 		return (struct Error){ ERROR_EOF_REACHED, NULL };
 	
-	/* if (is_digit(source[*i])) */
-	/* { */
-	/* 	int32_t start_i = *i; */
-	/* 	while (is_digit(source[*i])) */
-	/* 		++*i; */
+	if (is_digit(source[*i]))
+	{
+		// Loop over all digit chars in source code
+		// (the index `i` will be on the last valid digit char)
+		int32_t start_i = *i;
+		while (is_digit(source[*i + 1]))
+			++(*i);
 
-	/* 	char* value = malloc(*i - start_i + 1); */
-	/* 	strncpy(value, source + start_i, *i - start_i); */
-		
-	/* 	token->type = TT_LITERAL; */
-	/* 	token->value = value; */
-	/* 	return (struct Error){ ERROR_NONE, NULL }; */
-	/* } */
+		char* value = malloc(*i - start_i + 2);
+		if (value == NULL)
+			return (struct Error){ ERROR_MEMORY_ALLOCATION, "malloc failed" };
+
+		strncpy(value, source + start_i, *i - start_i + 1);
+		value[*i - start_i + 1] = '\0';
+
+		// currently, `i` is the last valid digit char so add one
+		++(*i);
+
+		token->type = TT_LITERAL;
+		token->value = value;
+		return (struct Error){ ERROR_NONE, NULL };
+	}
 
 	/* used for `match_punct` later in this function */
 	int32_t punct_i;
