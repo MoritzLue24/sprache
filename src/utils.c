@@ -50,7 +50,8 @@ skip_whitespaces(const char *source, int32_t *i)
 	while (
 		source[*i] == ' ' ||
 		source[*i] == '\t' ||
-		source[*i] == '\n'
+		source[*i] == '\n' ||
+		source[*i] == '\r'
 	) {
 		++(*i);
 	}

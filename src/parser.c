@@ -19,15 +19,15 @@ match_punct(const char *source, int32_t i, uint32_t *punct_len)
 	// TODO: error occurs on this fn.
 	uint32_t punctuations_len = sizeof(punctuations) / sizeof(punctuations[0]);
 
+	uint32_t punct_longest = 0;
 	if (punct_len == NULL)
 	{
 		/* Get the length of the punctuation with the longest characters */
-		uint32_t longest = 0;
 		uint32_t current_len;
 		for (uint32_t i = 0; i < punctuations_len; ++i)
-			if ((current_len = strlen(punctuations[i])) > longest)
-				longest = current_len;
-		*punct_len = longest;
+			if ((current_len = strlen(punctuations[i])) > punct_longest)
+				punct_longest = current_len;
+		punct_len = &punct_longest;
 	}
 
 	for (uint32_t punct_i = 0; punct_i < punctuations_len; ++punct_i)
@@ -36,15 +36,16 @@ match_punct(const char *source, int32_t i, uint32_t *punct_len)
 			continue;
 
 		/* Copy the substring from i to i + punct_len */
-		char* substr = malloc(*punct_len);
+		char *substr = malloc(*punct_len + 1);
 		strncpy(substr, source + i, *punct_len);
-		
+		substr[*punct_len] = '\0';
+
 		/* If the substr is the current punct_i string, return it */
 		if (!strcmp(punctuations[punct_i], substr))
 			return punct_i;
 	}
 
-	--*punct_len;
+	--(*punct_len);
 	if (*punct_len > 0)
 		return match_punct(source, i, punct_len);
 	return -1;
@@ -108,7 +109,7 @@ lex_next(const char *source, int32_t *i, struct Token *token)
 		return (struct Error){ ERROR_NONE, NULL };
 	}
 
-	else if ((punct_i = match_punct(source, *i, NULL)))
+	else if ((punct_i = match_punct(source, *i, NULL)) != -1)
 	{
 		*i += strlen(punctuations[punct_i]);
 		token->type = TT_PUNCT;
