@@ -58,7 +58,7 @@ main(int argc, char **argv)
 	else if (!strcmp(argv[1], "buffer"))
 	{
 		/* const char* source = argv[2]; */
-		// TODO: pass source into lexer (or tokenizer)
+		/* TODO: pass source into lexer (or tokenizer) */
 		return 0;
 	}
 	fprintf(stderr, "invalid command");
