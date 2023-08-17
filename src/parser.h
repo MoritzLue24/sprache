@@ -7,15 +7,6 @@
 #include "tokens.h"
 
 
-bool
-is_digit(char c);
-
-bool
-is_ident_start(char c);
-
-bool
-is_ident_char(char c);
-
 /* Finds the given `keyword` in the in `tokens.h` defined array `keywords`,
  * and gives the index in this array back.
  * 
