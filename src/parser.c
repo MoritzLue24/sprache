@@ -33,7 +33,7 @@ match_punct(
 		punct_len = &punct_longest;
 	}
 
-	for (int32_t punct_i_ = 0; punct_i_ < punctuations_len; ++punct_i_)
+	for (uint32_t punct_i_ = 0; punct_i_ < punctuations_len; ++punct_i_)
 	{
 		if (strlen(punctuations[punct_i_]) != *punct_len)
 			continue;
