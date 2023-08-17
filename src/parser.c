@@ -62,10 +62,9 @@ match_punct(
 struct Error
 lex_next(const char *source, int32_t *i, struct Token *token)
 {
-	skip_whitespaces(source, i);
 	if (source[*i] == '\0')
 		return (struct Error){ ERROR_EOF_REACHED, NULL };
-	
+
 	if (is_digit(source[*i]))
 	{
 		/* Loop over all digit chars in source code 
@@ -135,6 +134,8 @@ lex_next(const char *source, int32_t *i, struct Token *token)
 		token->value = punctuations[punct_i];
 		return (struct Error){ ERROR_NONE, NULL };
 	}
+
+	printf("char: %i", source[*i]);
 	return (struct Error){ ERROR_TOKEN_INVALID, NULL };
 }
 

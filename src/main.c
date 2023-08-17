@@ -49,6 +49,7 @@ main(int argc, char **argv)
 				return fail(err);
 			}
 			printf("%i, %s\n", token.type, token.value);
+			skip_whitespaces(source, &i);
 		}
 
 		free((void*)source);
