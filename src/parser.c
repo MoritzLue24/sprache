@@ -16,6 +16,7 @@ find_keyword(const char *keyword)
 int32_t 
 match_punct(const char *source, int32_t i, uint32_t *punct_len)
 {
+	// TODO: error occurs on this fn.
 	uint32_t punctuations_len = sizeof(punctuations) / sizeof(punctuations[0]);
 
 	if (punct_len == NULL)
@@ -52,35 +53,47 @@ match_punct(const char *source, int32_t i, uint32_t *punct_len)
 struct Error
 lex_next(const char *source, int32_t *i, struct Token *token)
 {
+	skip_whitespaces(source, i);
 	if (source[*i] == '\0')
 		return (struct Error){ ERROR_EOF_REACHED, NULL };
+	
+	/* if (is_digit(source[*i])) */
+	/* { */
+	/* 	int32_t start_i = *i; */
+	/* 	while (is_digit(source[*i])) */
+	/* 		++*i; */
 
-	if (is_digit(source[*i]))
-	{
-		int32_t start_i = *i;
-		while (is_digit(source[*i]))
-			++*i;
-
-		char* value = malloc(*i - start_i + 1);
-		strncpy(value, source + start_i, *i - start_i);
+	/* 	char* value = malloc(*i - start_i + 1); */
+	/* 	strncpy(value, source + start_i, *i - start_i); */
 		
-		token->type = TT_LITERAL;
-		token->value = value;
-		return (struct Error){ ERROR_NONE, NULL };
-	}
+	/* 	token->type = TT_LITERAL; */
+	/* 	token->value = value; */
+	/* 	return (struct Error){ ERROR_NONE, NULL }; */
+	/* } */
 
 	/* used for `match_punct` later in this function */
 	int32_t punct_i;
 
 	if (is_ident_start(source[*i]))
 	{
-		int32_t start_i = *i++;
-		while (is_ident_char(source[*i]))
-			++*i;
-
-		char* ident = malloc(*i - start_i + 1);
-		strncpy(ident, source + start_i, *i - start_i);
+		// Loop over all valid identifier chars in source code
+		// (the index `i` will be on the last valid ident char)
+		int32_t start_i = (*i)++;
 		
+		while (is_ident_char(source[*i + 1]))
+			++(*i);
+
+		char* ident = malloc(*i - start_i + 2);
+		if (ident == NULL)
+			return (struct Error){ ERROR_MEMORY_ALLOCATION, "malloc failed" };
+
+		// copy content from start_i to current i to `ident`
+		strncpy(ident, source + start_i, *i - start_i + 1);
+		ident[*i - start_i + 1] = '\0';
+
+		// currently, `i` is the last valid ident char so add one
+		++(*i);
+
 		int32_t kw_i;
 		if ((kw_i = find_keyword(ident)) != -1)
 		{

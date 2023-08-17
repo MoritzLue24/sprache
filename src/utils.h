@@ -17,4 +17,7 @@ is_ident_start(char c);
 bool
 is_ident_char(char c);
 
+void
+skip_whitespaces(const char *source, int32_t *i);
+
 #endif /* UTILS_H */

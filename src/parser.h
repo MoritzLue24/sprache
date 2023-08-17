@@ -48,7 +48,7 @@ match_punct(const char *source, int32_t i, uint32_t *punct_len);
  * The `source[*i]` char should be the first character of the desired token.
  * Writes the desired token to `struct Token *token`.
  * When this function returns, `source[*i]` will be one character 
- * after the token.
+ * after the token. Skips whitespace chars at the beginning.
  *
  * Args
  * - `source`, the source code

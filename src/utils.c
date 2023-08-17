@@ -43,3 +43,16 @@ is_ident_char(char c)
 {
 	return is_ident_start(c) || is_digit(c);
 }
+
+void
+skip_whitespaces(const char *source, int32_t *i)
+{
+	while (
+		source[*i] == ' ' ||
+		source[*i] == '\t' ||
+		source[*i] == '\n'
+	) {
+		++(*i);
+	}
+}
+
