@@ -19,20 +19,25 @@ int32_t
 find_keyword(const char *keyword);
 
 /* Searches for the punctuation in the in `tokens.h` defined `punctuations`
- * array, returns the index. When no punctuation matches at the current `i`.
+ * array, writes the index to `punct_i`.
+ * When no punctuation matches at the current `i`, write -1 to `punct_i`.
  * 
  * Args:
  * - `source`, the entire source code 
  * - `i`, the index of the current character
  * - `punct_len`, the length of the punctuation token,
  *		when calling this function externally, pass NULL
+ * - `punct_i`, will be index of punct in `punctuations` (-1 if no punct)
  *
  * Returns
- * - The index of the punctuation, or
- *		-1 if the following chars are not in `punctuations` 
+ * - `ERROR_MEMORY_ALLOCATION`, on memory allocation fail
 */
-int32_t 
-match_punct(const char *source, int32_t i, uint32_t *punct_len);
+struct Error 
+match_punct(
+	const char *source,
+	int32_t i,
+	uint32_t *punct_len,
+	int32_t *punct_i);
 
 /* Tokenizes the next token of the given source code at the ith character.
  * The `source[*i]` char should be the first character of the desired token.

@@ -13,8 +13,12 @@ find_keyword(const char *keyword)
 	return -1;
 }
 
-int32_t 
-match_punct(const char *source, int32_t i, uint32_t *punct_len)
+struct Error 
+match_punct(
+	const char *source,
+	int32_t i,
+	uint32_t *punct_len,
+	int32_t *punct_i)
 {
 	uint32_t punctuations_len = sizeof(punctuations) / sizeof(punctuations[0]);
 
@@ -29,9 +33,9 @@ match_punct(const char *source, int32_t i, uint32_t *punct_len)
 		punct_len = &punct_longest;
 	}
 
-	for (uint32_t punct_i = 0; punct_i < punctuations_len; ++punct_i)
+	for (int32_t punct_i_ = 0; punct_i_ < punctuations_len; ++punct_i_)
 	{
-		if (strlen(punctuations[punct_i]) != *punct_len)
+		if (strlen(punctuations[punct_i_]) != *punct_len)
 			continue;
 
 		/* Copy the substring source[i] to source[i + punct_len] */
@@ -40,14 +44,19 @@ match_punct(const char *source, int32_t i, uint32_t *punct_len)
 		substr[*punct_len] = '\0';
 
 		/* If the substr is the current punct_i string, return it */
-		if (!strcmp(punctuations[punct_i], substr))
-			return punct_i;
+		if (!strcmp(punctuations[punct_i_], substr))
+		{
+			*punct_i = punct_i_;
+			return (struct Error){ ERROR_NONE, NULL };
+		}
 	}
 
 	--(*punct_len);
 	if (*punct_len > 0)
-		return match_punct(source, i, punct_len);
-	return -1;
+		return match_punct(source, i, punct_len, punct_i);
+
+	*punct_i = -1;
+	return (struct Error){ ERROR_NONE, NULL };
 }
 
 struct Error
@@ -79,9 +88,6 @@ lex_next(const char *source, int32_t *i, struct Token *token)
 		token->value = value;
 		return (struct Error){ ERROR_NONE, NULL };
 	}
-
-	/* used for `match_punct` later in this function */
-	int32_t punct_i;
 
 	if (is_ident_start(source[*i]))
 	{
@@ -117,7 +123,12 @@ lex_next(const char *source, int32_t *i, struct Token *token)
 		return (struct Error){ ERROR_NONE, NULL };
 	}
 
-	else if ((punct_i = match_punct(source, *i, NULL)) != -1)
+	int32_t punct_i = -1;
+	struct Error match_punct_err = match_punct(source, *i, NULL, &punct_i);
+	if (match_punct_err.code != ERROR_NONE)
+		return match_punct_err;
+
+	if (punct_i != -1)
 	{
 		*i += strlen(punctuations[punct_i]);
 		token->type = TT_PUNCT;
