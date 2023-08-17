@@ -7,7 +7,7 @@
 
 
 /* Finds the given `keyword` in the in `tokens.h` defined array `keywords`,
- * and gives the index in this array back.
+ * and gives its index in this array back.
  * 
  * Args:
  * - `keyword`, the string you want to compare to the keywords array
@@ -19,8 +19,7 @@ int32_t
 find_keyword(const char *keyword);
 
 /* Searches for the punctuation in the in `tokens.h` defined `punctuations`
- * array, returns the index. When no punctuation matches at the current `i`,
- * punct_len will equal 0.
+ * array, returns the index. When no punctuation matches at the current `i`.
  * 
  * Args:
  * - `source`, the entire source code 
@@ -29,7 +28,8 @@ find_keyword(const char *keyword);
  *		when calling this function externally, pass NULL
  *
  * Returns
- * - The index of the punctuation, or -1 if `punct` is not in `punctuations` 
+ * - The index of the punctuation, or
+ *		-1 if the following chars are not in `punctuations` 
 */
 int32_t 
 match_punct(const char *source, int32_t i, uint32_t *punct_len);
@@ -48,6 +48,7 @@ match_punct(const char *source, int32_t i, uint32_t *punct_len);
  * Returns 
  * - `ERROR_EOF_REACHED`, if `source[*i] == '\0'` / if you're at the eof
  * - `ERROR_TOKEN_INVALID`, if the token does not exist
+ * - `ERROR_MEMORY_ALLOCATION`, on memory allocation fail
 */
 struct Error
 lex_next(const char *source, int32_t *i, struct Token *token);
