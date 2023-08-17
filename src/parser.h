@@ -2,7 +2,6 @@
 #define PARSER_H
 
 #include <stdint.h>
-#include <stdbool.h>
 #include "error.h"
 #include "tokens.h"
 
