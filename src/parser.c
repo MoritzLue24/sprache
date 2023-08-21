@@ -140,7 +140,7 @@ lex_next(const char *source, int32_t *i, struct Token *token)
 }
 
 struct Error
-parse(const char *source)
+parse(const char *source, struct Node_Root *root)
 {
 	int32_t i = 0;
 	while (source[i] != '\0')

@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "error.h"
 #include "tokens.h"
+#include "ast.h"
 
 
 /* Finds the given `keyword` in the in `tokens.h` defined array `keywords`,
@@ -58,7 +59,18 @@ match_punct(
 struct Error
 lex_next(const char *source, int32_t *i, struct Token *token);
 
+/* Converts an ast from the given source code.
+ *
+ * Args
+ * - `source`, the source code
+ * - `root`, pointer to root node to write to
+ *
+ * Returns
+ * - `ERROR_EOF_REACHED`, if `source[*i] == '\0'` / if you're at the eof
+ * - `ERROR_TOKEN_INVALID`, if a token does not exist
+ * - `ERROR_MEMORY_ALLOCATION`, on memory allocation fail
+*/
 struct Error
-parse(const char *source);
+parse(const char *source, struct Node_Root *root);
 
 #endif /* PARSER_H */
