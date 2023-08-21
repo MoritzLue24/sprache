@@ -26,7 +26,7 @@ struct Node_Function
 
 struct Node_Return 
 {
-	Node *value;
+	struct Node *value;
 };
 
 struct Node_Literal 
@@ -45,8 +45,5 @@ struct Node
 		struct Node_Root root;
 	};
 };
-
-
-
 
 #endif
