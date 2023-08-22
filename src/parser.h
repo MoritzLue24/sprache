@@ -73,11 +73,19 @@ lex_next(const char *source, int32_t *i, struct Token *token);
 struct Error
 parse(const char *source, struct Node *root);
 
+/* Parses a statement beginning with a keyword.
+ *
+ * Args:
+ * - `source`, the source code
+ * - `i`, current index in source code
+ * - `token`, the keyword token
+ * - `parent`, the parent node
+*/
 struct Error 
 parse_keyword(
 	const char *source,
 	int32_t *i,
 	struct Token token,
-	struct Node *root);
+	struct Node *parent);
 
 #endif /* PARSER_H */

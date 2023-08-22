@@ -12,6 +12,7 @@ struct Error {
 		ERROR_MEMORY_ALLOCATION,
 		ERROR_EOF_REACHED,
 		ERROR_TOKEN_INVALID,
+		ERROR_SYNTAX_INVALID,
 	} code;
 	const char *msg;
 };

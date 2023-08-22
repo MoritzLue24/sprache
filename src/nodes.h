@@ -5,18 +5,32 @@
 enum NodeKind
 {
 	NODE_ROOT,
-	NODE_STATEMENT,
+	NODE_FUNCTION,
+	NODE_RETURN,
 };
 
-struct Node_Root {};
+struct Node_Root
+{
+	struct Node *body;
+};
 
-struct Node_Statement {};
+struct Node_Function
+{
+	struct Node *body;
+	const char *name;
+};
+
+struct Node_Return 
+{
+	struct Node *value;
+};
 
 struct Node 
 {
 	enum NodeKind kind;
 	union {
-		Node_Root root;
+		struct Node_Root node_root;
+		struct Node_Function node_function;
 	};
 };
 

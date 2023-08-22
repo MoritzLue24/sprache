@@ -180,6 +180,14 @@ parse_keyword(
 	const char *kw = token.value;
 	if (!strcmp(kw, "fn"))
 	{
+		struct Token name_token;
+		struct Error err = lex_next(source, i, &name_token);
+		if (err.code != ERROR_NONE)
+			return err;
+
+		if (name_token.type != TT_IDENTIFIER)
+			return (struct Error){ ERROR_SYNTAX_INVALID, "identifier expected" };
+
 		
 	}
 	else if (!strcmp(kw, "return"))
