@@ -47,8 +47,10 @@ match_punct(
 		if (!strcmp(punctuations[punct_i_], substr))
 		{
 			*punct_i = punct_i_;
+			free(substr);
 			return (struct Error){ ERROR_NONE, NULL };
 		}
+		free(substr);
 	}
 
 	--(*punct_len);
@@ -135,18 +137,23 @@ lex_next(const char *source, int32_t *i, struct Token *token)
 		return (struct Error){ ERROR_NONE, NULL };
 	}
 
-	printf("char: %i", source[*i]);
 	return (struct Error){ ERROR_TOKEN_INVALID, NULL };
 }
 
 struct Error
-parse(const char *source, struct Node_Root *root)
+parse(const char *source, struct Node *root)
 {
 	int32_t i = 0;
 	while (source[i] != '\0')
 	{
-		/* TODO */
-		++i;	
+		struct Token token;
+		struct Error err = lex_next(source, &i, &token);
+		if (err.code != ERROR_NONE)
+			return err;
+
+		printf("%i, %s\n", token.type, token.value);
+		skip_whitespaces(source, &i);
+		free_token(token);
 	}
 	return (struct Error){ ERROR_NONE, NULL };
 }

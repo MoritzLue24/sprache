@@ -36,22 +36,17 @@ main(int argc, char **argv)
 	else if (!strcmp(argv[1], "file"))
 	{
 		const char *source = read_file(argv[2]);
-		int32_t i = 0;
 
-		while (source[i] != '\0')
+		struct Node root;
+		struct Error err = parse(source, &root);
+		if (err.code != ERROR_NONE)
 		{
-			struct Token token;
-			struct Error err = lex_next(source, &i, &token);
-
-			if (err.code != ERROR_NONE)
-			{
-				free((void*)source);
-				return fail(err);
-			}
-			printf("%i, %s\n", token.type, token.value);
-			skip_whitespaces(source, &i);
+			free((void*)source);
+			return fail(err);
 		}
 
+		/* print_ast(root); */
+		/* free_ast(root); */
 		free((void*)source);
 		return 0;
 	}

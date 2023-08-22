@@ -20,4 +20,13 @@ struct Token
 	const char* value;
 };
 
+/* Frees the value field of a token, if it has been allocated manually.
+ * (some of the token types have manually allocated values, some not)
+ *
+ * Args:
+ * - `token`, the token to free
+*/
+void
+free_token(struct Token token);
+
 #endif /* TOKENS_H */

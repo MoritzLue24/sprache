@@ -71,6 +71,6 @@ lex_next(const char *source, int32_t *i, struct Token *token);
  * - `ERROR_MEMORY_ALLOCATION`, on memory allocation fail
 */
 struct Error
-parse(const char *source, struct Node_Root *root);
+parse(const char *source, struct Node *root);
 
 #endif /* PARSER_H */
