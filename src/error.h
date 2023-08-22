@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
+#define OK (struct Error){ ERROR_NONE, NULL }
+
 
 struct Error {
 	enum ErrorCode {

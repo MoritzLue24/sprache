@@ -48,7 +48,7 @@ match_punct(
 		{
 			*punct_i = punct_i_;
 			free(substr);
-			return (struct Error){ ERROR_NONE, NULL };
+			return OK;
 		}
 		free(substr);
 	}
@@ -58,7 +58,7 @@ match_punct(
 		return match_punct(source, i, punct_len, punct_i);
 
 	*punct_i = -1;
-	return (struct Error){ ERROR_NONE, NULL };
+	return OK;
 }
 
 struct Error
@@ -87,7 +87,7 @@ lex_next(const char *source, int32_t *i, struct Token *token)
 
 		token->type = TT_LITERAL;
 		token->value = value;
-		return (struct Error){ ERROR_NONE, NULL };
+		return OK;
 	}
 
 	if (is_ident_start(source[*i]))
@@ -121,7 +121,7 @@ lex_next(const char *source, int32_t *i, struct Token *token)
 			token->type = TT_IDENTIFIER;
 			token->value = ident;
 		}
-		return (struct Error){ ERROR_NONE, NULL };
+		return OK;
 	}
 
 	int32_t punct_i = -1;
@@ -134,7 +134,7 @@ lex_next(const char *source, int32_t *i, struct Token *token)
 		*i += strlen(punctuations[punct_i]);
 		token->type = TT_PUNCT;
 		token->value = punctuations[punct_i];
-		return (struct Error){ ERROR_NONE, NULL };
+		return OK;
 	}
 
 	return (struct Error){ ERROR_TOKEN_INVALID, NULL };
@@ -152,8 +152,43 @@ parse(const char *source, struct Node *root)
 			return err;
 
 		printf("%i, %s\n", token.type, token.value);
+
+		switch (token.type)
+		{
+			case TT_KEYWORD:
+				parse_keyword(source, &i, token, root);
+				break;
+			case TT_IDENTIFIER:
+			case TT_PUNCT:
+			case TT_LITERAL:
+				break;
+		}
+
 		skip_whitespaces(source, &i);
 		free_token(token);
 	}
-	return (struct Error){ ERROR_NONE, NULL };
+	return OK;
+}
+
+struct Error 
+parse_keyword(
+	const char *source,
+	int32_t *i,
+	struct Token token,
+	struct Node *parent)
+{
+	const char *kw = token.value;
+	if (!strcmp(kw, "fn"))
+	{
+		
+	}
+	else if (!strcmp(kw, "return"))
+	{
+
+	}
+	else {
+		// return (struct Error){ ERROR_INVALID_SYNTAX, NULL };
+	}
+	
+	return OK;
 }

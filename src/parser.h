@@ -73,4 +73,11 @@ lex_next(const char *source, int32_t *i, struct Token *token);
 struct Error
 parse(const char *source, struct Node *root);
 
+struct Error 
+parse_keyword(
+	const char *source,
+	int32_t *i,
+	struct Token token,
+	struct Node *root);
+
 #endif /* PARSER_H */
