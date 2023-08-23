@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "error.h"
+#include "loc.h"
 #include "tokens.h"
 #include "ast.h"
 
@@ -33,12 +34,8 @@ find_keyword(const char *keyword);
  * Returns
  * - `ERROR_MEMORY_ALLOCATION`, on memory allocation fail
 */
-struct Error 
-match_punct(
-	const char *source,
-	int32_t i,
-	uint32_t *punct_len,
-	int32_t *punct_i);
+int32_t 
+match_punct(struct Loc *loc, uint32_t *punct_len);
 
 /* Tokenizes the next token of the given source code at the ith character.
  * The `source[*i]` char should be the first character of the desired token.
@@ -56,8 +53,8 @@ match_punct(
  * - `ERROR_TOKEN_INVALID`, if the token does not exist
  * - `ERROR_MEMORY_ALLOCATION`, on memory allocation fail
 */
-struct Error
-lex_next(const char *source, int32_t *i, struct Token *token);
+struct Token
+lex_next(struct Loc *loc);
 
 /* Converts an ast from the given source code.
  *
@@ -70,8 +67,8 @@ lex_next(const char *source, int32_t *i, struct Token *token);
  * - `ERROR_TOKEN_INVALID`, if a token does not exist
  * - `ERROR_MEMORY_ALLOCATION`, on memory allocation fail
 */
-struct Error
-parse(const char *source, struct Node *root);
+struct Node
+parse(const char *source);
 
 /* Parses a statement beginning with a keyword.
  *
@@ -81,11 +78,7 @@ parse(const char *source, struct Node *root);
  * - `token`, the keyword token
  * - `parent`, the parent node
 */
-struct Error 
-parse_keyword(
-	const char *source,
-	int32_t *i,
-	struct Token token,
-	struct Node *parent);
+void
+parse_keyword(struct Loc *loc, struct Token token, struct Node *parent);
 
 #endif /* PARSER_H */

@@ -1,5 +1,6 @@
 #include "tokens.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 
 const char *const keywords[] = {

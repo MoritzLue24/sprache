@@ -37,13 +37,7 @@ main(int argc, char **argv)
 	{
 		const char *source = read_file(argv[2]);
 
-		struct Node root;
-		struct Error err = parse(source, &root);
-		if (err.code != ERROR_NONE)
-		{
-			free((void*)source);
-			return fail(err);
-		}
+		parse(source);
 
 		/* print_ast(root); */
 		/* free_ast(root); */

@@ -1,13 +1,38 @@
 #include "error.h"
+#include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 
-int32_t
-fail(struct Error error)
+static const char *error_codes[] = {
+	"ERROR_NONE",
+	"ERROR_MEMORY_ALLOCATION",
+	"ERROR_CLI_USAGE",
+	"ERROR_EOF_REACHED",
+	"ERROR_TOKEN_INVALID",
+	"ERROR_SYNTAX_INVALID",
+};
+
+void
+fail(enum ErrorCode code, const char *msg)
 {
-	if (error.msg == NULL)
-		fprintf(stderr, "ERROR: code %i", error.code);
+	if (msg == NULL)
+		fprintf(stderr, "%s", error_codes[code]);
 	else 
-		fprintf(stderr, "ERROR: code %i, '%s'", error.code, error.msg);
-	return error.code;
+		fprintf(stderr, "%s: '%s'", error_codes[code], msg);
+	exit(code);
+}
+
+void
+fail_spr(enum ErrorCode code, struct Loc loc, const char *msg) 
+{
+	if (msg == NULL)
+		fprintf(stderr, 
+			"Sprache error %s at %i:%i",
+			error_codes[code], loc.line, loc.col);
+	else 
+		fprintf(stderr,
+			"Sprache error %s at %i:%i: '%s'",
+			error_codes[code], loc.line, loc.col, msg);
+	exit(code);
 }

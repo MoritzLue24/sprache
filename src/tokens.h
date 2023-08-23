@@ -4,6 +4,7 @@
 
 enum TokenType 
 {
+	TT_INVALID,
 	TT_KEYWORD,
 	TT_IDENTIFIER,
 	TT_PUNCT,
