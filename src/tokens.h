@@ -1,33 +1,46 @@
 #ifndef TOKENS_H
 #define TOKENS_H
 
+#include "loc.h"
+
 
 enum TokenType 
 {
-	TT_INVALID,
 	TT_KEYWORD,
 	TT_IDENTIFIER,
 	TT_PUNCT,
 	TT_LITERAL,
 };
 
-extern const char *const keywords[3];
+enum KeywordType
+{
+	KW_FUNCTION,
+	KW_RETURN,
+	KW_INVALID,
+};
 
-extern const char *const punctuations[6];
+enum PunctuationType
+{
+	PUNCT_PAREN_OPEN,
+	PUNCT_PAREN_CLOSE,
+	PUNCT_BRACE_OPEN,
+	PUNCT_BRACE_CLOSE,
+	PUNCT_INVALID,
+};
+
+extern const char *const keywords[2];
+
+extern const char *const punctuations[4];
 
 struct Token
 {
 	enum TokenType type;
-	const char* value;
+	struct Loc start;
+	struct Loc end;
+	union {
+		enum KeywordType kw_type;
+		enum PunctuationType punct_type;
+	};
 };
-
-/* Frees the value field of a token, if it has been allocated manually.
- * (some of the token types have manually allocated values, some not)
- *
- * Args:
- * - `token`, the token to free
-*/
-void
-free_token(struct Token token);
 
 #endif /* TOKENS_H */

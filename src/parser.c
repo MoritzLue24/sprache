@@ -6,16 +6,16 @@
 #include "utils.h"
 
 
-int32_t
+enum KeywordType
 find_keyword(const char *keyword)
 {
 	for (uint32_t i = 0; i < sizeof(keywords) / sizeof(keywords[0]); ++i)
 		if (!strcmp(keywords[i], keyword))
 			return i;
-	return -1;
+	return KW_INVALID;
 }
 
-int32_t 
+enum PunctuationType 
 match_punct(struct Loc *loc, uint32_t *punct_len)
 {
 	uint32_t punctuations_len = sizeof(punctuations) / sizeof(punctuations[0]);
@@ -25,9 +25,10 @@ match_punct(struct Loc *loc, uint32_t *punct_len)
 	{
 		/* Get the length of the punctuation with the longest characters */
 		uint32_t current_len;
-		for (uint32_t i = 0; i < punctuations_len; ++i)
+		for (uint32_t i = 0; i < punctuations_len; ++i) {
 			if ((current_len = strlen(punctuations[i])) > punct_longest)
 				punct_longest = current_len;
+		}
 		punct_len = &punct_longest;
 	}
 
@@ -62,124 +63,223 @@ lex_next(struct Loc *loc)
 	if (loc->c == '\0')
 		fail_spr(ERROR_EOF_REACHED, *loc, NULL);
 
+	while (
+		loc->c == ' ' ||
+		loc->c == '\t' ||
+		loc->c == '\n' ||
+		loc->c == '\r'
+	) {
+		step(loc);
+	}
+
+	struct Token token;
+
 	if (is_digit(loc->source[loc->i]))
 	{
+		token.type = TT_LITERAL;
+
 		/* Loop over all digit chars in source code 
 		(the index `i` will be on the last valid digit char) */
-		struct Loc start_loc = *loc;
+		token.start = *loc;
 		while (is_digit(loc->source[loc->i + 1]))
 			step(loc);
 
-		char* value = malloc(loc->i - start_loc.i + 2);
+		char* value = malloc(loc->i - token.start.i + 2);
 		if (value == NULL)
 			fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
 
-		strncpy(value, loc->source + start_loc.i, loc->i - start_loc.i + 1);
-		value[loc->i - start_loc.i + 1] = '\0';
+		strncpy(value, loc->source + token.start.i, loc->i - token.start.i + 1);
+		value[loc->i - token.start.i + 1] = '\0';
 
 		/* currently, `i` is the last valid digit char so add one */
+		token.end = *loc;
 		step(loc);
-		return (struct Token){ TT_LITERAL, value };
+	
+		return token;
 	}
 
 	if (is_ident_start(loc->c))
 	{
 		/* Loop over all valid identifier chars in source code
 		(the index `i` will be on the last valid ident char) */
-		struct Loc start_loc = *loc;
+		token.start = *loc;
 		step(loc);
 		
 		while (is_ident_char(loc->source[loc->i + 1]))
 			step(loc);
 
-		char* ident = malloc(loc->i - start_loc.i + 2);
+		char* ident = malloc(loc->i - token.start.i + 2);
 		if (ident == NULL)
 			fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
 
 		/* copy content from start_i to current i to `ident` */
-		strncpy(ident, loc->source + start_loc.i, loc->i - start_loc.i + 1);
-		ident[loc->i - start_loc.i + 1] = '\0';
+		strncpy(ident, loc->source + token.start.i, loc->i - token.start.i + 1);
+		ident[loc->i - token.start.i + 1] = '\0';
 
 		/* currently, `i` is the last valid ident char so add one */
+		token.end = *loc;
 		step(loc);
 
-		int32_t kw_i;
-		if ((kw_i = find_keyword(ident)) != -1)
-			return (struct Token){ TT_KEYWORD, keywords[kw_i] };
+		enum KeywordType kw_type = find_keyword(ident);
+		if (kw_type != KW_INVALID)
+		{
+			token.type = TT_KEYWORD;
+			token.kw_type = kw_type;
+		}
 		else
-			return (struct Token){ TT_IDENTIFIER, ident };
+			token.type = TT_IDENTIFIER;
+		return token;
 	}
 
-	int32_t punct_i = match_punct(loc, NULL);
-	if (punct_i != -1)
+	enum PunctuationType punct_type = match_punct(loc, NULL);
+	if (punct_type != PUNCT_INVALID)
 	{
-		for (uint64_t _ = 0; _ < strlen(punctuations[punct_i]); ++_)
+		token.type = TT_PUNCT;
+		token.start = *loc;
+		token.punct_type = punct_type;
+
+		/* Get the last character of the punctuation */
+		uint8_t punct_len = strlen(punctuations[punct_type]);
+		const char last_char = *(punctuations[punct_type] + punct_len - 1);
+
+		while (loc->c != last_char)
 			step(loc);
 
-		return (struct Token){ TT_PUNCT, punctuations[punct_i] };
+		/* currently, `i` is the last valid ident char so add one */
+		token.end = *loc;
+		step(loc);
+
+		return token;
 	}
 	
 	fail_spr(ERROR_TOKEN_INVALID, *loc, NULL);
-	return (struct Token){ TT_INVALID, NULL };
+	return (struct Token){};
 }
 
 struct Node
 parse(const char *source)
 {
 	struct Loc loc = { source, source[0], 0, 1, 1 };
+
+	struct Node root = { NODE_ROOT, .n_root = { malloc(sizeof(struct Node)) } };
+	root.n_root.body->self = NULL;
+	root.n_root.body->next = NULL;
+
 	while (loc.c != '\0')
 	{
 		struct Token token = lex_next(&loc);
-		printf("%i, %s\n", token.type, token.value);
-		/* switch (token.type) */
-		/* { */
-		/* 	case TT_KEYWORD: */
-		/* 		parse_keyword(source, &i, token, root); */
-		/* 		break; */
-		/* 	case TT_IDENTIFIER: */
-		/* 	case TT_PUNCT: */
-		/* 	case TT_LITERAL: */
-		/* 		break; */
-		/* } */
-		while (
-			loc.c == ' ' ||
-			loc.c == '\t' ||
-			loc.c == '\n' ||
-			loc.c == '\r'
-		) {
-			step(&loc);
-		}
-		free_token(token);
+		// printf("%i, %.*s\n", token.type, 
+		// 	token.end.i - token.start.i + 1, 
+		// 	token.start.source + token.start.i);
+		
+		struct Node statement = parse_statement(&loc, token);
+        if (root.n_root.body->self == NULL)
+            insert_node_list(root.n_root.body, statement, 0);
+        else 
+            append_node_list(root.n_root.body, statement);
+
+        while (
+            loc.c == ' ' ||
+            loc.c == '\t' ||
+            loc.c == '\n' ||
+            loc.c == '\r'
+        ) {
+            step(&loc);
+        }
 	}
+	return root;
 }
 
-/* struct Error */ 
-/* parse_keyword( */
-/* 	const char *source, */
-/* 	int32_t *i, */
-/* 	struct Token token, */
-/* 	struct Node *parent) */
-/* { */
-/* 	const char *kw = token.value; */
-/* 	if (!strcmp(kw, "fn")) */
-/* 	{ */
-/* 		struct Token name_token; */
-/* 		struct Error err = lex_next(source, i, &name_token); */
-/* 		if (err.code != ERROR_NONE) */
-/* 			return err; */
+struct Node
+parse_statement(struct Loc *loc, struct Token token)
+{
+	switch (token.type)
+	{
+		case TT_KEYWORD:
+			switch (token.kw_type)
+			{
+				case KW_FUNCTION:
+					return parse_function(loc);
+					break;
+                case KW_RETURN:
+                    return parse_return(loc);
+				default:
+					fail_spr(ERROR_SYNTAX_INVALID, *loc, "keyword not implemented");
+			}
+			break;
+		default:
+			fail_spr(ERROR_SYNTAX_INVALID, *loc, "token not implemented");
+	}
+	return (struct Node){};
+}
 
-/* 		if (name_token.type != TT_IDENTIFIER) */
-/* 			return (struct Error){ ERROR_SYNTAX_INVALID, "identifier expected" }; */
-
-		
-/* 	} */
-/* 	else if (!strcmp(kw, "return")) */
-/* 	{ */
-
-/* 	} */
-/* 	else { */
-/* 		// return (struct Error){ ERROR_INVALID_SYNTAX, NULL }; */
-/* 	} */
+struct Node
+parse_function(struct Loc *loc)
+{
+	struct Token name = lex_next(loc);
+	if (name.type != TT_IDENTIFIER)
+		fail_spr(ERROR_SYNTAX_INVALID, *loc, "identifier expected");
 	
-/* 	return OK; */
-/* } */
+
+	struct Token open_paren = lex_next(loc);
+	if (open_paren.type != TT_PUNCT && open_paren.punct_type != PUNCT_PAREN_OPEN)
+		fail_spr(ERROR_SYNTAX_INVALID, *loc, "'(' expected");
+
+	/* TODO: arguments */
+
+	struct Token close_paren = lex_next(loc);
+	if (close_paren.type != TT_PUNCT && close_paren.punct_type != PUNCT_PAREN_CLOSE)
+		fail_spr(ERROR_SYNTAX_INVALID, *loc, "')' expected");
+
+	struct Token open_brace = lex_next(loc);
+	if (open_brace.type != TT_PUNCT && open_brace.punct_type != PUNCT_BRACE_OPEN)
+		fail_spr(ERROR_SYNTAX_INVALID, *loc, "'{' expected");
+
+	struct NodeListElement* root_element = malloc(sizeof(struct NodeListElement));
+	if (root_element == NULL)
+		fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
+	root_element->self = NULL;
+	root_element->next = NULL;
+
+	struct Token current_t = lex_next(loc);
+	if (current_t.type != TT_PUNCT && current_t.punct_type != PUNCT_BRACE_CLOSE)
+        insert_node_list(root_element, parse_statement(loc, current_t), 0);
+
+	while (1)
+	{
+		current_t = lex_next(loc);
+        if (current_t.type == TT_PUNCT && current_t.punct_type == PUNCT_BRACE_CLOSE)
+            break;
+
+		struct Node statement = parse_statement(loc, current_t);
+		append_node_list(root_element, statement);
+	}
+
+	return (struct Node) {
+		NODE_FUNCTION,
+		.n_function = (struct Node_Function) {
+			name, .args = NULL, .body = root_element 
+		}
+	};
+}
+
+struct Node
+parse_return(struct Loc *loc)
+{
+    struct Token value = lex_next(loc);
+    if (value.type != TT_LITERAL)
+        fail_spr(ERROR_SYNTAX_INVALID, *loc, "literal expected");
+
+    struct Node *literal = malloc(sizeof(struct Node));
+    if (literal == NULL)
+        fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
+
+    literal->kind = NODE_LITERAL;
+    literal->n_literal = (struct Node_Literal) { .value = value };
+
+    return (struct Node) {
+        .kind = NODE_RETURN,
+        .n_return = (struct Node_Return) {
+            .value = literal        }
+    };
+}

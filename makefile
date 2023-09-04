@@ -9,6 +9,10 @@ EXEC ?= sprache
 SRC_DIR ?= src
 BUILD_DIR ?= build
 
+ifdef DEFINES
+	CFLAGS += $(DEFINES)
+endif
+
 # List of source files
 SRC_FILES := $(wildcard $(SRC_DIR)/*.c)
 
@@ -24,4 +28,4 @@ $(BUILD_DIR)/$(EXEC): $(OBJ_FILES)
 
 # Rule to build object files from source files
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+		$(CC) $(CFLAGS) -c $< -o $@

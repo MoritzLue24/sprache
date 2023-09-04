@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include "tests.h"
 #include "error.h"
 #include "utils.h"
 #include "parser.h"
@@ -23,6 +24,24 @@ print_help()
 int32_t
 main(int argc, char **argv)
 {
+#ifdef TEST 
+	if (!strcmp(argv[1], "all"))
+	{
+		test_all();
+		return 0;
+	}
+	for (int32_t i = 1; i < argc; i++)
+	{
+		if (!strcmp(argv[i], "tokens"))
+			test_tokens();
+		else if (!strcmp(argv[i], "node_list"))
+			test_node_list();
+		else if (!strcmp(argv[i], "ast"))
+			test_ast();
+	}
+	return 0;
+	
+#else
 	if (argc == 1)
 	{
 		fprintf(stderr, "command expected");
@@ -52,4 +71,5 @@ main(int argc, char **argv)
 	}
 	fprintf(stderr, "invalid command");
 	return -1;
+#endif
 }

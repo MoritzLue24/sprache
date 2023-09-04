@@ -2,6 +2,8 @@
 #define AST_H
 
 #include <stdint.h>
+#include "loc.h"
+#include "tokens.h"
 
 
 enum NodeKind
@@ -13,15 +15,29 @@ enum NodeKind
 };
 
 struct Node;
+struct NodeListElement;
+struct Node_Root;
+struct Node_Function;
+struct Node_Return;
+struct Node_Literal;
+
+
+struct NodeListElement
+{
+	struct Node *self;
+	struct NodeListElement *next;
+};
 
 struct Node_Root
 {
-	struct Node *body;
+	struct NodeListElement *body;
 };
 
 struct Node_Function
 {
-	const char *name;
+	struct Token name;
+	struct NodeListElement *args;
+	struct NodeListElement *body;
 };
 
 struct Node_Return 
@@ -31,18 +47,18 @@ struct Node_Return
 
 struct Node_Literal 
 {
-	struct Node *body;
-	uint32_t u_value;
+	struct Token value;
 };
 
 struct Node 
 {
 	enum NodeKind kind;
-	int32_t start_i;
-	int32_t end_i;
-
+	/* struct Loc start, end; */
 	union {
-		struct Node_Root root;
+		struct Node_Root n_root;
+		struct Node_Function n_function;
+		struct Node_Return n_return;
+		struct Node_Literal n_literal;
 	};
 };
 

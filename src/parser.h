@@ -17,7 +17,7 @@
  * Returns
  * - The index of the keyword, or -1 if `keyword` is not in `keywords` 
 */
-int32_t
+enum KeywordType
 find_keyword(const char *keyword);
 
 /* Searches for the punctuation in the in `tokens.h` defined `punctuations`
@@ -34,7 +34,7 @@ find_keyword(const char *keyword);
  * Returns
  * - `ERROR_MEMORY_ALLOCATION`, on memory allocation fail
 */
-int32_t 
+enum PunctuationType 
 match_punct(struct Loc *loc, uint32_t *punct_len);
 
 /* Tokenizes the next token of the given source code at the ith character.
@@ -56,29 +56,16 @@ match_punct(struct Loc *loc, uint32_t *punct_len);
 struct Token
 lex_next(struct Loc *loc);
 
-/* Converts an ast from the given source code.
- *
- * Args
- * - `source`, the source code
- * - `root`, pointer to root node to write to
- *
- * Returns
- * - `ERROR_EOF_REACHED`, if `source[*i] == '\0'` / if you're at the eof
- * - `ERROR_TOKEN_INVALID`, if a token does not exist
- * - `ERROR_MEMORY_ALLOCATION`, on memory allocation fail
-*/
 struct Node
 parse(const char *source);
 
-/* Parses a statement beginning with a keyword.
- *
- * Args:
- * - `source`, the source code
- * - `i`, current index in source code
- * - `token`, the keyword token
- * - `parent`, the parent node
-*/
-void
-parse_keyword(struct Loc *loc, struct Token token, struct Node *parent);
+struct Node
+parse_statement(struct Loc *loc, struct Token token);
+
+struct Node
+parse_function(struct Loc *loc);
+
+struct Node
+parse_return(struct Loc *loc);
 
 #endif /* PARSER_H */
