@@ -74,7 +74,7 @@ test_ast()
 	
 	const char *source = read_file("examples/latest.s");
     struct Node root = parse(source);
-    
+
 	print_node(root, 0);
     free_node(root);
 	free((void*)source);

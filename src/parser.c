@@ -60,10 +60,10 @@ match_punct(struct Loc *loc, uint32_t *punct_len)
 struct Token
 lex_next(struct Loc *loc)
 {
+	skip_whitespace(loc);
 	if (loc->c == '\0')
 		fail_spr(ERROR_EOF_REACHED, *loc, NULL);
 
-	skip_whitespace(loc);
 	struct Token token;
 
 	if (is_digit(loc->source[loc->i]))
@@ -166,6 +166,7 @@ parse(const char *source)
             insert_node_list(root.n_root.body, statement, 0);
         else 
             append_node_list(root.n_root.body, statement);
+        skip_whitespace(&loc);
 	}
 	return root;
 }
@@ -219,11 +220,11 @@ parse_function(struct Loc *loc)
 		fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
 	root_element->self = NULL;
 	root_element->next = NULL;
-
+    
 	struct Token current_t = lex_next(loc);
     if (current_t.type != TT_PUNCT && current_t.punct_type != PUNCT_BRACE_CLOSE)
         insert_node_list(root_element, parse_statement(loc, current_t), 0);
-    else 
+    else
         return (struct Node) {
             NODE_FUNCTION,
                 .n_function = (struct Node_Function) {

@@ -124,7 +124,13 @@ print_node_list(struct NodeListElement *root, uint8_t identation)
 	while (current != NULL)
 	{
 		if (current->self == NULL)
-			printf("NULL\n");
+        {
+            char ident[identation * 2 + 1];
+            for (uint8_t i = 0; i < identation * 2; ++i)
+                ident[i] = ' ';
+            ident[identation * 2] = '\0';
+            printf("%sNULL\n", ident);
+        }
 		else
 			print_node(*current->self, identation);
 		current = current->next;
