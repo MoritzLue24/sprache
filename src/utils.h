@@ -19,10 +19,19 @@ bool
 is_ident_char(char c);
 
 void
+skip_whitespace(struct Loc *loc);
+
+void
 print_node(struct Node node, uint8_t identation);
 
 void
+free_node(struct Node node);
+
+void
 print_node_list(struct NodeListElement *root, uint8_t identation);
+
+void
+free_node_list(struct NodeListElement *root);
 
 void
 append_node_list(struct NodeListElement *root, struct Node value);
@@ -30,7 +39,5 @@ append_node_list(struct NodeListElement *root, struct Node value);
 void
 insert_node_list(struct NodeListElement *root, struct Node value, uint32_t nth);
 
-void
-free_node_list(struct NodeListElement *root);
 
 #endif /* UTILS_H */

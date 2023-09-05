@@ -47,6 +47,19 @@ is_ident_char(char c)
 }
 
 void
+skip_whitespace(struct Loc *loc)
+{
+    while (
+        loc->c == ' ' ||
+        loc->c == '\t' ||
+        loc->c == '\n' ||
+        loc->c == '\r'
+    ) {
+        step(loc);
+    }
+}
+
+void
 print_node(struct Node node, uint8_t identation)
 {
 	const char *text;
@@ -83,6 +96,28 @@ print_node(struct Node node, uint8_t identation)
 }
 
 void
+free_node(struct Node node)
+{
+    switch (node.kind)
+    {
+        case NODE_ROOT:
+            free_node_list(node.n_root.body);
+            break;
+        case NODE_FUNCTION:
+            free_node_list(node.n_function.args);
+            free_node_list(node.n_function.body);
+            break;
+        case NODE_RETURN:
+            free(node.n_return.value);
+            break;
+        case NODE_LITERAL:
+            break;
+        default:
+            fail(ERROR_NODE_INVALID, "not imlpemented for free_node");
+    }
+}
+
+void
 print_node_list(struct NodeListElement *root, uint8_t identation)
 {
 	struct NodeListElement *current = root;
@@ -93,6 +128,24 @@ print_node_list(struct NodeListElement *root, uint8_t identation)
 		else
 			print_node(*current->self, identation);
 		current = current->next;
+	}
+}
+
+void
+free_node_list(struct NodeListElement *root)
+{
+	struct NodeListElement *current = root;
+	while (current != NULL)
+	{
+		if (current->self != NULL) 
+        {
+            free_node(*current->self);
+			free(current->self);
+        }
+
+		struct NodeListElement *next = current->next;
+		free(current);
+		current = next;
 	}
 }
 
@@ -142,17 +195,4 @@ insert_node_list(struct NodeListElement *root, struct Node value, uint32_t nth)
     }
 }
 
-void
-free_node_list(struct NodeListElement *root)
-{
-	struct NodeListElement *current = root;
-	while (current != NULL)
-	{
-		if (current->self != NULL)
-			free(current->self);
 
-		struct NodeListElement *next = current->next;
-		free(current);
-		current = next;
-	}
-}

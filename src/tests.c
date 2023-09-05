@@ -61,11 +61,9 @@ test_node_list()
     insert_node_list(root, some_node, 0);
     append_node_list(root, some_node);
 
-    printf("%p\n", root->next->next);
+    printf("%p\n", root->next->self);
 
-	// append_node_list(root, some_node);
-	// print_node_list(root);
-
+	print_node_list(root, 0);
 	free_node_list(root);
 }
 
@@ -76,8 +74,9 @@ test_ast()
 	
 	const char *source = read_file("examples/latest.s");
     struct Node root = parse(source);
-
+    
 	print_node(root, 0);
+    free_node(root);
 	free((void*)source);
 }
 

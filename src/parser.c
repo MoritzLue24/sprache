@@ -63,15 +63,7 @@ lex_next(struct Loc *loc)
 	if (loc->c == '\0')
 		fail_spr(ERROR_EOF_REACHED, *loc, NULL);
 
-	while (
-		loc->c == ' ' ||
-		loc->c == '\t' ||
-		loc->c == '\n' ||
-		loc->c == '\r'
-	) {
-		step(loc);
-	}
-
+	skip_whitespace(loc);
 	struct Token token;
 
 	if (is_digit(loc->source[loc->i]))
@@ -168,24 +160,12 @@ parse(const char *source)
 	while (loc.c != '\0')
 	{
 		struct Token token = lex_next(&loc);
-		// printf("%i, %.*s\n", token.type, 
-		// 	token.end.i - token.start.i + 1, 
-		// 	token.start.source + token.start.i);
-		
 		struct Node statement = parse_statement(&loc, token);
+
         if (root.n_root.body->self == NULL)
             insert_node_list(root.n_root.body, statement, 0);
         else 
             append_node_list(root.n_root.body, statement);
-
-        while (
-            loc.c == ' ' ||
-            loc.c == '\t' ||
-            loc.c == '\n' ||
-            loc.c == '\r'
-        ) {
-            step(&loc);
-        }
 	}
 	return root;
 }
@@ -220,7 +200,6 @@ parse_function(struct Loc *loc)
 	if (name.type != TT_IDENTIFIER)
 		fail_spr(ERROR_SYNTAX_INVALID, *loc, "identifier expected");
 	
-
 	struct Token open_paren = lex_next(loc);
 	if (open_paren.type != TT_PUNCT && open_paren.punct_type != PUNCT_PAREN_OPEN)
 		fail_spr(ERROR_SYNTAX_INVALID, *loc, "'(' expected");
@@ -242,12 +221,25 @@ parse_function(struct Loc *loc)
 	root_element->next = NULL;
 
 	struct Token current_t = lex_next(loc);
-	if (current_t.type != TT_PUNCT && current_t.punct_type != PUNCT_BRACE_CLOSE)
+    if (current_t.type != TT_PUNCT && current_t.punct_type != PUNCT_BRACE_CLOSE)
         insert_node_list(root_element, parse_statement(loc, current_t), 0);
+    else 
+        return (struct Node) {
+            NODE_FUNCTION,
+                .n_function = (struct Node_Function) {
+                    name, .args = NULL, .body = root_element 
+                }
+        };
 
-	while (1)
+    while (1)
 	{
+        skip_whitespace(loc);
+        if (loc->c == '\0')
+            fail(ERROR_EOF_REACHED, "expected '}'");
+
 		current_t = lex_next(loc);
+        skip_whitespace(loc);
+
         if (current_t.type == TT_PUNCT && current_t.punct_type == PUNCT_BRACE_CLOSE)
             break;
 
