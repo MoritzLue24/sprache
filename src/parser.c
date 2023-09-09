@@ -153,7 +153,6 @@ parse(const char *source)
 {
 	struct Loc loc = { source, source[0], 0, 1, 1 };
 
- // idk maby malloc NodeListElement but idk
 	struct Node root = { NODE_ROOT, .n_root = { malloc(sizeof(struct Node)) } };
 	root.n_root.body->self = NULL;
 	root.n_root.body->next = NULL;
