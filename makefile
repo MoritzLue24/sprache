@@ -1,31 +1,41 @@
-# Compiler and flags
-CC ?= gcc
-CFLAGS ?= -Wall -Wextra -Isrc
+# flags (-g3 for debug options)
+CFLAGS ?= -Wall -Wextra -g3
 
-# Executable name
-EXEC ?= sprache
+# executable name
+TARGET ?= out
 
-# Directories
+# directories
 SRC_DIR ?= src
+HEADER_DIR ?= include
 BUILD_DIR ?= build
+
+CFLAGS += -I$(HEADER_DIR)
 
 ifdef DEFINES
 	CFLAGS += $(DEFINES)
 endif
 
-# List of source files
 SRC_FILES := $(wildcard $(SRC_DIR)/*.c)
+OBJ_FILES := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRC_FILES))
 
-# Object files derived from source files
-OBJ_FILES := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC_FILES))
+# default target
+all: all
 
+# create build folder
+$(BUILD_DIR):
+	mkdir -p "$@"
 
-all: $(shell mkdir $(BUILD_DIR)) $(BUILD_DIR)/$(EXEC)
+# build the executable inside the build directory
+$(BUILD_DIR)/$(TARGET): $(OBJ_FILES)
+	gcc $(CFLAGS) $^ -o $@
 
-# Rule to build the executable inside the build directory
-$(BUILD_DIR)/$(EXEC): $(OBJ_FILES)
-	$(CC) $(CFLAGS) $^ -o $@
-
-# Rule to build object files from source files
+# build object files from source files
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
-		$(CC) $(CFLAGS) -c $< -o $@
+	gcc $(CFLAGS) -c $< -o $@
+
+.PHONY: all
+all: $(BUILD_DIR) $(BUILD_DIR)/$(TARGET)
+
+.PHONY: run
+run: all
+	./$(BUILD_DIR)/$(TARGET)

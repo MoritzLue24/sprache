@@ -24,7 +24,7 @@ print_help()
 int32_t
 main(int argc, char **argv)
 {
-#ifdef TEST 
+#ifdef TEST
 	if (!strcmp(argv[1], "all"))
 	{
 		test_all();
@@ -40,7 +40,7 @@ main(int argc, char **argv)
 			test_ast();
 	}
 	return 0;
-	
+
 #else
 	if (argc == 1)
 	{
