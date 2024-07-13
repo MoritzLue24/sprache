@@ -1,5 +1,5 @@
 # flags (-g3 for debug options)
-CFLAGS ?= -Wall -Wextra -g3
+CFLAGS ?= -Wall -Wextra -std=c11 -g3
 
 # executable name
 TARGET ?= out
