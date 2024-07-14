@@ -75,7 +75,7 @@ test_ast()
 {
 	printf("Testing 'ast'\n");
 	
-	const char *source = read_file("examples/debug.s")
+	const char *source = read_file("examples/debug.s");
     struct Node root = parse(source);
 
 	print_node(root, 0);
