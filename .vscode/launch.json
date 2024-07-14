@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/out.exe",
-            "args": ["file", "examples/debug.s"],
+            "args": ["ast"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],

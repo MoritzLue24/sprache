@@ -63,6 +63,9 @@ void
 print_node(struct Node node, uint8_t identation)
 {
 	const char *text;
+	char *value = malloc(sizeof(char));
+	value[0] = '\0';
+
 	switch (node.kind)
 	{
 		case NODE_ROOT:
@@ -76,6 +79,12 @@ print_node(struct Node node, uint8_t identation)
 			break;
 		case NODE_LITERAL:
 			text = "LITERAL";
+
+			uint32_t val_len = node.n_literal.value.end.i - node.n_literal.value.start.i + 1;
+			value = realloc(value, sizeof(char) * val_len + 1);
+			value[val_len] = '\0';
+
+			strncpy(value, node.n_literal.value.start.source + node.n_literal.value.start.i, val_len);
 			break;
 		default:
 			text = "UNKNOWN";
@@ -86,13 +95,15 @@ print_node(struct Node node, uint8_t identation)
         ident[i] = ' ';
     ident[identation * 2] = '\0';
 
-
-    printf("%s%s\n", ident, text);
+    printf("%s%s %s\n", ident, text, value);
+	free(value);
 
 	if (node.kind == NODE_ROOT)
 		print_node_list(node.n_root.body, identation + 1);
 	else if (node.kind == NODE_FUNCTION)
 		print_node_list(node.n_function.body, identation + 1);
+	else if (node.kind == NODE_RETURN)
+		print_node(*node.n_return.value, identation + 1);
 }
 
 void

@@ -72,7 +72,7 @@ test_ast()
 {
 	printf("Testing 'ast'\n");
 	
-	const char *source = read_file("examples/latest.s");
+	const char *source = "fn main() {return 1000}";
     struct Node root = parse(source);
 
 	print_node(root, 0);

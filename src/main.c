@@ -25,7 +25,7 @@ int32_t
 main(int argc, char **argv)
 {
 #ifdef TEST
-	if (!strcmp(argv[1], "all"))
+	if (argc == 0)
 	{
 		test_all();
 		return 0;
