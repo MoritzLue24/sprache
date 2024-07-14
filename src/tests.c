@@ -50,6 +50,9 @@ test_node_list()
 	printf("Testing 'node_list'\n");
 
 	struct NodeListElement *root = malloc(sizeof(struct Node));
+	if (root == NULL)
+		fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
+
 	root->self = NULL;
 	root->next = NULL;
 	

@@ -19,6 +19,9 @@ read_file(const char *path)
 	fseek(file, 0, SEEK_SET);
 	
 	char* source = malloc(size + 1);
+	if (source == NULL)
+		fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
+
 	fread(source, sizeof(char), size, file);
 	source[size] = '\0';
 
@@ -64,6 +67,8 @@ print_node(struct Node node, uint8_t identation)
 {
 	const char *text;
 	char *value = malloc(sizeof(char));
+	if (value == NULL)
+		fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
 	value[0] = '\0';
 
 	switch (node.kind)

@@ -39,6 +39,9 @@ match_punct(struct Loc *loc, uint32_t *punct_len)
 
 		/* Copy the substring source[i] to source[i + punct_len] */
 		char *substr = malloc(*punct_len + 1);
+		if (substr == NULL)
+			fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
+
 		strncpy(substr, loc->source + loc->i, *punct_len);
 		substr[*punct_len] = '\0';
 
@@ -155,6 +158,9 @@ parse(const char *source)
 
 // idk maby sizeof Node_Root
 	struct Node root = { NODE_ROOT, .n_root = { malloc(sizeof(struct Node)) } };
+	if (root.n_root.body == NULL)
+		fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
+		
 	root.n_root.body->self = NULL;
 	root.n_root.body->next = NULL;
 
