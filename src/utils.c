@@ -66,7 +66,7 @@ void
 print_node(struct Node node, uint8_t identation)
 {
 	const char *text;
-	char *value = malloc(sizeof(char));
+	char *value = malloc(1);
 	if (value == NULL)
 		fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
 	value[0] = '\0';
@@ -86,7 +86,7 @@ print_node(struct Node node, uint8_t identation)
 			text = "LITERAL";
 
 			uint32_t val_len = node.n_literal.value.end.i - node.n_literal.value.start.i + 1;
-			value = realloc(value, sizeof(char) * val_len + 1);
+			value = realloc(value, val_len + 1);
 			value[val_len] = '\0';
 
 			strncpy(value, node.n_literal.value.start.source + node.n_literal.value.start.i, val_len);
@@ -112,6 +112,13 @@ print_node(struct Node node, uint8_t identation)
 }
 
 void
+free_token(struct Token token)
+{
+	if (token.value != NULL)
+		free((void*)token.value);
+}
+
+void
 free_node(struct Node node)
 {
     switch (node.kind)
@@ -120,6 +127,7 @@ free_node(struct Node node)
             free_node_list(node.n_root.body);
             break;
         case NODE_FUNCTION:
+			free_token(node.n_function.name);
             free_node_list(node.n_function.args);
             free_node_list(node.n_function.body);
             break;
@@ -127,6 +135,7 @@ free_node(struct Node node)
             free(node.n_return.value);
             break;
         case NODE_LITERAL:
+			free_token(node.n_literal.value);
             break;
         default:
             fail(ERROR_NODE_INVALID, "not imlpemented for free_node");

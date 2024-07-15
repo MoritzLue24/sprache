@@ -23,15 +23,19 @@ test_tokens()
 {
 	printf("Testing 'tokens'\n");
 
-	const char *source = read_file("examples/latest.s");
+	const char *source = read_file("examples/debug.s");
 
 	struct Loc loc = { source, source[0], 0, 1, 1 };
 	while (loc.c != '\0')
 	{
 		struct Token token = lex_next(&loc);
-		printf("%i, %.*s\n", token.type, 
-			token.end.i - token.start.i + 1, 
-			token.start.source + token.start.i);
+		printf(
+			"TT %i, KW_T %i, PUNCT_T %i ; %s\n",
+			token.type, 
+			token.kw_type,
+			token.punct_type,
+			token.value
+		);
 
 		while (
 			loc.c == ' ' ||

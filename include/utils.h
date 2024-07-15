@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "ast.h"
+#include "tokens.h"
 
 
 char*
@@ -23,6 +24,9 @@ skip_whitespace(struct Loc *loc);
 
 void
 print_node(struct Node node, uint8_t identation);
+
+void
+free_token(struct Token token);
 
 void
 free_node(struct Node node);

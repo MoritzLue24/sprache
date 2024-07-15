@@ -11,7 +11,7 @@ find_keyword(const char *keyword)
 {
 	for (uint32_t i = 0; i < sizeof(keywords) / sizeof(keywords[0]); ++i)
 		if (!strcmp(keywords[i], keyword))
-			return i;
+			return i + 1;	/* Add one because the first type is KW_INVALID */
 	return KW_INVALID;
 }
 
@@ -49,7 +49,7 @@ match_punct(struct Loc *loc, uint32_t *punct_len)
 		if (!strcmp(punctuations[punct_i], substr))
 		{
 			free(substr);
-			return punct_i;
+			return punct_i + 1;		/* Add one because the first type is KW_INVALID */
 		}
 		free(substr);
 	}
@@ -57,7 +57,7 @@ match_punct(struct Loc *loc, uint32_t *punct_len)
 	--(*punct_len);
 	if (*punct_len > 0)
 		return match_punct(loc, punct_len);
-	return -1;
+	return PUNCT_INVALID;
 }
 
 struct Token
@@ -85,6 +85,8 @@ lex_next(struct Loc *loc)
 
 		strncpy(value, loc->source + token.start.i, loc->i - token.start.i + 1);
 		value[loc->i - token.start.i + 1] = '\0';
+
+		token.value = value;
 
 		/* currently, `i` is the last valid digit char so add one */
 		token.end = *loc;
@@ -120,9 +122,13 @@ lex_next(struct Loc *loc)
 		{
 			token.type = TT_KEYWORD;
 			token.kw_type = kw_type;
+			token.value = NULL;
 		}
 		else
+		{
 			token.type = TT_IDENTIFIER;
+			token.value = ident;
+		}
 		return token;
 	}
 
@@ -133,20 +139,21 @@ lex_next(struct Loc *loc)
 		token.start = *loc;
 		token.punct_type = punct_type;
 
-		/* Get the last character of the punctuation */
-		uint8_t punct_len = strlen(punctuations[punct_type]);
-		const char last_char = *(punctuations[punct_type] + punct_len - 1);
+		/* Subtract one because the punct type != the index, see mtach_punct*/
+		uint8_t punct_len = strlen(punctuations[punct_type - 1]);
+		// const char last_char = *(punctuations[punct_type] + punct_len - 1);
 
-		while (loc->c != last_char)
+		for (uint8_t i = 0; i < punct_len; i++)
+		{
+			if (i == punct_len - 1)
+				token.end = *loc;
 			step(loc);
+		}
 
-		/* currently, `i` is the last valid ident char so add one */
-		token.end = *loc;
-		step(loc);
-
+		token.value = NULL;
 		return token;
 	}
-	
+
 	fail_spr(ERROR_TOKEN_INVALID, *loc, NULL);
 	return (struct Token){};
 }
@@ -156,7 +163,7 @@ parse(const char *source)
 {
 	struct Loc loc = { source, source[0], 0, 1, 1 };
 
-// idk maby sizeof Node_Root
+	// idk maby sizeof Node_Root
 	struct Node root = { NODE_ROOT, .n_root = { malloc(sizeof(struct Node)) } };
 	if (root.n_root.body == NULL)
 		fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
@@ -227,7 +234,7 @@ parse_function(struct Loc *loc)
 		fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
 	root_element->self = NULL;
 	root_element->next = NULL;
-    
+
 	struct Token current_t = lex_next(loc);
     if (current_t.type != TT_PUNCT && current_t.punct_type != PUNCT_BRACE_CLOSE)
         insert_node_list(root_element, parse_statement(loc, current_t), 0);
