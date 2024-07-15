@@ -9,7 +9,7 @@ char*
 read_file(const char *path)
 {
 	FILE* file = fopen(path, "rb");
-	if (!file) {
+	if (file == NULL) {
 		perror(NULL);
 		exit(-1);
 	}

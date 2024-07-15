@@ -15,6 +15,10 @@ ifdef DEFINES
 	CFLAGS += $(DEFINES)
 endif
 
+ifdef TEST
+	CFLAGS += "-DTEST"
+endif
+
 SRC_FILES := $(wildcard $(SRC_DIR)/*.c)
 OBJ_FILES := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRC_FILES))
 
