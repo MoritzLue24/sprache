@@ -138,7 +138,7 @@ free_node(struct Node node)
 			free_token(node.n_literal.value);
             break;
         default:
-            fail(ERROR_NODE_UNKNOWN, "not imlpemented for free_node");
+            fail(ERROR_NODE_INVALID, "not imlpemented for free_node");
     }
 }
 
