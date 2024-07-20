@@ -11,6 +11,7 @@ static const char *error_codes[] = {
 	"ERROR_EOF_REACHED",
 	"ERROR_TOKEN_INVALID",
 	"ERROR_SYNTAX_INVALID",
+	"ERROR_NODE_INVALID"
 };
 
 void
