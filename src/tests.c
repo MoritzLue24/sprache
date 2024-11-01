@@ -8,6 +8,7 @@
 #include "tokens.h"
 #include "parser.h"
 #include "ast.h"
+#include "gen.h"
 
 
 void
@@ -16,6 +17,7 @@ test_all()
 	test_tokens();
 	test_node_list();
 	test_ast();
+	test_gen();
 }
 
 void 
@@ -51,6 +53,7 @@ test_tokens()
 void 
 test_node_list()
 {
+	/* TODO: is currently crashing -> fix it */
 	printf("Testing 'node_list'\n");
 
 	struct NodeListElement *root = malloc(sizeof(struct Node));
@@ -59,7 +62,7 @@ test_node_list()
 
 	root->self = NULL;
 	root->next = NULL;
-	
+
 	struct Node some_node = {
 	 	.kind = NODE_LITERAL,
 	 	.n_literal = (struct Node_Literal) { (struct Token) { .type = TT_LITERAL }},
@@ -78,12 +81,27 @@ void
 test_ast()
 {
 	printf("Testing 'ast'\n");
-	
+
 	const char *source = read_file("examples/debug.s");
     struct Node root = parse(source);
 
 	print_node(root, 0);
     free_node(root);
+	free((void*)source);
+}
+
+void
+test_gen()
+{
+	printf("Testing 'gen'\n");
+
+	const char *source = read_file("examples/debug.s");
+	struct Node root = parse(source);
+
+	char *const asm_buffer = "";
+	gen(root, asm_buffer, 50);
+
+	free_node(root);
 	free((void*)source);
 }
 

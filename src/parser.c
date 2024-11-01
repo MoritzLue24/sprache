@@ -141,7 +141,6 @@ lex_next(struct Loc *loc)
 
 		/* Subtract one because the punct type != the index, see mtach_punct*/
 		uint8_t punct_len = strlen(punctuations[punct_type - 1]);
-		// const char last_char = *(punctuations[punct_type] + punct_len - 1);
 
 		for (uint8_t i = 0; i < punct_len; i++)
 		{
@@ -163,11 +162,10 @@ parse(const char *source)
 {
 	struct Loc loc = { source, source[0], 0, 1, 1 };
 
-	// idk maby sizeof Node_Root
-	struct Node root = { NODE_ROOT, .n_root = { malloc(sizeof(struct Node)) } };
+	struct Node root = { NODE_ROOT, .n_root = { malloc(sizeof(struct NodeListElement)) } };
 	if (root.n_root.body == NULL)
 		fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
-		
+
 	root.n_root.body->self = NULL;
 	root.n_root.body->next = NULL;
 

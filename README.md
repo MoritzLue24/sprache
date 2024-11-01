@@ -11,3 +11,6 @@ The grammar file is in EBNF
 
 `sprache buffer <source>`
 
+
+### TODO
+- linux compatible

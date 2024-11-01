@@ -14,5 +14,8 @@ test_node_list();
 void 
 test_ast();
 
+void
+test_gen();
+
 #endif
 #endif

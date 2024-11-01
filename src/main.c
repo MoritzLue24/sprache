@@ -38,6 +38,8 @@ main(int argc, char **argv)
 			test_node_list();
 		else if (!strcmp(argv[i], "ast"))
 			test_ast();
+		else if (!strcmp(argv[i], "gen"))
+			test_gen();
 	}
 	return 0;
 
