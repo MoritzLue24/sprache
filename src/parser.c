@@ -285,6 +285,7 @@ parse_return(struct Loc *loc)
     return (struct Node) {
         .kind = NODE_RETURN,
         .n_return = (struct Node_Return) {
-            .value = literal        }
+            .value = literal
+		}
     };
 }
