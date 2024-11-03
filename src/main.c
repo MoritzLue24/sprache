@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+
 #include "tests.h"
 #include "error.h"
 #include "utils.h"
@@ -38,6 +39,8 @@ main(int argc, char **argv)
 			test_node_list();
 		else if (!strcmp(argv[i], "ast"))
 			test_ast();
+		else if (!strcmp(argv[i], "mem_stream"))
+			test_mem_stream();
 		else if (!strcmp(argv[i], "gen"))
 			test_gen();
 	}

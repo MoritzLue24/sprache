@@ -1,13 +1,16 @@
 #ifdef TEST
 #include "tests.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "utils.h"
 #include "loc.h"
 #include "tokens.h"
 #include "parser.h"
 #include "ast.h"
+#include "mem_stream.h"
 #include "gen.h"
 
 
@@ -88,6 +91,16 @@ test_ast()
 	print_node(root, 0);
     free_node(root);
 	free((void*)source);
+}
+
+void
+test_mem_stream()
+{
+	struct MemStream *stream = stream_open(0);
+	stream_write(stream, "hello", 5);
+	stream_write(stream, "\n", 1);
+	stream_write(stream, "world", 5);
+	stream_close(stream);
 }
 
 void

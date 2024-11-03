@@ -15,6 +15,9 @@ void
 test_ast();
 
 void
+test_mem_stream();
+
+void
 test_gen();
 
 #endif
