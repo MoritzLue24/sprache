@@ -4,30 +4,46 @@
 #include <string.h>
 
 #include "error.h"
+#include "mem_stream.h"
 
 
-void
-gen(struct Node root, char *const buffer, uint64_t size)
+struct MemStream *
+gen(struct Node root)
 {
-    memset(buffer, 0, size);
     if (root.kind != NODE_ROOT)
         fail(ERROR_NODE_INVALID, "root node expected");
-
+    struct MemStream *stream = stream_open(0);
     /* linux only */
     /* FILE *stream = fmemopen(buffer, size, "w"); */
-    FILE *stream = NULL;
-    if (stream == NULL)
-        fail(ERROR_MEMORY_ALLOCATION, "fmemopen failed");
 
-    /* gen_node_list(root.n_root.body, stream); */
-    fputs("section .text\nglobal _main\n_main:\n\tmov eax, 4\n\tret\n", stream);
+    stream_write(stream, "section .text\nglobal _main\n");
+    /* stream_write(stream, "_main:\n\tmov eax, 42\n\tret\n"); */
+    gen_node_list(root.n_root.body, stream);
 
-    fflush(stream);
-    fclose(stream);
+    stream_write_to_file(stream, "gen_test.asm");
+    free_stream(stream);
+
+    return stream;
 }
 
 void
-gen_node_list(struct NodeListElement *current, FILE *stream)
+gen_node_list(struct NodeListElement *current, struct MemStream *stream)
 {
-    
+    switch (current->self->kind)
+    {
+        case NODE_FUNCTION:
+            gen_function(current->self->n_function, stream);
+            break;
+
+        default:
+            break;
+            /* fail(ERROR_NOT_IMPLEMENTED, NULL); */
+    }
+}
+
+void
+gen_function(struct Node_Function function, struct MemStream *stream)
+{
+    stream_write(stream, "_%s:", function.name.value);
+    gen_node_list(function.body, stream);
 }

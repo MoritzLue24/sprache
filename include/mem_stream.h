@@ -19,10 +19,10 @@ struct MemStream*
 stream_open(size_t size);
 
 void
-stream_write(struct MemStream *stream, const char *src, size_t size);
+stream_write(struct MemStream *stream, const char *src, ...);
 
 void
-stream_close(struct MemStream *stream);
+free_stream(struct MemStream *stream);
 
 void
 stream_write_to_file(struct MemStream *stream, const char *path);

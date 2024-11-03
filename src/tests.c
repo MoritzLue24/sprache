@@ -97,10 +97,10 @@ void
 test_mem_stream()
 {
 	struct MemStream *stream = stream_open(0);
-	stream_write(stream, "hello", 5);
-	stream_write(stream, "\n", 1);
-	stream_write(stream, "world", 5);
-	stream_close(stream);
+	stream_write(stream, "%i", 40 + 2);
+	stream_write(stream, "%i", 30 + 2);
+	printf("%s, size: %i", stream->buf, stream->size);
+	free_stream(stream);
 }
 
 void
@@ -111,11 +111,11 @@ test_gen()
 	const char *source = read_file("examples/debug.s");
 	struct Node root = parse(source);
 
-	char *const asm_buffer = "";
-	gen(root, asm_buffer, 50);
+	struct MemStream *asm_stream = gen(root);
 
 	free_node(root);
 	free((void*)source);
+	free_stream(asm_stream);
 }
 
 #endif

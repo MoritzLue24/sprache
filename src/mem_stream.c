@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "error.h"
 
@@ -23,9 +24,27 @@ stream_open(size_t size)
     return stream;
 }
 
+
 void
-stream_write(struct MemStream *stream, const char *src, size_t size)
+stream_write(struct MemStream *stream, const char *format, ...)
 {
+    size_t format_len = strlen(format);
+    char *non_null_format = malloc(format);
+
+    /* TODO: format is null-terminated, may lead to misleading printf output */
+    va_list args;
+    va_start(args, format);
+    int size = vsnprintf(NULL, 0, format, args) + 1;
+    va_end(args);
+
+    char *src = malloc(size);
+    if (src == NULL)
+        fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
+
+    va_start(args, format);
+    vsnprintf(src, size, format, args);
+    va_end(args);
+
     if (stream->pos + size > stream->size)
     {
         stream->buf = (char*)realloc(stream->buf, stream->pos + size);
@@ -34,11 +53,12 @@ stream_write(struct MemStream *stream, const char *src, size_t size)
         stream->size = stream->pos + size;
     }
     memcpy(stream->buf + stream->pos, src, size);
+    free(src);
     stream->pos += size;
 }
 
 void
-stream_close(struct MemStream *stream)
+free_stream(struct MemStream *stream)
 {
     free(stream->buf);
     free(stream);

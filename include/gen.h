@@ -2,14 +2,18 @@
 #define GEN_H
 
 #include "ast.h"
+#include "mem_stream.h"
 
 #include <stdio.h>
 
 
-void
-gen(struct Node root, char *const buffer, uint64_t size);
+struct MemStream *
+gen(struct Node root);
 
 void
-gen_node_list(struct NodeListElement *current, FILE *stream);
+gen_node_list(struct NodeListElement *current, struct MemStream *stream);
+
+void
+gen_function(struct Node_Function function, struct MemStream *stream);
 
 #endif
