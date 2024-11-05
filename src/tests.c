@@ -56,7 +56,6 @@ test_tokens()
 void 
 test_node_list()
 {
-	/* TODO: is currently crashing -> fix it */
 	printf("Testing 'node_list'\n");
 
 	struct NodeListElement *root = malloc(sizeof(struct Node));
@@ -73,8 +72,6 @@ test_node_list()
 
     insert_node_list(root, some_node, 0);
     append_node_list(root, some_node);
-
-    printf("%p\n", root->next->self);
 
 	print_node_list(root, 0);
 	free_node_list(root);

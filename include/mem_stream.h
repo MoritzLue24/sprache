@@ -1,5 +1,3 @@
-/* TODO: memory allocation error checking, continue */
-
 #ifndef MEM_STREAM_H
 #define MEM_STREAM_H
 

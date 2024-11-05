@@ -87,11 +87,12 @@ print_node(struct Node node, uint8_t identation)
 		case NODE_LITERAL:
 			text = "LITERAL";
 
+			/* val_len considers null termination */
 			uint32_t val_len = node.n_literal.value.end.i - node.n_literal.value.start.i + 1;
-			value = realloc(value, val_len + 1);
+			value = realloc(value, val_len);
 			value[val_len] = '\0';
 
-			strncpy(value, node.n_literal.value.start.source + node.n_literal.value.start.i, val_len);
+			strncpy(value, node.n_literal.value.end.source + node.n_literal.value.start.i, val_len - 1);
 			break;
 		default:
 			text = "UNKNOWN";

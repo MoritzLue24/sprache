@@ -29,7 +29,7 @@ void
 stream_write(struct MemStream *stream, const char *format, ...)
 {
     size_t format_len = strlen(format);
-    char *non_null_format = malloc(format);
+    char *non_null_format = (char*)malloc(format_len);
 
     /* TODO: format is null-terminated, may lead to misleading printf output */
     va_list args;
