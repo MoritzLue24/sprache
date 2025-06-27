@@ -25,4 +25,8 @@ free_stream(struct MemStream *stream);
 void
 stream_write_to_file(struct MemStream *stream, const char *path);
 
+
+void
+print_stream(struct MemStream *stream);
+
 #endif

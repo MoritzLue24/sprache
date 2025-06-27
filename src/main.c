@@ -8,6 +8,8 @@
 #include "utils.h"
 #include "parser.h"
 #include "ast.h"
+#include "gen.h"
+#include "mem_stream.h"
 
 
 void
@@ -63,8 +65,12 @@ main(int argc, char **argv)
 		const char *source = read_file(argv[2]);
 
 		struct Node root = parse(source);
-
+		printf("%s\n", root.n_root.body->self->n_function.body->self->n_return.value->n_literal.value.value);
 		print_node(root, 0);
+		//struct MemStream *stream = gen(root);
+		//printf("%s", stream->buf);
+
+		//free_stream(stream);
 		free_node(root);
 		free((void*)source);
 		return 0;

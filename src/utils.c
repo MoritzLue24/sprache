@@ -67,44 +67,29 @@ skip_whitespace(struct Loc *loc)
 void
 print_node(struct Node node, uint8_t identation)
 {
-	const char *text;
-	char *value = malloc(1);
-	if (value == NULL)
-		fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
-	value[0] = '\0';
+	char ident[identation * 2 + 1];
+    for (uint8_t i = 0; i < identation * 2; ++i)
+        ident[i] = ' ';
+    ident[identation * 2] = '\0';
+	printf("%s", ident);
 
 	switch (node.kind)
 	{
 		case NODE_ROOT:
-			text = "ROOT";
+			printf("ROOT\n");
 			break;
 		case NODE_FUNCTION:
-			text = "fn";
+			printf("fn\n");
 			break;
 		case NODE_RETURN:
-			text = "return";
+			printf("return\n");
 			break;
 		case NODE_LITERAL:
-			text = "LITERAL";
-
-			/* val_len considers null termination */
-			uint32_t val_len = node.n_literal.value.end.i - node.n_literal.value.start.i + 1;
-			value = realloc(value, val_len);
-			value[val_len] = '\0';
-
-			strncpy(value, node.n_literal.value.end.source + node.n_literal.value.start.i, val_len - 1);
+			printf("LITERAL %s\n", node.n_literal.value.value);
 			break;
 		default:
-			text = "UNKNOWN";
+			printf("UNKNOWN\n");
 	}
-
-    char ident[identation * 2 + 1];
-    for (uint8_t i = 0; i < identation * 2; ++i)
-        ident[i] = ' ';
-    ident[identation * 2] = '\0';
-
-    printf("%s%s %s\n", ident, text, value);
-	free(value);
 
 	if (node.kind == NODE_ROOT)
 		print_node_list(node.n_root.body, identation + 1);

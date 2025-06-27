@@ -80,3 +80,9 @@ stream_write_to_file(struct MemStream *stream, const char *path)
 
 	fclose(file);
 }
+
+void
+print_stream(struct MemStream *stream)
+{
+    printf("%s", stream->buf);
+}
