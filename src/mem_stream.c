@@ -28,13 +28,9 @@ stream_open(size_t size)
 void
 stream_write(struct MemStream *stream, const char *format, ...)
 {
-    size_t format_len = strlen(format);
-    char *non_null_format = (char*)malloc(format_len);
-
-    /* TODO: format is null-terminated, may lead to misleading printf output */
     va_list args;
     va_start(args, format);
-    int size = vsnprintf(NULL, 0, format, args) + 1;
+    int size = vsnprintf(NULL, 0, format, args);
     va_end(args);
 
     char *src = malloc(size);
@@ -42,7 +38,7 @@ stream_write(struct MemStream *stream, const char *format, ...)
         fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
 
     va_start(args, format);
-    vsnprintf(src, size, format, args);
+    vsnprintf(src, size + 1, format, args);
     va_end(args);
 
     if (stream->pos + size > stream->size)
@@ -75,6 +71,8 @@ stream_write_to_file(struct MemStream *stream, const char *path)
 
     for (size_t i = 0; i < stream->size; i++)
     {
+        /*if (stream->buf[i] == '\0')
+            break;*/
         fprintf(file, "%c", stream->buf[i]);
     }
 
