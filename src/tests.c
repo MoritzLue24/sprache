@@ -94,10 +94,34 @@ void
 test_mem_stream()
 {
 	struct MemStream *stream = stream_open(0);
-	stream_write(stream, "%i", 40 + 2);
-	stream_write(stream, "%i", 30 + 2);
-	printf("%s, size: %i", stream->buf, stream->size);
+	stream_write(stream, "a(%i, \"%s\")", 40 + 2, "oui");
+	stream_write(stream, "b(%i)", 30 + 2);
+	stream_write_to_file(stream, "./build/test_mem_stream.txt");
 	free_stream(stream);
+
+	FILE* file = fopen("./build/test_mem_stream.txt", "rb");
+	if (file == NULL) {
+		perror(NULL);
+		exit(-1);
+	}
+	
+	fseek(file, 0, SEEK_END);
+    int64_t size = ftell(file);
+	fseek(file, 0, SEEK_SET);
+	
+	char* source = malloc(size + 1);
+	if (source == NULL)
+		fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
+
+	fread(source, sizeof(char), size, file);
+	source[size] = '\0';
+
+	fclose(file);
+
+	for (int64_t i = 0; i < size; i++)
+	{
+		printf("%i;", source[i]);
+	}
 }
 
 void

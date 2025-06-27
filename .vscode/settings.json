@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "error.h": "c",
+        "gen.h": "c",
+        "tests.h": "c",
+        "stdio.h": "c",
+        "ast.h": "c",
+        "string.h": "c",
+        "utils.h": "c",
+        "mem_stream.h": "c",
+        "stdlib.h": "c"
+    }
+}

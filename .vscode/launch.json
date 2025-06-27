@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/out.exe",
-            "args": ["ast"],
+            "args": ["mem_stream"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
