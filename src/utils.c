@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "error.h"
 
@@ -49,6 +50,25 @@ bool
 is_ident_char(char c)
 {
 	return is_ident_start(c) || is_digit(c);
+}
+
+char*
+format(const char *source, ...)
+{
+    va_list args;
+    va_start(args, source);
+    int size = vsnprintf(NULL, 0, source, args);
+    va_end(args);
+
+    char *formatted = malloc(size);
+    if (formatted == NULL)
+        fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
+
+    va_start(args, source);
+    vsnprintf(formatted, size + 1, source, args);
+    va_end(args);
+
+	return formatted;
 }
 
 void

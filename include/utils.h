@@ -19,6 +19,9 @@ is_ident_start(char c);
 bool
 is_ident_char(char c);
 
+char*
+format(const char *source, ...);
+
 void
 skip_whitespace(struct Loc *loc);
 
@@ -42,6 +45,5 @@ append_node_list(struct NodeListElement *root, struct Node value);
 
 void
 insert_node_list(struct NodeListElement *root, struct Node value, uint32_t nth);
-
 
 #endif /* UTILS_H */

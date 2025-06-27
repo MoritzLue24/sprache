@@ -26,19 +26,19 @@ stream_open(size_t size)
 
 
 void
-stream_write(struct MemStream *stream, const char *format, ...)
+stream_write(struct MemStream *stream, const char *source, ...)
 {
     va_list args;
-    va_start(args, format);
-    int size = vsnprintf(NULL, 0, format, args);
+    va_start(args, source);
+    int size = vsnprintf(NULL, 0, source, args);
     va_end(args);
 
-    char *src = malloc(size);
-    if (src == NULL)
+    char *formatted = malloc(size);
+    if (formatted == NULL)
         fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
 
-    va_start(args, format);
-    vsnprintf(src, size + 1, format, args);
+    va_start(args, source);
+    vsnprintf(formatted, size + 1, source, args);
     va_end(args);
 
     if (stream->pos + size > stream->size)
@@ -48,8 +48,8 @@ stream_write(struct MemStream *stream, const char *format, ...)
             fail(ERROR_MEMORY_ALLOCATION, "realloc failed");
         stream->size = stream->pos + size;
     }
-    memcpy(stream->buf + stream->pos, src, size);
-    free(src);
+    memcpy(stream->buf + stream->pos, formatted, size);
+    free(formatted);
     stream->pos += size;
 }
 

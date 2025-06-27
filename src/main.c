@@ -65,12 +65,17 @@ main(int argc, char **argv)
 		const char *source = read_file(argv[2]);
 
 		struct Node root = parse(source);
-		printf("%s\n", root.n_root.body->self->n_function.body->self->n_return.value->n_literal.value.value);
+		printf("AST:\n");
 		print_node(root, 0);
-		//struct MemStream *stream = gen(root);
-		//printf("%s", stream->buf);
 
-		//free_stream(stream);
+		struct MemStream *stream = gen(root);
+		printf("\nAssembled Code:\n%s\n", stream->buf);
+
+		char *path = format("%s.asm", argv[2]);
+		stream_write_to_file(stream, path);
+
+		free(path);
+		free_stream(stream);
 		free_node(root);
 		free((void*)source);
 		return 0;

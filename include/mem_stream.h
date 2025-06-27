@@ -17,14 +17,13 @@ struct MemStream*
 stream_open(size_t size);
 
 void
-stream_write(struct MemStream *stream, const char *src, ...);
+stream_write(struct MemStream *stream, const char *source, ...);
 
 void
 free_stream(struct MemStream *stream);
 
 void
 stream_write_to_file(struct MemStream *stream, const char *path);
-
 
 void
 print_stream(struct MemStream *stream);
