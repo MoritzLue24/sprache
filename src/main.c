@@ -7,6 +7,7 @@
 #include "error.h"
 #include "utils.h"
 #include "parser.h"
+#include "ast.h"
 
 
 void
@@ -61,10 +62,10 @@ main(int argc, char **argv)
 	{
 		const char *source = read_file(argv[2]);
 
-		parse(source);
+		struct Node root = parse(source);
 
-		/* print_ast(root); */
-		/* free_ast(root); */
+		print_node(root, 0);
+		free_node(root);
 		free((void*)source);
 		return 0;
 	}
