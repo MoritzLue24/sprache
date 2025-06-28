@@ -68,7 +68,7 @@ main(int argc, char **argv)
 		printf("AST:\n");
 		print_node(root, 0);
 
-		struct MemStream *stream = gen(root);
+		struct MemStream *stream = gen(root.n_root);
 		printf("\nAssembled Code:\n%s\n", stream->buf);
 
 		char *path = format("%s.asm", argv[2]);

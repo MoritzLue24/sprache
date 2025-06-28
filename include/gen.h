@@ -8,12 +8,15 @@
 
 
 struct MemStream *
-gen(struct Node root);
+gen(struct Node_Root root);
 
 void
-gen_node_list(struct NodeListElement *current, struct MemStream *stream);
+gen_node_list(struct MemStream *stream, struct NodeListElement *node_list);
 
 void
-gen_function(struct Node_Function function, struct MemStream *stream);
+gen_function(struct MemStream *stream, struct Node_Function function);
+
+void
+gen_return(struct MemStream *stream, struct Node_Return ret);
 
 #endif
