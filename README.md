@@ -1,6 +1,10 @@
 # Sprache
 The grammar file is in EBNF
 
+## Defines
+* `TEST`
+* `SAVE_ASM`
+
 ## CLI usage
 `sprache <command> [<args>]`
 
