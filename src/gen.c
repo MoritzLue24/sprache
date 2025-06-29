@@ -24,7 +24,7 @@ void
 gen_node_list(struct MemStream *stream, struct NodeListElement *node_list)
 {
     struct NodeListElement *current = node_list;
-	while (current != NULL)
+	while (current != NULL && current->self != NULL)
 	{
         switch (current->self->kind)
         {
