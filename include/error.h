@@ -6,9 +6,10 @@
 
 enum ErrorCode {
 	ERROR_NONE,
+	ERROR_CLI_USAGE,
+	ERROR_FILEPATH_INVALID,
 	ERROR_MEMORY_ALLOCATION,
 	ERROR_NOT_IMPLEMENTED,
-	ERROR_CLI_USAGE,
 	ERROR_EOF_REACHED,
 	ERROR_TOKEN_INVALID,
 	ERROR_SYNTAX_INVALID,
@@ -20,7 +21,7 @@ enum ErrorCode {
  * exits the program.
 */
 void
-fail(enum ErrorCode code, const char *msg);
+fail(enum ErrorCode code, const char *msg, ...);
 
 /* Writes the error and the occurrence in the source code to `stderr`.
 */
