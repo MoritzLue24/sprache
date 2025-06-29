@@ -13,8 +13,7 @@ read_file(const char *path)
 {
 	FILE* file = fopen(path, "rb");
 	if (file == NULL) {
-		perror(NULL);
-		exit(-1);
+		fail(ERROR_FILEPATH_INVALID, path);
 	}
 	
 	fseek(file, 0, SEEK_END);
