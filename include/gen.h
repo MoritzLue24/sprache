@@ -1,10 +1,9 @@
 #ifndef GEN_H
 #define GEN_H
 
-#include "ast.h"
-#include "mem_stream.h"
-
 #include <stdio.h>
+
+#include "ast.h"
 
 
 char *
