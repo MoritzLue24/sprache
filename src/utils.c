@@ -246,9 +246,17 @@ append_string(char **dest, const char *source, ...)
 	}
 
 	va_list args;
-	va_start(args, source);
-	char *formatted = format(source, args);
-	va_end(args);
+    va_start(args, source);
+    int f_size = vsnprintf(NULL, 0, source, args);
+    va_end(args);
+
+    char *formatted = malloc(f_size + 1);
+    if (formatted == NULL)
+        fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
+
+    va_start(args, source);
+    vsnprintf(formatted, f_size + 1, source, args);
+    va_end(args);
 
 	size_t old_len = strlen(*dest);
 	size_t add_len = strlen(formatted);

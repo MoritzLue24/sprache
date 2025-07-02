@@ -48,10 +48,7 @@ gen_function(char **stream, struct Node_Function function)
     if (!strcmp(function.name.value, "main"))
         append_string(stream, "_start:\n");
     else
-    {
-        printf("%s\n", function.name.value);
         append_string(stream, "%s:\n", function.name.value);
-    }
     gen_node_list(stream, function.body);
 }
 

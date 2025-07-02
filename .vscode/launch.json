@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/out.exe",
-            "args": ["mem_stream"],
+            "args": ["examples/return_421.s"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
