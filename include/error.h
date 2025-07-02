@@ -26,6 +26,6 @@ fail(enum ErrorCode code, const char *msg, ...);
 /* Writes the error and the occurrence in the source code to `stderr`.
 */
 void
-fail_spr(enum ErrorCode code, struct Loc loc, const char *msg);
+fail_spr(enum ErrorCode code, struct Loc loc, const char *msg, ...);
 
 #endif /* ERROR_H */

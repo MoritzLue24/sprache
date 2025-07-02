@@ -45,15 +45,23 @@ fail(enum ErrorCode code, const char *msg, ...)
 }
 
 void
-fail_spr(enum ErrorCode code, struct Loc loc, const char *msg) 
+fail_spr(enum ErrorCode code, struct Loc loc, const char *msg, ...) 
 {
 	if (msg == NULL)
 		fprintf(stderr, 
 			"Sprache error %s at %i:%i",
 			error_codes[code], loc.line, loc.col);
-	else 
+	else  
+	{
 		fprintf(stderr,
-			"Sprache error %s at %i:%i: '%s'",
-			error_codes[code], loc.line, loc.col, msg);
+			"Sprache error %s at %i:%i: ",
+			error_codes[code], loc.line, loc.col);
+	
+		va_list args;
+    	va_start(args, msg);
+		vfprintf(stderr, msg, args);
+        fprintf(stderr, "\n");
+		va_end(args);
+	}
 	exit(code);
 }
