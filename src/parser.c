@@ -103,7 +103,7 @@ lex_next(struct Loc *loc)
 		(the index `i` will be on the last valid ident char) */
 		token.start = *loc;
 		step(loc);
-		
+
 		while (is_ident_char(loc->source[loc->i + 1]))
 			step(loc);
 
@@ -125,6 +125,7 @@ lex_next(struct Loc *loc)
 			token.type = TT_KEYWORD;
 			token.kw_type = kw_type;
 			token.value = NULL;
+			free(ident);
 		}
 		else
 		{
@@ -218,8 +219,6 @@ parse_function(struct Loc *loc)
 	struct Token open_paren = lex_next(loc);
 	if (open_paren.type != TT_PUNCT && open_paren.punct_type != PUNCT_PAREN_OPEN)
 		fail_spr(ERROR_SYNTAX_INVALID, *loc, "'(' expected");
-
-	/* TODO: arguments */
 
 	struct Token close_paren = lex_next(loc);
 	if (close_paren.type != TT_PUNCT && close_paren.punct_type != PUNCT_PAREN_CLOSE)

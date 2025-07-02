@@ -59,7 +59,7 @@ format(const char *source, ...)
     int size = vsnprintf(NULL, 0, source, args);
     va_end(args);
 
-    char *formatted = malloc(size);
+    char *formatted = malloc(size + 1);
     if (formatted == NULL)
         fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
 
@@ -98,7 +98,7 @@ print_node(struct Node node, uint8_t identation)
 			printf("ROOT\n");
 			break;
 		case NODE_FUNCTION:
-			printf("fn\n");
+			printf("fn %s\n", node.n_function.name.value);
 			break;
 		case NODE_RETURN:
 			printf("return\n");
@@ -122,7 +122,7 @@ void
 free_token(struct Token token)
 {
 	if (token.value != NULL)
-		free((void*)token.value);
+		free(token.value);
 }
 
 void
@@ -139,7 +139,8 @@ free_node(struct Node node)
             free_node_list(node.n_function.body);
             break;
         case NODE_RETURN:
-            free(node.n_return.value);
+            free_node(*(node.n_return.value));
+			free(node.n_return.value);
             break;
         case NODE_LITERAL:
 			free_token(node.n_literal.value);
@@ -233,4 +234,29 @@ insert_node_list(struct NodeListElement *root, struct Node value, uint32_t nth)
     }
 }
 
+void
+append_string(char **dest, const char *source, ...)
+{
+	if (*dest == NULL)
+	{
+		*dest = malloc(1);
+		if (*dest == NULL)
+			fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
+		(*dest)[0] = '\0';
+	}
 
+	va_list args;
+	va_start(args, source);
+	char *formatted = format(source, args);
+	va_end(args);
+
+	size_t old_len = strlen(*dest);
+	size_t add_len = strlen(formatted);
+
+	*dest = realloc(*dest, old_len + add_len + 1);
+	if (*dest == NULL)
+		fail(ERROR_MEMORY_ALLOCATION, "realloc failed");
+
+	strcat(*dest, formatted);
+	free(formatted);
+}

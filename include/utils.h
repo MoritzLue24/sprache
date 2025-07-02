@@ -46,4 +46,10 @@ append_node_list(struct NodeListElement *root, struct Node value);
 void
 insert_node_list(struct NodeListElement *root, struct Node value, uint32_t nth);
 
+/* `dest` cannot be initialized with a string literal.
+ * string literals create read-only memory.
+*/
+void
+append_string(char **dest, const char *source, ...);
+
 #endif /* UTILS_H */

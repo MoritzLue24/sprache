@@ -33,12 +33,16 @@ compile(char *in_file, char *asm_file)
 	printf("AST:\n");
 	print_node(root, 0);
 
-	/* TODO: with examples/return_421.s, there is a '1' at the end of stream */
-	struct MemStream *stream = gen(root.n_root);
-	printf("\nAssembled Code:\n%s\n", stream->buf);
-	stream_write_to_file(stream, asm_file);
+	char *stream = gen(root.n_root);
+	printf("\nAssembled Code:\n%s\n", stream);
+	FILE *asm_f = fopen(asm_file, "w");
+	if (asm_f == NULL)
+		fail(ERROR_FILEPATH_INVALID, "failed opening asm file '%s'", asm_file);
+	
+	fprintf(asm_f, "%s", stream);
+	fclose(asm_f);
 
-	free_stream(stream);
+	free(stream);
 	free_node(root);
 	free(source);
 }
@@ -99,13 +103,14 @@ main(int argc, char **argv)
 		char *ext = strrchr(in_file, '.');
 		if (ext == NULL || strcmp(ext, ".s"))
 			fail(ERROR_FILEPATH_INVALID, "'%s' extension '.s' is missing", in_file);
-
-		size_t asm_file_len = strlen(in_file) - strlen(".s") + strlen(".asm") + 1;
-		asm_file = malloc(asm_file_len);
+		
+		size_t base_len = strlen(in_file) - strlen(".s");
+		asm_file = malloc(base_len + strlen(".asm") + 1);
 		if (asm_file == NULL)
 			fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
 
-		strncpy(asm_file, in_file, strlen(in_file) - strlen(".s"));
+		strncpy(asm_file, in_file, base_len);
+		asm_file[base_len] = '\0';
 		strcat(asm_file, ".asm");
 	}
 

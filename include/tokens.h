@@ -37,7 +37,7 @@ struct Token
 	enum TokenType type;
 	struct Loc start;
 	struct Loc end;
-	const char* value;
+	char *value;
 	union {
 		enum KeywordType kw_type;
 		enum PunctuationType punct_type;
