@@ -35,7 +35,7 @@ gen_node_list(char **stream, struct NodeListElement *node_list)
                 gen_return(stream, current->self->n_return);
                 break;
             default:
-                fail_spr(ERROR_NODE_INVALID, "gen not yet implemented for kind %i", current->self->kind);
+                fail(ERROR_NODE_INVALID, "gen not yet implemented for kind %i", current->self->kind);
                 break;
         }
 		current = current->next;
