@@ -2,6 +2,7 @@
 #define LOC_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 
 struct Loc 
@@ -9,8 +10,8 @@ struct Loc
 	const char *source;
 	char c;
 	size_t i;
-	size_t col;
-	size_t line;
+	uint16_t col;
+	uint16_t line;
 };
 
 void

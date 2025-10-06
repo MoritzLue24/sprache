@@ -1,6 +1,8 @@
 #ifndef GEN_H
 #define GEN_H
 
+#include <stdio.h>
+
 #include "ast.h"
 
 
