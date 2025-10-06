@@ -1,6 +1,8 @@
 #include "ast.h"
 
 #include <stdio.h>
+#include <stdint.h>
+#include <stddef.h>
 #include <stdlib.h>
 
 #include "error.h"
@@ -10,7 +12,7 @@ void
 print_node(struct Node node, uint8_t identation)
 {
     char ident[identation * 2 + 1];
-    for (uint8_t i = 0; i < identation * 2; ++i)
+    for (size_t i = 0; i < identation * 2; ++i)
         ident[i] = ' ';
     ident[identation * 2] = '\0';
 
@@ -18,7 +20,7 @@ print_node(struct Node node, uint8_t identation)
     {
         case NODE_BLOCK:
             printf("%s{\n", ident);
-            for (uint32_t i = 0; i < node.n_block.count; ++i)
+            for (size_t i = 0; i < node.n_block.count; ++i)
                 print_node(node.n_block.body[i], identation + 1);
             printf("%s}\n", ident);
             break;
@@ -48,7 +50,7 @@ free_node(struct Node node)
     switch (node.kind)
     {
         case NODE_BLOCK:
-            for (uint32_t i = 0; i < node.n_block.count; ++i)
+            for (size_t i = 0; i < node.n_block.count; ++i)
                 free_node(node.n_block.body[i]);
             free(node.n_block.body);
             break;

@@ -1,8 +1,6 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include <stdint.h>
-#include "error.h"
 #include "loc.h"
 #include "tokens.h"
 #include "ast.h"
@@ -35,7 +33,7 @@ find_keyword(const char *keyword);
  * - `ERROR_MEMORY_ALLOCATION`, on memory allocation fail
 */
 enum PunctuationType 
-match_punct(struct Loc *loc, unsigned int *punct_len);
+match_punct(struct Loc *loc, size_t *punct_len);
 
 /* Tokenizes the next token of the given source code at the ith character.
  * The `source[*i]` char should be the first character of the desired token.

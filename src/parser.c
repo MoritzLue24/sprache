@@ -1,8 +1,8 @@
 #include "parser.h"
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <stddef.h>
 #include <string.h>
+#include <stdlib.h>
 #include <ctype.h>
 
 #include "error.h"
@@ -12,7 +12,7 @@
 enum KeywordType
 find_keyword(const char *keyword)
 {
-	for (uint8_t i = 0; i < sizeof(keywords) / sizeof(keywords[0]); ++i)
+	for (size_t i = 0; i < sizeof(keywords) / sizeof(keywords[0]); ++i)
 		if (!strcmp(keywords[i], keyword))
 			return i;
 	return KW_INVALID;
@@ -135,9 +135,8 @@ lex_next(struct Loc *loc)
 		token.start = *loc;
 		token.punct_type = punct_type;
 
-		uint8_t punct_len = strlen(punctuations[punct_type]);
-
-		for (uint8_t i = 0; i < punct_len; i++)
+		size_t punct_len = strlen(punctuations[punct_type]);
+		for (size_t i = 0; i < punct_len; i++)
 		{
 			if (i == punct_len - 1)
 				token.end = *loc;

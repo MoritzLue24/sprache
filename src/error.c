@@ -1,9 +1,8 @@
 #include "error.h"
 
 #include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
 
 static const char *error_codes[] = {

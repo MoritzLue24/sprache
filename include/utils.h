@@ -2,9 +2,7 @@
 #define UTILS_H
 
 #include <stdint.h>
-#include <stdbool.h>
 #include "ast.h"
-#include "tokens.h"
 
 
 char*

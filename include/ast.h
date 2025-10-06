@@ -1,6 +1,8 @@
 #ifndef AST_H
 #define AST_H
 
+#include <stdint.h>
+
 #include "loc.h"
 #include "tokens.h"
 
@@ -22,7 +24,7 @@ struct Node_Literal;
 struct Node_Block
 {
 	struct Node *body;
-	unsigned int count;
+	uint16_t count;
 };
 
 struct Node_Function

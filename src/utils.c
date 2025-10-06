@@ -17,7 +17,7 @@ read_file(const char *path)
 	}
 	
 	fseek(file, 0, SEEK_END);
-    int64_t size = ftell(file);
+    size_t size = ftell(file);
 	fseek(file, 0, SEEK_SET);
 	
 	char* source = malloc(size + 1);
@@ -36,7 +36,7 @@ format(const char *source, ...)
 {
     va_list args;
     va_start(args, source);
-    int size = vsnprintf(NULL, 0, source, args);
+    size_t size = vsnprintf(NULL, 0, source, args);
     va_end(args);
 
     char *formatted = malloc(size + 1);
@@ -76,7 +76,7 @@ append_string(char *dest, const char *source, ...)
 
 	va_list args;
     va_start(args, source);
-    int f_size = vsnprintf(NULL, 0, source, args);
+    size_t f_size = vsnprintf(NULL, 0, source, args);
     va_end(args);
 
     char *formatted = malloc(f_size + 1);

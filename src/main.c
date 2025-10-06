@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include <stdint.h>
+#include <string.h>
+#include <stddef.h>
 
 #include "tests.h"
 #include "error.h"
@@ -47,7 +47,7 @@ compile(char *in_file, char *asm_file)
 	free(source);
 }
 
-int32_t
+int
 main(int argc, char **argv)
 {
 #ifdef TEST
@@ -56,7 +56,7 @@ main(int argc, char **argv)
 		test_all();
 		return 0;
 	}
-	for (int32_t i = 1; i < argc; i++)
+	for (size_t i = 1; i < argc; i++)
 	{
 		if (!strcmp(argv[i], "tokens"))
 			test_tokens();
@@ -75,7 +75,7 @@ main(int argc, char **argv)
 	char *in_file = NULL;
 	char *asm_file = NULL;
 
-	for (int i = 1; i < argc; i++)
+	for (size_t i = 1; i < argc; i++)
 	{
 		if (!strcmp(argv[i], "--help") || !strcmp(argv[i], "-h"))
 		{

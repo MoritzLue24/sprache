@@ -1,7 +1,7 @@
 #include "gen.h"
 
 #include <stdio.h>
-#include <string.h>
+#include <stddef.h>
 
 #include "error.h"
 #include "utils.h"
@@ -31,7 +31,7 @@ gen_block(FILE *stream, struct Node block)
 {
     if (block.kind != NODE_BLOCK)
         fail(ERROR_NODE_INVALID, "gen_block only accepts NODE_BLOCK");
-    for (unsigned int i = 0; i < block.n_block.count; i++)
+    for (size_t i = 0; i < block.n_block.count; i++)
     {
         struct Node statement = block.n_block.body[i];
         switch (statement.kind)
