@@ -1,65 +1,62 @@
 #ifndef AST_H
 #define AST_H
 
-#include <stdint.h>
 #include "loc.h"
 #include "tokens.h"
 
 
 enum NodeKind
 {
-	NODE_ROOT,
+	NODE_BLOCK,
 	NODE_FUNCTION,
 	NODE_RETURN,
 	NODE_LITERAL,
 };
 
 struct Node;
-struct NodeListElement;
-struct Node_Root;
+struct Node_Block;
 struct Node_Function;
 struct Node_Return;
 struct Node_Literal;
 
-
-struct NodeListElement
+struct Node_Block
 {
-	struct Node *self;
-	struct NodeListElement *next;
-};
-
-struct Node_Root
-{
-	struct NodeListElement *body;
+	struct Node *body;
+	unsigned int count;
 };
 
 struct Node_Function
 {
-	struct Token name;
-	struct NodeListElement *args;
-	struct NodeListElement *body;
+	struct Token name_token;
+	struct Node *block_node;
 };
 
 struct Node_Return 
 {
-	struct Node *value;
+	struct Node *value_node;
 };
 
 struct Node_Literal 
 {
-	struct Token value;
+	struct Token value_token;
 };
 
 struct Node 
 {
 	enum NodeKind kind;
-	/* struct Loc start, end; */
+	struct Loc start, end;
 	union {
-		struct Node_Root n_root;
+		struct Node_Block n_block;
 		struct Node_Function n_function;
 		struct Node_Return n_return;
 		struct Node_Literal n_literal;
 	};
 };
+
+void
+print_node(struct Node node, uint8_t identation);
+
+void
+free_node(struct Node node);
 
 #endif

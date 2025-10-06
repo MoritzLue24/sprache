@@ -10,13 +10,14 @@
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE",
-                "TEST"
+                "_GNU_SOURCE"
+                //"TEST"
             ],
             "windowsSdkVersion": "10.0.22621.0",
-            "compilerPath": "C:/Dev/programs/MinGW/bin/gcc",
+            "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "gcc-x64",
+            "intelliSenseMode": "gcc-x64"
         }
     ],
     "version": 4

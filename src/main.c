@@ -18,8 +18,8 @@ print_help()
 		"Usage: sprache <file> [options]\n\n"
 		"Options:\n"
 		"\t-h, --help			Shows this message\n"
-		"\t-o, --output			Specifies the executable output\n"
-		/* TODO: "\t-s, --asm [<file>]		Generates an assembly file when compiling\n" */
+		"\t-a, --asm <file>		Generates an assembly file when compiling\n"
+		//"\t-o, --output	<file>	Specifies the executable output\n"
 	);
 }
 
@@ -32,16 +32,17 @@ compile(char *in_file, char *asm_file)
 	printf("AST:\n");
 	print_node(root, 0);
 
-	char *stream = gen(root.n_root);
-	printf("\nAssembled Code:\n%s\n", stream);
+	char *asm_code = gen(root);
+	printf("\nAssembled Code:\n%s\n", asm_code);
+	/*
 	FILE *asm_f = fopen(asm_file, "w");
 	if (asm_f == NULL)
 		fail(ERROR_FILEPATH_INVALID, "failed opening asm file '%s'", asm_file);
 	
 	fprintf(asm_f, "%s", stream);
 	fclose(asm_f);
-
-	free(stream);
+	*/
+	free(asm_code);
 	free_node(root);
 	free(source);
 }
@@ -73,7 +74,6 @@ main(int argc, char **argv)
 #else
 	char *in_file = NULL;
 	char *asm_file = NULL;
-	char *out_file = NULL;
 
 	for (int i = 1; i < argc; i++)
 	{
@@ -82,10 +82,10 @@ main(int argc, char **argv)
 			print_help();
 			return 0;
 		}
-		else if (!strcmp(argv[i], "--output") || !strcmp(argv[i], "-o"))
+		else if (!strcmp(argv[i], "--asm") || !strcmp(argv[i], "-a"))
 		{
 			if (i + 1 < argc)
-				out_file = argv[++i];
+				asm_file = argv[++i];
 			else
 				fail(ERROR_CLI_USAGE, "option '%s' requires an argument", argv[i]);
 		}
@@ -103,14 +103,17 @@ main(int argc, char **argv)
 		if (ext == NULL || strcmp(ext, ".s"))
 			fail(ERROR_FILEPATH_INVALID, "'%s' extension '.s' is missing", in_file);
 		
-		size_t base_len = strlen(in_file) - strlen(".s");
-		asm_file = malloc(base_len + strlen(".asm") + 1);
 		if (asm_file == NULL)
-			fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
+		{
+			size_t base_len = strlen(in_file) - strlen(".s");
+			asm_file = malloc(base_len + strlen(".asm") + 1);
+			if (asm_file == NULL)
+				fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
 
-		strncpy(asm_file, in_file, base_len);
-		asm_file[base_len] = '\0';
-		strcat(asm_file, ".asm");
+			strncpy(asm_file, in_file, base_len);
+			asm_file[base_len] = '\0';
+			strcat(asm_file, ".asm");
+		}
 	}
 
 	compile(in_file, asm_file);

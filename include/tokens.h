@@ -9,23 +9,25 @@ enum TokenType
 	TT_KEYWORD,
 	TT_IDENTIFIER,
 	TT_PUNCT,
-	TT_LITERAL,
+	TT_LITERAL
 };
 
 enum KeywordType
 {
-	KW_INVALID,
 	KW_FUNCTION,
-	KW_RETURN
+	KW_RETURN,
+
+	KW_INVALID
 };
 
 enum PunctuationType
 {
-	PUNCT_INVALID,
 	PUNCT_PAREN_OPEN,
 	PUNCT_PAREN_CLOSE,
 	PUNCT_BRACE_OPEN,
-	PUNCT_BRACE_CLOSE
+	PUNCT_BRACE_CLOSE,
+
+	PUNCT_INVALID
 };
 
 extern const char *const keywords[2];

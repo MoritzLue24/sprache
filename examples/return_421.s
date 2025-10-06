@@ -1,3 +1,3 @@
-fn maieen() {
+{fn maieen() {
     return 421
-}
+}}

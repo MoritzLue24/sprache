@@ -35,7 +35,7 @@ find_keyword(const char *keyword);
  * - `ERROR_MEMORY_ALLOCATION`, on memory allocation fail
 */
 enum PunctuationType 
-match_punct(struct Loc *loc, uint32_t *punct_len);
+match_punct(struct Loc *loc, unsigned int *punct_len);
 
 /* Tokenizes the next token of the given source code at the ith character.
  * The `source[*i]` char should be the first character of the desired token.
@@ -60,12 +60,15 @@ struct Node
 parse(const char *source);
 
 struct Node
+parse_block(struct Loc *loc, struct Token token);
+
+struct Node
 parse_statement(struct Loc *loc, struct Token token);
 
 struct Node
-parse_function(struct Loc *loc);
+parse_function(struct Loc *loc, struct Token token);
 
 struct Node
-parse_return(struct Loc *loc);
+parse_return(struct Loc *loc, struct Token token);
 
 #endif /* PARSER_H */

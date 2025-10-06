@@ -7,15 +7,16 @@
 
 
 char *
-gen(struct Node_Root root);
+gen(struct Node node);
 
 void
-gen_node_list(char **stream, struct NodeListElement *node_list);
+gen_block(FILE *stream, struct Node block);
 
 void
-gen_function(char **stream, struct Node_Function function);
+gen_function(FILE *stream, struct Node function);
 
 void
-gen_return(char **stream, struct Node_Return ret);
+gen_return(FILE *stream, struct Node ret);
+
 
 #endif
