@@ -179,7 +179,7 @@ parse_module(struct Loc *loc, struct Token token)
 	while (current_t.type != TT_EOF)
 	{	
 		if (current_t.type != TT_KEYWORD || current_t.kw_type != KW_FUNCTION)
-			fail_spr(ERROR_SYNTAX_INVALID, current_t.start, "function expected by module");
+			fail_spr(ERROR_SYNTAX_INVALID, current_t.start, "function def expected by module");
 
 		struct Node function = parse_function(loc, current_t);
 		
@@ -202,15 +202,15 @@ struct Node
 parse_function(struct Loc *loc, struct Token token)
 {
 	struct Node function = {
-		.kind = NODE_FUNCTION,
+		.kind = NODE_FUNC_DEF,
 		.start = token.start,
-		.n_function = {}
+		.n_func_def = {}
 	};
 
 	struct Token name = lex_next(loc);
 	if (name.type != TT_IDENTIFIER)
 		fail_spr(ERROR_SYNTAX_INVALID, name.start, "identifier expected");
-	function.n_function.name_token = name;
+	function.n_func_def.name_t = name;
 	
 	struct Token open_paren = lex_next(loc);
 	if (open_paren.type != TT_PUNCT && open_paren.punct_type != PUNCT_PAREN_OPEN)
@@ -220,12 +220,12 @@ parse_function(struct Loc *loc, struct Token token)
 	if (close_paren.type != TT_PUNCT && close_paren.punct_type != PUNCT_PAREN_CLOSE)
 		fail_spr(ERROR_SYNTAX_INVALID, close_paren.start, "')' expected");
 
-	function.n_function.block_node = malloc(sizeof(struct Node));
-	if (function.n_function.block_node == NULL)
+	function.n_func_def.block_n = malloc(sizeof(struct Node));
+	if (function.n_func_def.block_n == NULL)
 		fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
-	*function.n_function.block_node = parse_block(loc, lex_next(loc));
+	*function.n_func_def.block_n = parse_block(loc, lex_next(loc));
 
-	function.end = function.n_function.block_node->end;
+	function.end = function.n_func_def.block_n->end;
 	return function;
 }
 
@@ -249,7 +249,7 @@ parse_block(struct Loc *loc, struct Token token)
 	{	
 		if (current_t.type == TT_EOF)
 			fail_spr(ERROR_SYNTAX_INVALID, current_t.start, "'}' expected by block");
-			
+
 		struct Node statement = parse_statement(loc, current_t);
 		
 		block.n_block.count++;
@@ -278,7 +278,7 @@ parse_statement(struct Loc *loc, struct Token token)
                 case KW_RETURN:
                     return parse_return(loc, token);
 				default:
-					fail_spr(ERROR_SYNTAX_INVALID, *loc, "invalid statement");
+					fail_spr(ERROR_SYNTAX_INVALID, *loc, "invalid keyword");
 			}
 			break;
 		default:
@@ -294,7 +294,7 @@ parse_return(struct Loc *loc, struct Token token)
 		.kind = NODE_RETURN,
 		.start = token.start,
 		.n_return = {
-			.value_node = NULL
+			.value_n= NULL
 		}
 	};
 	
@@ -304,15 +304,15 @@ parse_return(struct Loc *loc, struct Token token)
     	fail_spr(ERROR_SYNTAX_INVALID, value.start, "literal expected");
 	}
 
-	return_node.n_return.value_node = malloc(sizeof(struct Node));
-	if (return_node.n_return.value_node == NULL)
+	return_node.n_return.value_n = malloc(sizeof(struct Node));
+	if (return_node.n_return.value_n == NULL)
 		fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
 
-	*return_node.n_return.value_node = (struct Node) {
+	*return_node.n_return.value_n = (struct Node) {
 		.kind = NODE_LITERAL,
 		.start = value.start,
 		.end = value.end,
-		.n_literal = { .value_token = value }
+		.n_literal = { .value_t = value }
 	};
 
 	return_node.end = value.end;

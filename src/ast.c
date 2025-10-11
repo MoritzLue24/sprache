@@ -23,9 +23,9 @@ print_node(struct Node node, uint8_t identation)
             for (size_t i = 0; i < node.n_module.count; ++i)
                 print_node(node.n_module.body[i], identation + 1);
             break;
-        case NODE_FUNCTION:
-            printf("%sFUNCTION %s\n", ident, node.n_function.name_token.value);
-            print_node(*node.n_function.block_node, identation + 1);
+        case NODE_FUNC_DEF:
+            printf("%sFUNCTION %s\n", ident, node.n_func_def.name_t.value);
+            print_node(*node.n_func_def.block_n, identation + 1);
             break;
 
         case NODE_BLOCK:
@@ -37,11 +37,11 @@ print_node(struct Node node, uint8_t identation)
 
         case NODE_RETURN:
             printf("%sRETURN \n", ident);
-            print_node(*node.n_return.value_node, identation + 1);
+            print_node(*node.n_return.value_n, identation + 1);
             break;
 
         case NODE_LITERAL:
-            printf("%sLITERAL %s\n", ident, node.n_literal.value_token.value);
+            printf("%sLITERAL %s\n", ident, node.n_literal.value_t.value);
             break;
     
         default:
@@ -60,11 +60,11 @@ free_node(struct Node node)
             free(node.n_module.body);
             break;
 
-        case NODE_FUNCTION:
-            if (node.n_function.name_token.value != NULL)
-                free(node.n_function.name_token.value);
-            free_node(*node.n_function.block_node);
-            free(node.n_function.block_node);
+        case NODE_FUNC_DEF:
+            if (node.n_func_def.name_t.value != NULL)
+                free(node.n_func_def.name_t.value);
+            free_node(*node.n_func_def.block_n);
+            free(node.n_func_def.block_n);
             break;
 
         case NODE_BLOCK:
@@ -74,13 +74,13 @@ free_node(struct Node node)
             break;
 
         case NODE_RETURN:
-            free_node(*node.n_return.value_node);
-			free(node.n_return.value_node);
+            free_node(*node.n_return.value_n);
+			free(node.n_return.value_n);
             break;
 
         case NODE_LITERAL:
-            if (node.n_literal.value_token.value != NULL)
-                free(node.n_literal.value_token.value);
+            if (node.n_literal.value_t.value != NULL)
+                free(node.n_literal.value_t.value);
             break;
 
         default:

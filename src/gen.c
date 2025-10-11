@@ -34,8 +34,8 @@ gen_module(FILE *stream, struct Node module)
     for (size_t i = 0; i < module.n_module.count; i++)
     {
         struct Node function = module.n_module.body[i];
-        if (function.kind != NODE_FUNCTION)
-            fail(ERROR_NODE_INVALID, "gen_module only accepts NODE_FUNCTION as body items");
+        if (function.kind != NODE_FUNC_DEF)
+            fail(ERROR_NODE_INVALID, "gen_module only accepts NODE_FUNC_DEF as body items");
         gen_function(stream, function);
     }
 }
@@ -43,15 +43,15 @@ gen_module(FILE *stream, struct Node module)
 void
 gen_function(FILE *stream, struct Node function)
 {
-    if (function.kind != NODE_FUNCTION)
-        fail(ERROR_NODE_INVALID, "gen_function only accepts NODE_FUNCTION");
-    else if (function.n_function.name_token.type != TT_IDENTIFIER)
+    if (function.kind != NODE_FUNC_DEF)
+        fail(ERROR_NODE_INVALID, "gen_function only accepts NODE_FUNC_DEF");
+    else if (function.n_func_def.name_t.type != TT_IDENTIFIER)
         fail(ERROR_NODE_INVALID, "gen_function only accepts identifier as name");
-    else if (function.n_function.name_token.value == NULL)
+    else if (function.n_func_def.name_t.value == NULL)
         fail(ERROR_NODE_INVALID, "function name token has no value");
         
-    fprintf(stream, "%s:\n", function.n_function.name_token.value);
-    gen_block(stream, *function.n_function.block_node);
+    fprintf(stream, "%s:\n", function.n_func_def.name_t.value);
+    gen_block(stream, *function.n_func_def.block_n);
 }
 
 void
@@ -82,10 +82,10 @@ gen_return(FILE *stream, struct Node ret)
 {
     if (ret.kind != NODE_RETURN)
         fail(ERROR_NODE_INVALID, "gen_return only accepts NODE_RETURN");
-    else if (ret.n_return.value_node->kind != NODE_LITERAL)
+    else if (ret.n_return.value_n->kind != NODE_LITERAL)
         fail(ERROR_NODE_INVALID, "gen_return only accepts NODE_LITERAL as return value");
-    else if (ret.n_return.value_node->n_literal.value_token.type != TT_LITERAL)
+    else if (ret.n_return.value_n->n_literal.value_t.type != TT_LITERAL)
         fail(ERROR_NODE_INVALID, "gen_return only accepts literal token as return value");
 
-    fprintf(stream, "\tmov eax, 1\n\tmov ebx, %s\n\tint 0x80\n", ret.n_return.value_node->n_literal.value_token.value);
+    fprintf(stream, "\tmov eax, 1\n\tmov ebx, %s\n\tint 0x80\n", ret.n_return.value_n->n_literal.value_t.value);
 }

@@ -10,7 +10,7 @@
 enum NodeKind
 {
 	NODE_MODULE,
-	NODE_FUNCTION,
+	NODE_FUNC_DEF,
 	NODE_BLOCK,
 	NODE_RETURN,
 	NODE_LITERAL,
@@ -18,37 +18,37 @@ enum NodeKind
 
 struct Node;
 struct Node_Module;
-struct Node_Function;
+struct Node_FuncDef;
 struct Node_Block;
 struct Node_Return;
 struct Node_Literal;
 
 struct Node_Module
 {
-	struct Node *body;
+	struct Node *body;	/* of kind NODE_FUNCTION_DEF */
 	size_t count;
 };
 
-struct Node_Function
+struct Node_FuncDef
 {
-	struct Token name_token;
-	struct Node *block_node;
+	struct Token name_t;
+	struct Node *block_n;	/* of kind NODE_BLOCK */
 };
 
 struct Node_Block
 {
-	struct Node *body;
+	struct Node *body;	/* of kind Node_RETURN */
 	size_t count;
 };
 
 struct Node_Return 
 {
-	struct Node *value_node;
+	struct Node *value_n;	/* of kind NODE_LITERAL */
 };
 
 struct Node_Literal 
 {
-	struct Token value_token;
+	struct Token value_t;
 };
 
 struct Node 
@@ -57,7 +57,7 @@ struct Node
 	struct Loc start, end;
 	union {
 		struct Node_Module n_module;
-		struct Node_Function n_function;
+		struct Node_FuncDef n_func_def;
 		struct Node_Block n_block;
 		struct Node_Return n_return;
 		struct Node_Literal n_literal;
