@@ -294,7 +294,7 @@ parse_return(struct Loc *loc, struct Token token)
 		.kind = NODE_RETURN,
 		.start = token.start,
 		.n_return = {
-			.value_n= NULL
+			.value_n = NULL
 		}
 	};
 	
