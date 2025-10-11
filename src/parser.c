@@ -66,7 +66,12 @@ lex_next(struct Loc *loc)
 {
 	skip_whitespace(loc);
 	if (loc->c == '\0')
-		fail_spr(ERROR_EOF_REACHED, *loc, NULL);
+		return (struct Token) {
+			.type = TT_EOF,
+			.start = *loc,
+			.end = *loc,
+			.value = NULL
+		};
 
 	struct Token token = {};
 
@@ -155,7 +160,73 @@ struct Node
 parse(const char *source)
 {
 	struct Loc loc = { source, source[0], 0, 1, 1 };
-    return parse_block(&loc, lex_next(&loc));
+    return parse_module(&loc, lex_next(&loc));
+}
+
+struct Node
+parse_module(struct Loc *loc, struct Token token)
+{
+	struct Node module = {
+		.kind = NODE_MODULE,
+		.start = token.start,
+		.n_module = {
+			.body = NULL,
+			.count = 0
+		}
+	};
+
+	struct Token current_t = token;
+	while (current_t.type != TT_EOF)
+	{	
+		if (current_t.type != TT_KEYWORD || current_t.kw_type != KW_FUNCTION)
+			fail_spr(ERROR_SYNTAX_INVALID, current_t.start, "function expected by module");
+
+		struct Node function = parse_function(loc, current_t);
+		
+		module.n_module.count++;
+		if (module.n_module.body == NULL)
+			module.n_module.body = malloc(sizeof(struct Node));
+		else
+			module.n_module.body = realloc(module.n_module.body, sizeof(struct Node) * module.n_module.count);
+		if (module.n_module.body == NULL)
+			fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
+		module.n_module.body[module.n_module.count - 1] = function;
+
+		current_t = lex_next(loc);
+	}
+	module.end = current_t.end;
+	return module;
+}
+
+struct Node
+parse_function(struct Loc *loc, struct Token token)
+{
+	struct Node function = {
+		.kind = NODE_FUNCTION,
+		.start = token.start,
+		.n_function = {}
+	};
+
+	struct Token name = lex_next(loc);
+	if (name.type != TT_IDENTIFIER)
+		fail_spr(ERROR_SYNTAX_INVALID, name.start, "identifier expected");
+	function.n_function.name_token = name;
+	
+	struct Token open_paren = lex_next(loc);
+	if (open_paren.type != TT_PUNCT && open_paren.punct_type != PUNCT_PAREN_OPEN)
+		fail_spr(ERROR_SYNTAX_INVALID, open_paren.start, "'(' expected");
+
+	struct Token close_paren = lex_next(loc);
+	if (close_paren.type != TT_PUNCT && close_paren.punct_type != PUNCT_PAREN_CLOSE)
+		fail_spr(ERROR_SYNTAX_INVALID, close_paren.start, "')' expected");
+
+	function.n_function.block_node = malloc(sizeof(struct Node));
+	if (function.n_function.block_node == NULL)
+		fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
+	*function.n_function.block_node = parse_block(loc, lex_next(loc));
+
+	function.end = function.n_function.block_node->end;
+	return function;
 }
 
 struct Node
@@ -176,6 +247,9 @@ parse_block(struct Loc *loc, struct Token token)
 	struct Token current_t = lex_next(loc);
 	while (current_t.type != TT_PUNCT && current_t.punct_type != PUNCT_BRACE_CLOSE)
 	{	
+		if (current_t.type == TT_EOF)
+			fail_spr(ERROR_SYNTAX_INVALID, current_t.start, "'}' expected by block");
+			
 		struct Node statement = parse_statement(loc, current_t);
 		
 		block.n_block.count++;
@@ -201,50 +275,16 @@ parse_statement(struct Loc *loc, struct Token token)
 		case TT_KEYWORD:
 			switch (token.kw_type)
 			{
-				case KW_FUNCTION:
-					return parse_function(loc, token);
-					break;
                 case KW_RETURN:
                     return parse_return(loc, token);
 				default:
-					fail_spr(ERROR_SYNTAX_INVALID, *loc, "keyword not implemented");
+					fail_spr(ERROR_SYNTAX_INVALID, *loc, "invalid statement");
 			}
 			break;
 		default:
-			fail_spr(ERROR_SYNTAX_INVALID, *loc, "unexpected token");
+			fail_spr(ERROR_SYNTAX_INVALID, *loc, "invalid statement");
 	}
 	return (struct Node){};
-}
-
-struct Node
-parse_function(struct Loc *loc, struct Token token)
-{
-	struct Node function = {
-		.kind = NODE_FUNCTION,
-		.start = token.start,
-		.n_function = {}
-	};
-
-	struct Token name = lex_next(loc);
-	if (name.type != TT_IDENTIFIER)
-		fail_spr(ERROR_SYNTAX_INVALID, *loc, "identifier expected");
-	function.n_function.name_token = name;
-	
-	struct Token open_paren = lex_next(loc);
-	if (open_paren.type != TT_PUNCT && open_paren.punct_type != PUNCT_PAREN_OPEN)
-		fail_spr(ERROR_SYNTAX_INVALID, *loc, "'(' expected");
-
-	struct Token close_paren = lex_next(loc);
-	if (close_paren.type != TT_PUNCT && close_paren.punct_type != PUNCT_PAREN_CLOSE)
-		fail_spr(ERROR_SYNTAX_INVALID, *loc, "')' expected");
-
-	function.n_function.block_node = malloc(sizeof(struct Node));
-	if (function.n_function.block_node == NULL)
-		fail(ERROR_MEMORY_ALLOCATION, "malloc failed");
-	*function.n_function.block_node = parse_block(loc, lex_next(loc));
-
-	function.end = function.n_function.block_node->end;
-	return function;
 }
 
 struct Node
@@ -261,7 +301,7 @@ parse_return(struct Loc *loc, struct Token token)
     struct Token value = lex_next(loc);
     if (value.type != TT_LITERAL)
 	{
-    	fail_spr(ERROR_SYNTAX_INVALID, *loc, "literal expected");
+    	fail_spr(ERROR_SYNTAX_INVALID, value.start, "literal expected");
 	}
 
 	return_node.n_return.value_node = malloc(sizeof(struct Node));

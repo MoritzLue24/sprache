@@ -58,13 +58,16 @@ struct Node
 parse(const char *source);
 
 struct Node
+parse_module(struct Loc *loc, struct Token token);
+
+struct Node
+parse_function(struct Loc *loc, struct Token token);
+
+struct Node
 parse_block(struct Loc *loc, struct Token token);
 
 struct Node
 parse_statement(struct Loc *loc, struct Token token);
-
-struct Node
-parse_function(struct Loc *loc, struct Token token);
 
 struct Node
 parse_return(struct Loc *loc, struct Token token);

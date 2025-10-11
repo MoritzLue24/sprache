@@ -18,16 +18,21 @@ print_node(struct Node node, uint8_t identation)
 
     switch (node.kind)
     {
+        case NODE_MODULE:
+            printf("%sMODULE\n", ident);
+            for (size_t i = 0; i < node.n_module.count; ++i)
+                print_node(node.n_module.body[i], identation + 1);
+            break;
+        case NODE_FUNCTION:
+            printf("%sFUNCTION %s\n", ident, node.n_function.name_token.value);
+            print_node(*node.n_function.block_node, identation + 1);
+            break;
+
         case NODE_BLOCK:
             printf("%s{\n", ident);
             for (size_t i = 0; i < node.n_block.count; ++i)
                 print_node(node.n_block.body[i], identation + 1);
             printf("%s}\n", ident);
-            break;
-
-        case NODE_FUNCTION:
-            printf("%sFUNCTION %s\n", ident, node.n_function.name_token.value);
-            print_node(*node.n_function.block_node, identation + 1);
             break;
 
         case NODE_RETURN:
@@ -49,10 +54,10 @@ free_node(struct Node node)
 {
     switch (node.kind)
     {
-        case NODE_BLOCK:
-            for (size_t i = 0; i < node.n_block.count; ++i)
-                free_node(node.n_block.body[i]);
-            free(node.n_block.body);
+        case NODE_MODULE:
+            for (size_t i = 0; i < node.n_module.count; ++i)
+                free_node(node.n_module.body[i]);
+            free(node.n_module.body);
             break;
 
         case NODE_FUNCTION:
@@ -60,6 +65,12 @@ free_node(struct Node node)
                 free(node.n_function.name_token.value);
             free_node(*node.n_function.block_node);
             free(node.n_function.block_node);
+            break;
+
+        case NODE_BLOCK:
+            for (size_t i = 0; i < node.n_block.count; ++i)
+                free_node(node.n_block.body[i]);
+            free(node.n_block.body);
             break;
 
         case NODE_RETURN:

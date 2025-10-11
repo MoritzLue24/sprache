@@ -1,2 +1,1 @@
-{return 24
-fn asd(){}}
+fn asd(){return 421}

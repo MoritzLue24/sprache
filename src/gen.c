@@ -21,31 +21,22 @@ gen(struct Node node)
         fail(ERROR_MEMORY_ALLOCATION, "open_memstream failed");
     
     fprintf(stream, "section .text\nglobal _start\n");
-    gen_block(stream, node);
+    gen_module(stream, node);
     fclose(stream);
     return buf;
 }
 
 void
-gen_block(FILE *stream, struct Node block)
+gen_module(FILE *stream, struct Node module)
 {
-    if (block.kind != NODE_BLOCK)
-        fail(ERROR_NODE_INVALID, "gen_block only accepts NODE_BLOCK");
-    for (size_t i = 0; i < block.n_block.count; i++)
+    if (module.kind != NODE_MODULE)
+        fail(ERROR_NODE_INVALID, "gen_module only accepts NODE_MODULE");
+    for (size_t i = 0; i < module.n_module.count; i++)
     {
-        struct Node statement = block.n_block.body[i];
-        switch (statement.kind)
-        {
-            case NODE_FUNCTION:
-                gen_function(stream, statement);
-                break;
-            case NODE_RETURN:
-                gen_return(stream, statement);
-                break;
-            default:
-                fail(ERROR_NODE_INVALID, "gen not yet implemented for kind %i", statement.kind);
-                break;
-        }
+        struct Node function = module.n_module.body[i];
+        if (function.kind != NODE_FUNCTION)
+            fail(ERROR_NODE_INVALID, "gen_module only accepts NODE_FUNCTION as body items");
+        gen_function(stream, function);
     }
 }
 
@@ -56,9 +47,34 @@ gen_function(FILE *stream, struct Node function)
         fail(ERROR_NODE_INVALID, "gen_function only accepts NODE_FUNCTION");
     else if (function.n_function.name_token.type != TT_IDENTIFIER)
         fail(ERROR_NODE_INVALID, "gen_function only accepts identifier as name");
-
+    else if (function.n_function.name_token.value == NULL)
+        fail(ERROR_NODE_INVALID, "function name token has no value");
+        
     fprintf(stream, "%s:\n", function.n_function.name_token.value);
     gen_block(stream, *function.n_function.block_node);
+}
+
+void
+gen_block(FILE *stream, struct Node block)
+{
+    if (block.kind != NODE_BLOCK)
+        fail(ERROR_NODE_INVALID, "gen_block only accepts NODE_BLOCK");
+    for (size_t i = 0; i < block.n_block.count; i++)
+        gen_statement(stream, block.n_block.body[i]);
+}
+
+void
+gen_statement(FILE *stream, struct Node statement)
+{
+    switch (statement.kind)
+    {
+        case NODE_RETURN:
+            gen_return(stream, statement);
+            break;
+        default:
+            fail(ERROR_NODE_INVALID, "invalid statement %i", statement.kind);
+            break;
+    }
 }
 
 void

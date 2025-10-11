@@ -2,13 +2,15 @@
 
 
 const char *const keywords[] = {
+	"",		/* placeholder for KW_INVALID */
 	"fn",
-	"return",
+	"return"
 };
 
 const char *const punctuations[] = {
+	"",		/* placeholder for PUNCT_INVALID */
 	"(",
 	")",
 	"{",
-	"}",
+	"}"
 };
