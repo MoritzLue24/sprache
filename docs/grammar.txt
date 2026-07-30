@@ -1,0 +1,22 @@
+<block>         := {<statement>;}*
+<statement>     := 
+                var <ident>
+                | var <ident> = <expr>
+                | <ident> = <expr>
+                | return <expr>
+
+<expr>          := <term> {
+                    "+" term
+                    | "-" term
+                }*
+<term>          := <factor> {
+                    "*" factor
+                }*
+<factor>        := <literal> | <ident> | ( <expr> )
+
+<ident>         ::= <ident_start> {<ident_letter>}*
+<literal>       ::= {<digit>}+
+
+<ident_start>   ::= a | ... | z | A | ... | Z | _
+<ident_letter>  ::= <digit> | <ident_start>
+<digit>         ::= 0 | 1 | 2 | ... | 9

@@ -1,22 +1,16 @@
 {
     "configurations": [
         {
-            "name": "Win32",
+            "name": "Ubuntu",
             "includePath": [
-                "${default}",
-                "${workspaceFolder}/include"
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/tests"
             ],
-            "defines": [
-                "_DEBUG",
-                "UNICODE",
-                "_UNICODE",
-                "TEST"
-            ],
-            "windowsSdkVersion": "10.0.22621.0",
-            "compilerPath": "C:/Dev/programs/MinGW/bin/gcc",
-            "cStandard": "c11",
-            "cppStandard": "c++17",
-            "intelliSenseMode": "gcc-x64",
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4
