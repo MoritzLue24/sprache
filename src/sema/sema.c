@@ -127,7 +127,7 @@ static void check_var(struct Node* node)
         add_error(
             errors, ERROR_UNDECLARED, node->begin,
             "Usage of an undeclared symbol '%s'",
-            node->var_assign.ident
+            node->var.ident
         );
     }
     node->var.symbol = existing;
