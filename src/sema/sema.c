@@ -18,10 +18,8 @@ static void check_block(struct Node* node)
 {
     symtable_enter_scope(st, 10);
 
-    // do not consume nodes
     for (size_t i = 0; i < node->block.nodes.size; i++) {
-        struct Node* cur = nodelist_get(&node->block.nodes, i);
-        check_node(cur);
+        check_node(node->block.nodes.data[i]);
     }
 
     symtable_exit_scope(st);

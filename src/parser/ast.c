@@ -17,7 +17,6 @@ void init_nodelist(struct NodeList* nl, size_t capacity)
     nl->data = calloc(capacity, sizeof(struct Node*));
     nl->size = 0;
     nl->capacity = capacity;
-    nl->head = 0;
 }
 
 bool nodelist_push(struct NodeList* nl, struct Node* node)
@@ -25,24 +24,8 @@ bool nodelist_push(struct NodeList* nl, struct Node* node)
     if (nl->head + nl->size >= nl->capacity)
         expand_nodelist(nl);
 
-    nl->data[nl->head + nl->size++] = node;
+    nl->data[nl->size++] = node;
     return true;
-}
-
-struct Node* nodelist_pop_first(struct NodeList* nl)
-{
-    if (nl->size == 0)
-        return NULL;
-
-    nl->size--;
-    return nl->data[nl->head++];
-}
-
-struct Node* nodelist_get(const struct NodeList* nl, size_t i)
-{
-    if (i >= nl->size)
-        return NULL;
-    return nl->data[nl->head + i];
 }
 
 void free_nodelist(struct NodeList* nl)
@@ -76,7 +59,7 @@ static void print_nodelist(const char* label, const struct NodeList* nl, int dep
     print_indent(depth);
     printf("%s: [\n", label);
     for (size_t i = 0; i < nl->size; i++) {
-        print_node(NULL, nodelist_get(nl, i), depth + 1);
+        print_node(NULL, nl->data[i], depth + 1);
     }
     print_indent(depth);
     printf("]\n");
@@ -163,7 +146,7 @@ void free_ast(struct Node* root)
     switch (root->type) {
         case NODE_BLOCK:
             for (size_t i = 0; i < root->block.nodes.size; i++) {
-                free_ast(nodelist_get(&root->block.nodes, i));
+                free_ast(root->block.nodes.data[i]);
             }
             // not free_queue, that would call free on all nodes. we do that already
             xfree((void**)&root->block.nodes.data);
@@ -205,13 +188,11 @@ void free_ast(struct Node* root)
             break;
 
         case NODE_BUILTIN:
-            if (root->builtin.ident != NULL)
+            if (root->builtin.ident != NULL) {
                 xfree((void**)&root->builtin.ident);
-
-            struct Node* cur = nodelist_pop_first(&root->builtin.args);
-            while (cur != NULL) {
-                free_ast(cur);
-                cur = nodelist_pop_first(&root->builtin.args);
+            }
+            for (size_t i = 0; i < root->builtin.args.size; i++) {
+                free_ast(root->block.nodes.data[i]);
             }
             free_nodelist(&root->builtin.args);
             break;

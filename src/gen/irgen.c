@@ -193,11 +193,8 @@ struct IRInstr* gen_ir(struct Node* root, struct ErrorList* error_list)
             struct IRInstr* init_sf = tail; // remember, to set src1 as stack size
             init_stackframe(sf, 10);
 
-            struct Node* cur_node = nodelist_pop_first(&root->block.nodes);
-            while (cur_node != NULL) {
-                gen_instr(cur_node);
-                free_ast(cur_node);
-                cur_node = nodelist_pop_first(&root->block.nodes);
+            for (size_t i = 0; i < root->block.nodes.size; i++) {
+                gen_instr(root->block.nodes.data[i]); 
             }
 
             // -1 because it starts at 1
@@ -209,5 +206,7 @@ struct IRInstr* gen_ir(struct Node* root, struct ErrorList* error_list)
          default:
             assert(0);
     }
+    free_stackframe(sf);
+    xfree((void**)&sf);
     return head;
 }

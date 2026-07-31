@@ -27,9 +27,6 @@ enum OpType {
     OP_MUL
 };
 
-/// @brief A dynamic array of nodes, optimized for
-/// first pushing, then popping (FIFO).
-/// You HAVE to first push everything, then pop. No interference
 struct NodeList {
     struct Node** data;
     size_t size;
@@ -99,13 +96,6 @@ struct Node {
 void init_nodelist(struct NodeList* nl, size_t capacity);
 
 bool nodelist_push(struct NodeList* nl, struct Node* node);
-
-/// @brief Pops the FIRST added element.
-/// IMPORTANT: ownership is transfered to the caller.
-/// Freeing the Node over nodelist is not longer possible
-struct Node* nodelist_pop_first(struct NodeList* nl);
-
-struct Node* nodelist_get(const struct NodeList* nl, size_t i);
 
 void free_nodelist(struct NodeList* nl);
 
