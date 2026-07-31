@@ -28,8 +28,16 @@ static void write_binop(FILE* out, const char* mnemonic, bool commutative, struc
 
     if (strcmp(regs_str.dest, regs_str.src1) == 0)
         fprintf(out, "\t%s %s, %s\n", mnemonic, regs_str.dest, regs_str.src2);
-    else if (strcmp(regs_str.dest, regs_str.src2) == 0 && commutative)
-        fprintf(out, "\t%s %s, %s\n", mnemonic, regs_str.dest, regs_str.src1);
+    else if (strcmp(regs_str.dest, regs_str.src2) == 0) {
+        if (commutative) {
+            fprintf(out, "\t%s %s, %s\n", mnemonic, regs_str.dest, regs_str.src1);
+        }
+        else {
+            fprintf(out, "\tmov r%i, %s\n", target.tmp_reg, regs_str.src1);
+            fprintf(out, "\t%s r%i, %s\n", mnemonic, target.tmp_reg, regs_str.src2);
+            fprintf(out, "\tmov %s, r%i\n", regs_str.dest, target.tmp_reg);
+        }
+    }
     else {
         fprintf(out, "\tmov %s, %s\n", regs_str.dest, regs_str.src1);
         fprintf(out, "\t%s %s, %s\n", mnemonic, regs_str.dest, regs_str.src2);
