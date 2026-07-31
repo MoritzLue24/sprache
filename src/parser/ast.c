@@ -192,7 +192,7 @@ void free_ast(struct Node* root)
                 xfree((void**)&root->builtin.ident);
             }
             for (size_t i = 0; i < root->builtin.args.size; i++) {
-                free_ast(root->block.nodes.data[i]);
+                free_ast(root->builtin.args.data[i]);
             }
             free_nodelist(&root->builtin.args);
             break;
