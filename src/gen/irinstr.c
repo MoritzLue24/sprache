@@ -114,7 +114,7 @@ void print_irlist(struct IRInstr* head)
             printf("%s <- %s\n", dest, src1);
             break;
         case IR_STORE_LOCAL:
-            printf("%s -> %s\n", src1, dest);
+            printf("%s <- %s\n", dest, src1);
             break;
         default:
             assert(0);
