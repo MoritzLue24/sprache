@@ -2,6 +2,7 @@
 #define TOKENS_H
 
 #include <stdlib.h>
+
 #include "core/loc.h"
 #include "core/match_type_pair.h"
 
@@ -51,6 +52,7 @@ const char* tt_str(enum TokenType tt);
 /// <type>: <line>:<col>, '<value_if_exists>'
 void print_tokenlist(struct Token* head);
 
+/// @brief Frees all token `value`s, and each token itself
 void free_tokenlist(struct Token* head);
 
 #endif

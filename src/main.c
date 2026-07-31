@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 
     // syntax & semantic
     struct Token* tok_head = lex(source);
-    // print_tokenlist(tok_head);
+    print_tokenlist(tok_head);
     struct Node* root = parse(tok_head, &errors);
     // print_node(NULL, root, 0);
 
