@@ -1,21 +1,38 @@
-<block>         := {<statement>;}*
-<statement>     := 
-                var <ident>
-                | var <ident> = <expr>
-                | <ident> = <expr>
-                | return <expr>
+<program>               ::= { <top-level-item> }*
+<top-level-item>        ::= <function-definition>
+                            | <global-definition>
 
-<expr>          := <term> {
-                    "+" term
-                    | "-" term
-                }*
-<term>          := <factor> {
-                    "*" factor
-                }*
-<factor>        := <literal> | <ident> | ( <expr> )
+<function-definition>   ::= fn <ident> ( <parameter-list>? ) <block>
+<global-definition>     ::= global <ident> = <expression> ;
+<parameter-list>        ::= <ident> { , <parameter-list> }
+
+<block>                 ::= "{" { <statement> }* "}"
+
+<statement>             ::= <compound-statement>
+                            | <simple-statement>
+<compound-statement>    ::= <block>
+<simple-statement>      ::= <expression-statement>
+                            | <variable-declaration-statement>
+                            | <variable-definition-statement>
+                            | <return-statement>
+
+<expression-statement>              ::= <expression> ;
+<variable-declaration-statement>    ::= var <ident> ;
+<variable-definition-statement>     ::= var <ident> = <expression> ;
+<return-statement>                  ::= return <expression> ;
+
+<expression>            ::= <assigment-expression>
+<assigment-expression>  ::= <sum> { = <sum> }*
+<sum>                   ::= <term> { + <term> | - <term> }*
+<term>                  ::= <factor> { * <factor> }*
+<factor>                ::= <call> | <literal> | <builtin> | <ident> | ( <expression> )
+
+<call>          ::= <ident> ( <argument-list>? )
+<builtin>       ::= @ <ident> ( <argument-list>? )
+<argument-list> ::= <expr> { , <argument-list> }
 
 <ident>         ::= <ident_start> {<ident_letter>}*
-<literal>       ::= {<digit>}+
+<literal>       ::= { <digit> }+
 
 <ident_start>   ::= a | ... | z | A | ... | Z | _
 <ident_letter>  ::= <digit> | <ident_start>

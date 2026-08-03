@@ -3,14 +3,15 @@
 #include "args.h"
 #include "utils/file.h"
 #include "utils/xalloc.h"
-#include "core/error.h"
-#include "parser/lexer.h"
-#include "parser/parser.h"
-#include "sema/sema.h"
-#include "sema/symbols.h"
-#include "gen/regalloc.h"
-#include "gen/irgen.h"
-#include "gen/avrgen.h"
+#include "frontend/core/error.h"
+#include "frontend/tokenizer/lexer.h"
+#include "frontend/parser/parser.h"
+#include "frontend/sema/sema.h"
+#include "frontend/sema/symbols.h"
+#include "backend/target/avr_target.h"
+#include "backend/ir/irgen.h"
+#include "backend/codegen/regalloc.h"
+#include "backend/codegen/avrgen.h"
 
 
 void args_print_help()
@@ -48,21 +49,28 @@ int main(int argc, char** argv)
 
     // syntax & semantic
     struct Token* tok_head = lex(source);
-    print_tokenlist(tok_head);
     struct Node* root = parse(tok_head, &errors);
-    // print_node(NULL, root, 0);
 
     struct SymTable st;
-    check_sema(root, &errors, &st);
-    print_node(NULL, root, 0);
+    init_symtable(&st, 10);
+    symtable_enter_scope(&st, 10);
 
-    // goto done_sema;
+    target_declare_symbols(&st);
+    check_sema(root, &errors, &st);
+    symtable_exit_scope(&st);
+
+    print_node(NULL, root, 0);
+    if (has_errors(&errors)) {
+        print_errors(&errors);
+        goto done_sema;
+    }
+
+    goto done_sema;
 
     // ir & regalloc
-    struct IRInstr* head = gen_ir(root, &errors);
+    struct IRInstr* head = gen_ir(root);
     regalloc(head);
     print_irlist(head);
-    print_errors(&errors);
 
     // goto done_ir;
 
@@ -79,7 +87,9 @@ done_ir: __attribute__((unused));
     free_irlist(head);
 done_sema: __attribute__((unused));
     free_symtable(&st);
-    free_ast(root);
+done_parser: __attribute__((unused));
+    free_node(root);
+done_lexer: __attribute__((unused));
     free_tokenlist(tok_head);
     free_errorlist(&errors);
     xfree((void**)&source);

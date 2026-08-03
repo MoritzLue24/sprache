@@ -1,7 +1,9 @@
-#include "core/error.h"
-#include <assert.h> // assert
-#include <stdio.h>  // printf
-#include <stdarg.h> // va_list, va_start, va_end
+#include "frontend/core/error.h"
+
+#include <assert.h>
+#include <stdio.h>
+#include <stdarg.h>
+
 #include "utils/xalloc.h"
 
 
@@ -76,6 +78,12 @@ void print_errors(const struct ErrorList* errors)
                 break;
             case ERROR_REDECLARATION:
                 type = "REDECLARATION";
+                break;
+            case ERROR_LVALUE_NOT_MODIFIABLE:
+                type = "LVALUE_NOT_MODIFIABLE";
+                break;
+            case ERROR_NOT_CALLABLE:
+                type = "NOT_CALLABLE";
                 break;
             case ERROR_INVALID_BUILTIN:
                 type = "INVALID_BUILTIN";

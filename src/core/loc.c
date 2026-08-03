@@ -1,6 +1,7 @@
-#include "core/loc.h"
+#include "frontend/core/loc.h"
 
 #include <stdio.h>  // printf
+
 
 void init_loc(struct Loc* loc, const char* source)
 {
