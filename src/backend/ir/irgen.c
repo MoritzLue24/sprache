@@ -51,7 +51,9 @@ static struct IRFunc* gen_func_def(const struct Node* node)
     // init result
     struct IRFunc* fn = xmalloc(sizeof(struct IRFunc));
     fn->ident = xstrdup(node->func_def.ident);
-    init_stackframe(&fn->sf);
+    fn->instrs = NULL;
+    fn->next = NULL;
+    init_stackframe(&fn->sf, fn->ident);
     use_stackframe(&fn->sf);
 
     // instr: alloc sf
@@ -79,7 +81,12 @@ static struct IRFunc* gen_func_def(const struct Node* node)
     // instr: drop
     // & update stacksize in alloc instr
     alloc_sf_instr->src1 = new_imm_op(fn->sf.s_size);
-    push_instr(new_instr(IR_DROP_SF, EMPTY_OPRND, new_imm_op(fn->sf.s_size), EMPTY_OPRND));
+    push_instr(new_instr(
+        IR_DROP_SF,
+        EMPTY_OPRND,
+        new_imm_op(fn->sf.s_size),
+        new_func_op(get_func_ident())
+    ));
     unuse_instrlist(&fn->instrs);
 
     // ret
@@ -149,7 +156,7 @@ static struct IROperand gen_return(const struct Node* node)
     struct IROperand expr_op = gen_instr(node->ret.expr);
     push_instr(new_instr(
         IR_RETURN,
-        EMPTY_OPRND, expr_op, EMPTY_OPRND
+        EMPTY_OPRND, expr_op, new_func_op(get_func_ident())
     ));
     return EMPTY_OPRND;
 }

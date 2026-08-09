@@ -39,7 +39,7 @@ char* oprnd_str(struct IROperand oprnd)
 
         case OPRND_REG: {
             char* str;
-            if (oprnd.reg.conv_done) {
+            if (oprnd.reg.regalloc_done) {
                 int len = snprintf(NULL, 0, "r%zu", oprnd.reg.preg_i);
                 str = xmalloc(len + 1);
                 snprintf(str, len + 1, "r%zu", oprnd.reg.preg_i);
@@ -135,8 +135,18 @@ void print_irfunc(const struct IRFunc* func)
 
 static void free_irlist(struct IRInstr* head)
 {
+    if (head->dest.type == OPRND_FUNC) {
+        xfree((void**)&head->dest.func.ident);
+    }
+    if (head->src1.type == OPRND_FUNC) {
+        xfree((void**)&head->src1.func.ident);
+    }
+    if (head->src2.type == OPRND_FUNC) {
+        xfree((void**)&head->src2.func.ident);
+    }
     if (head->next != NULL)
         free_irlist(head->next);
+
     xfree((void**)&head);
 }
 

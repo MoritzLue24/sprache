@@ -10,7 +10,7 @@
 enum IROp {
     /// @brief initialize stackframe, src1: imm, number of bytes to reserve in the stackframe
     IR_ALLOC_SF,
-    /// @brief free stackfarme, src1 same as init sf
+    /// @brief src1: stacksize, src2: func
     IR_DROP_SF,
 
     /// @brief src1: vreg
@@ -28,7 +28,7 @@ enum IROp {
     /// @brief dest = src1 * src2
     IR_MUL,
 
-    /// @brief return src1
+    /// @brief return src1, src2: func
     IR_RETURN,
     /// @brief load local variable from stackframe
     IR_LOAD_LOCAL,

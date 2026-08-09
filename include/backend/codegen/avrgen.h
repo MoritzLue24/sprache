@@ -4,6 +4,6 @@
 #include "backend/ir/irgen.h"
 #include <stdio.h>
 
-bool gen_avr(const struct IRInstr* head, FILE* out);
+void gen_avr(const struct IRFunc* head, FILE* out);
 
 #endif

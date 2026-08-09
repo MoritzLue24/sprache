@@ -15,23 +15,17 @@ static unsigned int sf_next_offset = 1;
 static unsigned int next_rel_arg_offset = 1;
 
 
-static void expand(struct StackFrame* sf)
-{
-    sf->capacity *= 2;
-    sf->entries = xrealloc(sf->entries, sf->capacity, sizeof(struct SFEntry));
-}
-
-void init_stackframe(struct StackFrame* sf)
+void init_stackframe(struct StackFrame* sf, const char* func_ident)
 {
     sf_next_offset = 1;
-    sf->entries = xcalloc(STACKFRAME_INIT_CAPACITY, sizeof(struct SFEntry));
-    sf->size = 0;
-    sf->capacity = STACKFRAME_INIT_CAPACITY;
+    sf->func_ident = xstrdup(func_ident);
+    sf->head = NULL;
+    sf->tail = NULL;
 }
 
 void free_stackframe(struct StackFrame* sf)
 {
-    xfree((void**)&sf->entries);
+    xfree((void**)&sf->func_ident);
 }
 
 void use_stackframe(struct StackFrame* sf)
@@ -50,33 +44,39 @@ struct SFEntry* stackframe_push(const struct Symbol* sym, bool is_arg)
     assert(ctx);
     assert(!stackframe_lookup(sym));
 
-    if (ctx->size >= ctx->capacity) {
-        expand(ctx);
-    }
-
+    struct SFEntry* entry = xmalloc(sizeof(struct SFEntry));
     if (is_arg) {
-        ctx->entries[ctx->size++] = (struct SFEntry){
+        *entry = (struct SFEntry){
             .symbol = sym,
             .needs_resolving = true,
             .rel_arg_offset = next_rel_arg_offset++
         };
-        return &ctx->entries[ctx->size - 1];
     }
-    ctx->entries[ctx->size++] = (struct SFEntry){
-        .symbol = sym,
-        .needs_resolving = false,
-        .offset = sf_next_offset++
-    };
-    ctx->s_size++;
-    return &ctx->entries[ctx->size - 1];
+    else {
+        *entry = (struct SFEntry){
+            .symbol = sym,
+            .needs_resolving = false,
+            .offset = sf_next_offset++
+        };
+        ctx->s_size++;
+    }
+
+    if (ctx->head == NULL) {
+        ctx->head = entry;
+    }
+    else {
+        ctx->tail->next = entry;
+    }
+    ctx->tail = entry;
+    return entry;
 }
 
 struct SFEntry* stackframe_lookup(const struct Symbol* sym)
 {
     assert(ctx);
-    for (size_t i = 0; i < ctx->size; i++) {
-        if (ctx->entries[i].symbol == sym) {
-            return &ctx->entries[i];
+    for (struct SFEntry* e = ctx->head; e != NULL; e = e->next) {
+        if (e->symbol == sym) {
+            return e;
         }
     }
     return NULL;
@@ -84,15 +84,21 @@ struct SFEntry* stackframe_lookup(const struct Symbol* sym)
 
 void resolve_arg_offsets()
 {
-    for (size_t i = 0; i < ctx->size; i++) {
-        if (!ctx->entries[i].needs_resolving)
+    for (struct SFEntry* e = ctx->head; e != NULL; e = e->next) {
+        if (!e->needs_resolving)
             continue;
-        ctx->entries[i].offset = ctx->s_size
+        e->offset = ctx->s_size
             + target.sp_size_bytes
             + target.ret_addr_size_bytes
-            + ctx->entries[i].rel_arg_offset;
-        ctx->entries[i].needs_resolving = false;
+            + e->rel_arg_offset;
+        e->needs_resolving = false;
     }
+}
+
+const char* get_func_ident()
+{
+    assert(ctx);
+    return xstrdup(ctx->func_ident);
 }
 
 void print_stackframe(const struct StackFrame* sf, const char* label, int depth)
@@ -101,13 +107,13 @@ void print_stackframe(const struct StackFrame* sf, const char* label, int depth)
     if (label != NULL) {
         printf("%s: [\n", label);
     }
-
-    for (size_t i = 0; i < sf->size; i++) {
+    
+    for (const struct SFEntry* e = sf->head; e != NULL; e = e->next) {
         printf("%*s", (depth + 1) * 4, "");
         printf("SFEntry(\n");
-        print_symbol("symbol", sf->entries[i].symbol, depth + 2);
+        print_symbol("symbol", e->symbol, depth + 2);
         printf("%*s", (depth + 2) * 4, "");
-        printf("offset: '%i'\n", sf->entries[i].offset);
+        printf("offset: '%i'\n", e->offset);
         printf("%*s", (depth + 1) * 4, "");
         printf(")\n");
     }

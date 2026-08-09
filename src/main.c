@@ -71,7 +71,7 @@ int main(int argc, char** argv)
         regalloc(cur->instrs);
     }
     print_irfunc(head);
-    goto done_ir;
+    // goto done_ir;
 
     // avr generation
     FILE* f = fopen(args.asm_file, "w");

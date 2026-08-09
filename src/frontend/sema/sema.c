@@ -43,6 +43,11 @@ void check_sema(struct Node* node, struct ErrorList* errorlist, struct SymTable*
     errors = errorlist;
     st = st_dest;
     check_node(node);
+
+    const struct Symbol* main_sym = symtable_lookup(st, "main");
+    if (main_sym == NULL || main_sym->type != SYM_FUNC) {
+        add_error(errors, ERROR_MAIN_MISSING, EMPTY_LOC, "'main' function is missing");
+    }
 }
 
 static void check_node(struct Node* node)

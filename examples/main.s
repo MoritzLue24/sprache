@@ -1,9 +1,13 @@
 
-fn myfunc(a, b) {
-    return a + b;
+fn horner(x) {
+    var a = 3 * x;
+    var b = a + 2;
+    var c = b * x;
+    var result = c + 1;
+    return result;
 }
 
-fn main() {
-    var res = myfunc(4+2, 8*2);
+fn maain() {
+    var res = horner(7);
     return res;
 }

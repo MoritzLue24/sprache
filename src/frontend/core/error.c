@@ -91,6 +91,9 @@ void print_errors(const struct ErrorList* errors)
             case ERROR_INVALID_ARG_SIZE:
                 type = "INVALID_ARG_SIZE";
                 break;
+            case ERROR_MAIN_MISSING:
+                type = "MAIN_MISSING";
+                break;
             default:
                 assert(0);
         }

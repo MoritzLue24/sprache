@@ -33,7 +33,7 @@ struct IROperand new_vreg_op()
     return (struct IROperand){
         .none = false,
         .type = OPRND_REG,
-        .reg.conv_done = false,
+        .reg.regalloc_done = false,
         .reg.vreg_i = vreg_cnt++
     };
 }
