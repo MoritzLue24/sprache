@@ -1,5 +1,9 @@
 
+fn myfunc(a, b) {
+    return a + b;
+}
+
 fn main() {
-    var asd = 2;
-    asd = §;
+    var res = myfunc(4+2, 8*2);
+    return res;
 }

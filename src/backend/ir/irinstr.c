@@ -7,32 +7,6 @@
 #include "utils/xalloc.h"
 
 
-const char* irop_str(enum IROp op)
-{
-    switch (op) {
-        case IR_INIT_SF:
-            return "INIT_SF";
-        case IR_FREE_SF:
-            return "FREE_SF";
-        case IR_IMM:
-            return "IMM";
-        case IR_ADD:
-            return "ADD";
-        case IR_SUB:
-            return "SUB";
-        case IR_MUL:
-            return "MUL";
-        case IR_RETURN:
-            return "RETURN";
-        case IR_LOAD_LOCAL:
-            return "LOAD_LOCAL";
-        case IR_STORE_LOCAL:
-            return "STORE_LOCAL";
-        default:
-            assert(0);
-    }
-}
-
 char* oprnd_str(struct IROperand oprnd)
 {
     if (oprnd.none) {
@@ -41,35 +15,47 @@ char* oprnd_str(struct IROperand oprnd)
         return val;
     }
     switch (oprnd.type) {
-        case OPRND_VAR:
-        {
-            int len = snprintf(NULL, 0, "<%i>", oprnd.sf_offset);
-            char* str = xmalloc(len + 1);
-            snprintf(str, len + 1, "<%i>", oprnd.sf_offset); // \0 automatically set
+        case OPRND_VAR: {
+            char* str;
+            if (!oprnd.var.sf_entry->needs_resolving) {
+                int len = snprintf(NULL, 0, "local[%i]", oprnd.var.sf_entry->offset);
+                str = xmalloc(len + 1);
+                snprintf(str, len + 1, "local[%i]", oprnd.var.sf_entry->offset); // \0 automatically set
+            }
+            else {
+                int len = snprintf(NULL, 0, "arg[%i]", oprnd.var.sf_entry->rel_arg_offset);
+                str = xmalloc(len + 1);
+                snprintf(str, len + 1, "arg[%i]", oprnd.var.sf_entry->rel_arg_offset);
+            }
             return str;
         }
 
-        case OPRND_IMM:
-        {
-            int len = snprintf(NULL, 0, "[%i]", oprnd.imm);
+        case OPRND_IMM: {
+            int len = snprintf(NULL, 0, "[%i]", oprnd.imm.value);
             char* str = xmalloc(len + 1);
-            snprintf(str, len + 1, "[%i]", oprnd.imm); // \0 automatically set
+            snprintf(str, len + 1, "[%i]", oprnd.imm.value); // \0 automatically set
             return str;
         }
 
-        case OPRND_VREG:
-        {
-            int len = snprintf(NULL, 0, "vr%zu", oprnd.vreg_i);
-            char* str = xmalloc(len + 1);
-            snprintf(str, len + 1, "vr%zu", oprnd.vreg_i); // \0 automatically set
+        case OPRND_REG: {
+            char* str;
+            if (oprnd.reg.conv_done) {
+                int len = snprintf(NULL, 0, "r%zu", oprnd.reg.preg_i);
+                str = xmalloc(len + 1);
+                snprintf(str, len + 1, "r%zu", oprnd.reg.preg_i);
+            }
+            else {
+                int len = snprintf(NULL, 0, "vr%zu", oprnd.reg.vreg_i);
+                str = xmalloc(len + 1);
+                snprintf(str, len + 1, "vr%zu", oprnd.reg.vreg_i);
+            }
             return str;
         }
 
-        case OPRND_PREG:
-        {
-            int len = snprintf(NULL, 0, "r%zu", oprnd.preg_i);
+        case OPRND_FUNC: {
+            int len = snprintf(NULL, 0, "'%s'", oprnd.func.ident);
             char* str = xmalloc(len + 1);
-            snprintf(str, len + 1, "r%zu", oprnd.preg_i); // \0 automatically set
+            snprintf(str, len + 1, "'%s'", oprnd.func.ident);
             return str;
         }
 
@@ -78,7 +64,7 @@ char* oprnd_str(struct IROperand oprnd)
     }
 }
 
-void print_irlist(struct IRInstr* head)
+static void print_irlist(const struct IRInstr* head, int depth)
 {
     assert(head);
 
@@ -86,14 +72,22 @@ void print_irlist(struct IRInstr* head)
     char* src1 = oprnd_str(head->src1);
     char* src2 = oprnd_str(head->src2);
 
-    // printf("%s\tdest=%s\t\tsrc1=%s\t\tsrc2=%s\t\timm=%s\n", irop_str(head->op), dest, src1, src2, imm);
-
+    printf("%*s", depth * 4, "");
     switch (head->op) {
-        case IR_INIT_SF:
-            printf("INIT_SF, %s\n", src1);
+        case IR_ALLOC_SF:
+            printf("ALLOC_SF, %s\n", src1);
             break;
-        case IR_FREE_SF:
-            printf("FREE_SF, %s\n", src1);
+        case IR_DROP_SF:
+            printf("DROP_SF, %s\n", src1);
+            break;
+        case IR_PUSH_ARG:
+            printf("PUSH_ARG, %s\n", src1);
+            break;
+        case IR_CALL:
+            printf("%s <- CALL %s\n", dest, src1);
+            break;
+        case IR_POP_ARG:
+            printf("POP_ARG\n");
             break;
         case IR_IMM:
             printf("%s <- %s\n", dest, src1);
@@ -125,12 +119,33 @@ void print_irlist(struct IRInstr* head)
     xfree((void**)&src2);
 
     if (head->next != NULL)
-        print_irlist(head->next);
+        print_irlist(head->next, depth);
 }
 
-void free_irlist(struct IRInstr* head)
+void print_irfunc(const struct IRFunc* func)
+{
+    assert(func);
+
+    printf("FUNC '%s'\n", func->ident);
+    print_irlist(func->instrs, 1);
+
+    if (func->next)
+        print_irfunc(func->next);
+}
+
+static void free_irlist(struct IRInstr* head)
 {
     if (head->next != NULL)
         free_irlist(head->next);
     xfree((void**)&head);
+}
+
+void free_irfunc(struct IRFunc* func)
+{
+    xfree((void**)&func->ident);
+    free_stackframe(&func->sf);
+    free_irlist(func->instrs);
+    if (func->next)
+        free_irfunc(func->next);
+    xfree((void**)&func);
 }

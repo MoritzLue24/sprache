@@ -8,17 +8,31 @@
 #include "frontend/sema/builtins.h"
 
 
+
+struct Node* alloc_node(enum NodeType type, struct Loc begin)
+{
+    struct Node* n = xmalloc(sizeof(struct Node));
+    n->type = type;
+    n->begin = begin;
+    return n;
+}
+
+struct Node* alloc_invalid_node()
+{
+    return alloc_node(NODE_INVALID, EMPTY_LOC);
+}
+
 static void expand_nodelist(struct NodeList* nl)
 {
     nl->capacity *= 2;
     nl->data = xrealloc(nl->data, nl->capacity, sizeof(struct Node*));
 }
 
-void init_nodelist(struct NodeList* nl, size_t capacity)
+void init_nodelist(struct NodeList* nl)
 {
-    nl->data = calloc(capacity, sizeof(struct Node*));
+    nl->data = calloc(NODELIST_INIT_CAPACITY, sizeof(struct Node*));
     nl->size = 0;
-    nl->capacity = capacity;
+    nl->capacity = NODELIST_INIT_CAPACITY;
 }
 
 bool nodelist_push(struct NodeList* nl, struct Node* node)
@@ -36,6 +50,23 @@ void free_nodelist(struct NodeList* nl)
         free_node(nl->data[i]);
     }
     xfree((void**)&nl->data);
+}
+
+enum OpType tt_to_op(enum TokenType tt)
+{
+    switch (tt) {
+        case TT_PLUS:
+            return OP_PLUS;
+
+        case TT_MINUS:
+            return OP_MINUS;
+
+        case TT_STAR:
+            return OP_MUL;
+
+        default:
+            assert(0);
+    }
 }
 
 const char* op_type_str(enum OpType type)
@@ -86,6 +117,10 @@ void print_node(const char* label, const struct Node* node, int depth)
     }
 
 	switch (node->type) {
+        case NODE_INVALID:
+            printf("INVALID\n");
+            break;
+
         case NODE_PROGRAM:
             printf("PROGRAM {\n");
             print_nodelist("items", &node->program.items, field_depth);
@@ -167,8 +202,11 @@ void print_node(const char* label, const struct Node* node, int depth)
 		default:
 			assert(0);
 	}
-    print_indent(depth);
-    printf("}\n");
+
+    if (node->type != NODE_INVALID) {
+        print_indent(depth);
+        printf("}\n");
+    }
 }
 
 void free_node(struct Node* node)
@@ -176,6 +214,9 @@ void free_node(struct Node* node)
     assert(node != NULL);
 
     switch (node->type) {
+        case NODE_INVALID:
+            break;
+
         case NODE_PROGRAM:
             free_nodelist(&node->program.items);
             break;

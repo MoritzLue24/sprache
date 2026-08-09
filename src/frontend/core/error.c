@@ -14,10 +14,10 @@ static void expand_errorlist(struct ErrorList* errors)
     assert(errors->data);
 }
 
-void init_errorlist(struct ErrorList* errors, size_t capacity)
+void init_errorlist(struct ErrorList* errors)
 {
-    errors->data = xcalloc(capacity, sizeof(struct Error));
-    errors->capacity = capacity;
+    errors->data = xcalloc(ERRORLIST_INIT_CAPACITY, sizeof(struct Error));
+    errors->capacity = ERRORLIST_INIT_CAPACITY;
     errors->size = 0;
 }
 

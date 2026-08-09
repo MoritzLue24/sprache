@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     }
 
     struct ErrorList errors;
-    init_errorlist(&errors, 10);
+    init_errorlist(&errors);
 
     // syntax & semantic
     struct Token* tok_head = lex(source);
@@ -65,14 +65,13 @@ int main(int argc, char** argv)
         goto done_sema;
     }
 
-    goto done_sema;
-
     // ir & regalloc
-    struct IRInstr* head = gen_ir(root);
-    regalloc(head);
-    print_irlist(head);
-
-    // goto done_ir;
+    struct IRFunc* head = gen_ir(root);
+    for (const struct IRFunc* cur = head; cur != NULL; cur = cur->next) {
+        regalloc(cur->instrs);
+    }
+    print_irfunc(head);
+    goto done_ir;
 
     // avr generation
     FILE* f = fopen(args.asm_file, "w");
@@ -84,7 +83,7 @@ int main(int argc, char** argv)
     fclose(f);
 
 done_ir: __attribute__((unused));
-    free_irlist(head);
+    free_irfunc(head);
 done_sema: __attribute__((unused));
     free_symtable(&st);
 done_parser: __attribute__((unused));

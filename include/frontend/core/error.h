@@ -3,6 +3,8 @@
 
 #include "frontend/core/loc.h"
 
+#define ERRORLIST_INIT_CAPACITY 10
+
 
 enum ErrorType {
     ERROR_TOKEN,
@@ -27,7 +29,7 @@ struct ErrorList {
     size_t size;
 };
 
-void init_errorlist(struct ErrorList* errors, size_t capacity);
+void init_errorlist(struct ErrorList* errors);
 
 bool has_errors(const struct ErrorList* errors);
 

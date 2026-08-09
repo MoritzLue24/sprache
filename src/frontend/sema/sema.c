@@ -42,11 +42,7 @@ void check_sema(struct Node* node, struct ErrorList* errorlist, struct SymTable*
 {
     errors = errorlist;
     st = st_dest;
-
-    symtable_enter_scope(st, 10);  // target scope
-    target_declare_symbols(st);
     check_node(node);
-    symtable_exit_scope(st);
 }
 
 static void check_node(struct Node* node)
@@ -97,6 +93,9 @@ static void check_node(struct Node* node)
             break;
 
         case NODE_LITERAL:
+            break;
+
+        case NODE_INVALID:
             break;
 
         default:

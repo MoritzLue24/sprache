@@ -6,7 +6,7 @@
 #include "backend/codegen/regalloc.h"
 #include "backend/target/avr_target.h"
 
-
+/*
 struct RegsStr { char dest[16], src1[16], src2[16]; };
 
 static struct RegsStr get_regs_str(const struct IRInstr* instr)
@@ -135,3 +135,5 @@ bool gen_avr(const struct IRInstr* head, FILE* out)
     }
     return true;
 }
+
+*/

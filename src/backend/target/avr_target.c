@@ -13,6 +13,9 @@ const struct AVRTarget atmega16 = {
     .oprnd_reg_num = 4,
     .ret_reg = 24,
 
+    .sp_size_bytes = 2,
+    .ret_addr_size_bytes = 2,
+
     .symbol_count = 1,
     .symbols = {
         {

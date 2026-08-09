@@ -6,8 +6,12 @@
 #include "frontend/core/loc.h"
 #include "frontend/tokenizer/tokens.h"
 
+#define NODELIST_INIT_CAPACITY 10
+
 
 enum NodeType {
+    NODE_INVALID,
+
     // top-level
     NODE_PROGRAM,
     NODE_FUNC_DEF,
@@ -18,7 +22,7 @@ enum NodeType {
     NODE_VAR_DECL,  // var a;
     NODE_VAR_DEF,   // var a = 2;
     NODE_RETURN,
-    
+
     // expr
     NODE_ASSIGN_EXPR,
     NODE_BINARY_OP,
@@ -123,11 +127,17 @@ struct Node {
     };
 };
 
-void init_nodelist(struct NodeList* nl, size_t capacity);
+struct Node* alloc_node(enum NodeType type, struct Loc begin);
+
+struct Node* alloc_invalid_node();
+
+void init_nodelist(struct NodeList* nl);
 
 bool nodelist_push(struct NodeList* nl, struct Node* node);
 
 void free_nodelist(struct NodeList* nl);
+
+enum OpType tt_to_op(enum TokenType tt);
 
 const char* op_type_str(enum OpType type);
 

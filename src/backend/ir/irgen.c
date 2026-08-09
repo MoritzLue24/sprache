@@ -1,4 +1,5 @@
 #include "backend/ir/irgen.h"
+#include "backend/ir/irgen_internal.h"
 
 #include <assert.h>
 
@@ -7,204 +8,246 @@
 #include "backend/ir/stack_frame.h"
 
 
-static struct IRInstr* tail = NULL;
-static struct IRInstr* head = NULL;
+// forward decl
+static struct IRFunc* gen_func_def(const struct Node* node);
+static struct IROperand gen_instr(const struct Node* node);
+static struct IROperand gen_block(const struct Node* node);
+static struct IROperand gen_var_def(const struct Node* node);
+static struct IROperand gen_return(const struct Node* node);
+static struct IROperand gen_assign_expr(const struct Node* node);
+static struct IROperand gen_bin_op(const struct Node* node);
+static struct IROperand gen_var(const struct Node* node);
+static struct IROperand gen_call(const struct Node* node);
+static struct IROperand gen_literal(const struct Node* node);
 
-/// @brief virtual register count
-static unsigned int vreg_cnt = 0;
 
-static struct StackFrame* sf = NULL;
-
-
-static struct IROperand new_var_op(unsigned int sf_offset)
+struct IRFunc* gen_ir(const struct Node* node)
 {
-    return (struct IROperand){
-        .none = false,
-        .type = OPRND_VAR,
-        .sf_offset = sf_offset
-    };
+    assert(node->type == NODE_PROGRAM);
+    struct IRFunc* head = NULL;
+    struct IRFunc* tail = NULL;
+
+    for (size_t i = 0; i < node->program.items.size; i++) {
+        const struct Node* item = node->program.items.data[i];
+        assert(item->type == NODE_FUNC_DEF);
+
+        struct IRFunc* fn = gen_func_def(item);
+        if (head == NULL) {
+            head = fn;
+        }
+        else {
+            tail->next = fn;
+        }
+        tail = fn;
+    }
+    return head;
 }
 
-static struct IROperand new_vreg_op()
+static struct IRFunc* gen_func_def(const struct Node* node)
 {
-    return (struct IROperand){
-        .none = false,
-        .type = OPRND_VREG,
-        .vreg_i = vreg_cnt++
-    };
+    assert(node->type == NODE_FUNC_DEF);
+    assert(node->func_def.ident);
+
+    // init result
+    struct IRFunc* fn = xmalloc(sizeof(struct IRFunc));
+    fn->ident = xstrdup(node->func_def.ident);
+    init_stackframe(&fn->sf);
+    use_stackframe(&fn->sf);
+
+    // instr: alloc sf
+    use_instrlist(&fn->instrs);
+    struct IRInstr* alloc_sf_instr = new_instr(
+        IR_ALLOC_SF, new_imm_op(0), EMPTY_OPRND, EMPTY_OPRND
+    );
+    push_instr(alloc_sf_instr);
+
+    // push arguments to the stackframe
+    for (size_t i = 0; i < node->func_def.params.size; i++) {
+        const struct Node* param_n = node->func_def.params.data[i];
+        assert(param_n->type == NODE_PARAM);
+        assert(param_n->param.symbol);
+        stackframe_push(param_n->param.symbol, true);
+    }
+
+    // gen body
+    gen_instr(node->func_def.body);
+
+    // calculate stackpointer offsets for arguments
+    // arguments are stored by a offset relative to the basepointer + ret_addr 
+    resolve_arg_offsets();
+
+    // instr: drop
+    // & update stacksize in alloc instr
+    alloc_sf_instr->src1 = new_imm_op(fn->sf.s_size);
+    push_instr(new_instr(IR_DROP_SF, EMPTY_OPRND, new_imm_op(fn->sf.s_size), EMPTY_OPRND));
+    unuse_instrlist(&fn->instrs);
+
+    // ret
+    unuse_stackframe(&fn->sf);
+    return fn;
 }
 
-static struct IROperand new_imm_op(int value)
+static struct IROperand gen_instr(const struct Node* node)
 {
-    return (struct IROperand){
-        .none = false,
-        .type = OPRND_IMM,
-        .imm = value
-    };
+    switch (node->type) {
+        case NODE_BLOCK:
+            return gen_block(node);
+        case NODE_VAR_DECL:
+            assert(node->var_decl.target->type == NODE_VAR);
+            stackframe_push(node->var_decl.target->var.symbol, false);
+            return EMPTY_OPRND;
+        case NODE_VAR_DEF:
+            return gen_var_def(node);
+        case NODE_RETURN:
+            return gen_return(node);
+        case NODE_ASSIGN_EXPR:
+            return gen_assign_expr(node);
+        case NODE_BINARY_OP:
+            return gen_bin_op(node);
+        case NODE_VAR:
+            return gen_var(node);
+        case NODE_CALL:
+            return gen_call(node);
+        case NODE_LITERAL:
+            return gen_literal(node);
+        case NODE_BUILTIN:
+        default:
+            assert(0);
+    }
 }
 
-static struct IROperand push(enum IROp op, struct IROperand dest, struct IROperand src1, struct IROperand src2)
+/// @brief writes to the current irlist ctx
+static struct IROperand gen_block(const struct Node* node)
 {
-    if (tail == NULL) {
-        tail = xmalloc(sizeof(struct IRInstr));
-        head = tail;
+    assert(node->type == NODE_BLOCK);
+    for (size_t i = 0; i < node->block.statements.size; i++) {
+        const struct Node* cur = node->block.statements.data[i];
+        gen_instr(cur);
+    }
+    return EMPTY_OPRND;
+}
+
+static struct IROperand gen_var_def(const struct Node* node)
+{
+    assert(node->type == NODE_VAR_DEF);
+    assert(node->var_def.target->type == NODE_VAR);
+
+    struct SFEntry* sf_entry = stackframe_push(node->var_decl.target->var.symbol, false);
+
+    struct IROperand expr_op = gen_instr(node->var_def.expr);
+    push_instr(new_instr(
+        IR_STORE_LOCAL,
+        new_var_op(sf_entry), expr_op, EMPTY_OPRND
+    ));
+    return EMPTY_OPRND;
+}
+
+static struct IROperand gen_return(const struct Node* node)
+{
+    assert(node->type == NODE_RETURN);
+
+    struct IROperand expr_op = gen_instr(node->ret.expr);
+    push_instr(new_instr(
+        IR_RETURN,
+        EMPTY_OPRND, expr_op, EMPTY_OPRND
+    ));
+    return EMPTY_OPRND;
+}
+
+static struct IROperand gen_assign_expr(const struct Node* node)
+{
+    assert(node->type == NODE_ASSIGN_EXPR);
+    assert(node->assign_expr.target->type == NODE_VAR);
+
+    struct SFEntry* entry = stackframe_lookup(node->assign_expr.target->var.symbol);
+    assert(entry);
+
+    struct IROperand target_op = new_var_op(entry);
+    struct IROperand expr_op = gen_instr(node->assign_expr.expr);
+    push_instr(new_instr(
+        IR_STORE_LOCAL,
+        target_op, expr_op, EMPTY_OPRND
+    ));
+    return expr_op;
+}
+
+static struct IROperand gen_bin_op(const struct Node* node)
+{
+    assert(node->type == NODE_BINARY_OP);
+
+    unsigned int lhs_cost = vreg_cost(node->bin_op.lhs);
+    unsigned int rhs_cost = vreg_cost(node->bin_op.rhs);
+
+    struct IROperand lhs, rhs;
+    if (lhs_cost >= rhs_cost) {
+        lhs = gen_instr(node->bin_op.lhs);
+        rhs = gen_instr(node->bin_op.rhs);
     }
     else {
-        tail->next = xmalloc(sizeof(struct IRInstr));
-        tail = tail->next;
+        rhs = gen_instr(node->bin_op.rhs);
+        lhs = gen_instr(node->bin_op.lhs);
     }
-    tail->op = op;
-    tail->dest = dest;
-    tail->src1 = src1;
-    tail->src2 = src2;
-    tail->next = NULL;
-    return tail->dest;
-}
-
-// FIXME: is not optimal, atm its just basic leaves-counting
-// see https://www.geeksforgeeks.org/compiler-design/labeling-algorithm-in-compiler-design/
-static unsigned int vreg_cost(const struct Node* node)
-{
-    switch (node->type) {
-    case NODE_VAR:
-        return 1;
-
-    case NODE_LITERAL:
-        return 1;
-
-    case NODE_BINARY_OP:
-        return vreg_cost(node->bin_op.lhs) + vreg_cost(node->bin_op.rhs);
-
-    case NODE_RETURN:
-        return vreg_cost(node->ret.expr);
-
-    default:
-        assert(0);
-    }
-}
-
-static struct IROperand gen_imm(struct Node* lit)
-{
-    assert(lit->type == NODE_LITERAL);
-    int val = atoi(lit->literal.value);
-    return push(IR_IMM, new_vreg_op(), new_imm_op(val), EMPTY_OPRND);
-}
-
-static struct IROperand gen_binop(struct Node* binop, struct IROperand src1, struct IROperand src2)
-{
-    assert(binop->type == NODE_BINARY_OP);
     struct IROperand dest = new_vreg_op();
-    switch (binop->bin_op.op) {
+
+    struct IRInstr* instr;
+    switch (node->bin_op.op) {
         case OP_PLUS:
-            return push(IR_ADD, dest, src1, src2);
+            instr = new_instr(IR_ADD, dest, lhs, rhs);
             break;
-
         case OP_MINUS:
-            return push(IR_SUB, dest, src1, src2);
+            instr = new_instr(IR_SUB, dest, lhs, rhs);
             break;
-
         case OP_MUL:
-            return push(IR_MUL, dest, src1, src2);
-
-        default:
-            assert(0);
-    }
-}
-
-static struct IROperand gen_instr(struct Node* node)
-{
-    switch (node->type) {
-        case NODE_LITERAL:
-        {
-            return gen_imm(node);
-        }
-
-        case NODE_BINARY_OP:
-        {
-            unsigned int lhs_cost = vreg_cost(node->bin_op.lhs);
-            unsigned int rhs_cost = vreg_cost(node->bin_op.rhs);
-
-            struct IROperand lhs, rhs;
-            if (lhs_cost >=rhs_cost) {
-                lhs = gen_instr(node->bin_op.lhs);
-                rhs = gen_instr(node->bin_op.rhs);
-            }
-            else {
-                rhs = gen_instr(node->bin_op.rhs);
-                lhs = gen_instr(node->bin_op.lhs);
-            }
-            return gen_binop(node, lhs, rhs);
-        }
-
-        case NODE_RETURN:
-        {
-            return push(IR_RETURN, EMPTY_OPRND, gen_instr(node->ret.expr), EMPTY_OPRND);
-        }
-
-        case NODE_VAR_DECL:
-        {
-            unsigned int sf_offset = stackframe_push(sf, node->var_decl.target->var.symbol);
-            return new_var_op(sf_offset);
-        }
-
-        case NODE_VAR_DEF:
-        {
-            unsigned int sf_offset = stackframe_push(sf, node->var_def.target->var.symbol);
-            struct IROperand dest = push(IR_STORE_LOCAL, new_var_op(sf_offset), gen_instr(node->var_def.expr), EMPTY_OPRND);
-            return dest;
-        }
-
-        /*case NODE_VAR_ASSIGN:
-        {
-            unsigned int sf_offset;
-            if (!get_sf_offset(sf, node->assign_expr.symbol, &sf_offset)) {
-                assert(0);
-            }
-            return push(IR_STORE_LOCAL, new_var_op(sf_offset), gen_instr(node->assign_expr.expr), EMPTY_OPRND);
-        }*/
-
-        case NODE_VAR:
-        {
-            unsigned int sf_offset;
-            if (!get_sf_offset(sf, node->var.symbol, &sf_offset)) {
-                assert(0);
-            }
-            return push(IR_LOAD_LOCAL, new_vreg_op(), new_var_op(sf_offset), EMPTY_OPRND);
-        }
-
-        default:
-            assert(0);
-    }
-}
-
-struct IRInstr* gen_ir(struct Node* root)
-{
-    vreg_cnt = 0;
-    tail = head = NULL;
-
-    sf = xmalloc(sizeof(struct StackFrame));
-
-    switch (root->type) {
-        // NODE_BLOCK is handled as a function for now
-        case NODE_BLOCK:
-            push(IR_INIT_SF, EMPTY_OPRND, new_imm_op(0), EMPTY_OPRND);
-            struct IRInstr* init_sf = tail; // remember, to set src1 as stack size
-            init_stackframe(sf, 10);
-
-            for (size_t i = 0; i < root->block.statements.size; i++) {
-                gen_instr(root->block.statements.data[i]); 
-            }
-
-            // -1 because it starts at 1
-            unsigned int sf_size = get_stacksize(sf);
-            init_sf->src1.imm = sf_size;
-            push(IR_FREE_SF, EMPTY_OPRND, new_imm_op(sf_size), EMPTY_OPRND);
+            instr = new_instr(IR_MUL, dest, lhs, rhs);
             break;
-
-         default:
+        default:
             assert(0);
     }
-    free_stackframe(sf);
-    xfree((void**)&sf);
-    return head;
+    push_instr(instr);
+    return instr->dest;
+}
+
+static struct IROperand gen_var(const struct Node* node)
+{
+    assert(node->type == NODE_VAR);
+
+    struct SFEntry* entry = stackframe_lookup(node->var.symbol);
+    assert(entry);
+
+    struct IROperand dest = new_vreg_op();
+    struct IROperand op = new_var_op(entry);
+    push_instr(new_instr(IR_LOAD_LOCAL, dest, op, EMPTY_OPRND));
+    return dest;
+}
+
+static struct IROperand gen_call(const struct Node* node)
+{
+    assert(node->type == NODE_CALL);
+
+    for (int i = (int)node->call.args.size - 1; i >= 0; i--) {
+        const struct Node* arg_n = node->call.args.data[i];
+        struct IROperand src = gen_instr(arg_n);
+        push_instr(new_instr(IR_PUSH_ARG, EMPTY_OPRND, src, EMPTY_OPRND));
+    }
+
+    struct IROperand dest = new_vreg_op();
+    struct IROperand src = new_func_op(node->call.ident);
+    push_instr(new_instr(IR_CALL, dest, src, EMPTY_OPRND));
+
+    for (size_t i = 0; i < node->call.args.size; i++) {
+        push_instr(new_instr(IR_POP_ARG, EMPTY_OPRND, EMPTY_OPRND, EMPTY_OPRND));
+    }
+    return dest;
+}
+
+static struct IROperand gen_literal(const struct Node* node)
+{
+    assert(node->type == NODE_LITERAL);
+
+    int val = atoi(node->literal.value);    // FIXME
+    struct IROperand dest = new_vreg_op();
+    struct IROperand src = new_imm_op(val);
+
+    push_instr(new_instr(IR_IMM, dest, src, EMPTY_OPRND));
+    return dest;
 }

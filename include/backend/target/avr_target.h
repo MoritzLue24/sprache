@@ -12,6 +12,10 @@ struct AVRTarget {
     unsigned int oprnd_reg_num;
     unsigned int ret_reg;
 
+    /// @brief Stackpointer size in bytes
+    unsigned int sp_size_bytes;
+    unsigned int ret_addr_size_bytes;
+
     size_t symbol_count;
     struct Symbol symbols[];
 };

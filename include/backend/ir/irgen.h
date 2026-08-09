@@ -5,6 +5,6 @@
 #include "frontend/parser/ast.h"
 
 
-struct IRInstr* gen_ir(struct Node* root);
+struct IRFunc* gen_ir(const struct Node* root);
 
 #endif
