@@ -42,7 +42,7 @@ struct Token {
 
 struct MatchTypePair {
     const char* const match;
-    const unsigned int type;
+    const enum TokenType type;
 };
 
 extern const struct MatchTypePair punctuations[];

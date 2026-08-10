@@ -59,7 +59,7 @@ int main(int argc, char** argv)
     check_sema(root, &errors, &st);
     symtable_exit_scope(&st);
 
-    print_node(NULL, root, 0);
+    //print_node(NULL, root, 0);
     if (has_errors(&errors)) {
         print_errors(&errors);
         goto done_sema;
@@ -70,7 +70,7 @@ int main(int argc, char** argv)
     for (const struct IRFunc* cur = head; cur != NULL; cur = cur->next) {
         regalloc(cur->instrs);
     }
-    print_irfunc(head);
+    //print_irfunc(head);
     // goto done_ir;
 
     // avr generation

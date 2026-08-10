@@ -27,8 +27,7 @@ struct IRFunc* gen_ir(const struct Node* node)
     struct IRFunc* head = NULL;
     struct IRFunc* tail = NULL;
 
-    for (size_t i = 0; i < node->program.items.size; i++) {
-        const struct Node* item = node->program.items.data[i];
+    for (const struct Node* item = node->program.items_head; item != NULL; item = item->next) {
         assert(item->type == NODE_FUNC_DEF);
 
         struct IRFunc* fn = gen_func_def(item);
@@ -59,13 +58,12 @@ static struct IRFunc* gen_func_def(const struct Node* node)
     // instr: alloc sf
     use_instrlist(&fn->instrs);
     struct IRInstr* alloc_sf_instr = new_instr(
-        IR_ALLOC_SF, new_imm_op(0), EMPTY_OPRND, EMPTY_OPRND
+        IR_ALLOC_SF, EMPTY_OPRND, new_imm_op(0), EMPTY_OPRND
     );
     push_instr(alloc_sf_instr);
 
     // push arguments to the stackframe
-    for (size_t i = 0; i < node->func_def.params.size; i++) {
-        const struct Node* param_n = node->func_def.params.data[i];
+    for (const struct Node* param_n = node->func_def.params_head; param_n != NULL; param_n = param_n->next) {
         assert(param_n->type == NODE_PARAM);
         assert(param_n->param.symbol);
         stackframe_push(param_n->param.symbol, true);
@@ -127,8 +125,7 @@ static struct IROperand gen_instr(const struct Node* node)
 static struct IROperand gen_block(const struct Node* node)
 {
     assert(node->type == NODE_BLOCK);
-    for (size_t i = 0; i < node->block.statements.size; i++) {
-        const struct Node* cur = node->block.statements.data[i];
+    for (const struct Node* cur = node->block.statements_head; cur != NULL; cur = cur->next) {
         gen_instr(cur);
     }
     return EMPTY_OPRND;
@@ -227,21 +224,27 @@ static struct IROperand gen_var(const struct Node* node)
     return dest;
 }
 
+static void gen_push_arg_rev(const struct Node* args_head)
+{
+    if (args_head->next) {
+        gen_push_arg_rev(args_head->next);
+    }
+    struct IROperand src = gen_instr(args_head);
+    push_instr(new_instr(IR_PUSH_ARG, EMPTY_OPRND, src, EMPTY_OPRND));
+}
+
 static struct IROperand gen_call(const struct Node* node)
 {
     assert(node->type == NODE_CALL);
 
-    for (int i = (int)node->call.args.size - 1; i >= 0; i--) {
-        const struct Node* arg_n = node->call.args.data[i];
-        struct IROperand src = gen_instr(arg_n);
-        push_instr(new_instr(IR_PUSH_ARG, EMPTY_OPRND, src, EMPTY_OPRND));
-    }
+    // push IR_PUSH_ARG instrs in rev order
+    gen_push_arg_rev(node->call.args_head);
 
     struct IROperand dest = new_vreg_op();
     struct IROperand src = new_func_op(node->call.ident);
     push_instr(new_instr(IR_CALL, dest, src, EMPTY_OPRND));
 
-    for (size_t i = 0; i < node->call.args.size; i++) {
+    for (const struct Node* arg = node->call.args_head; arg != NULL; arg = arg->next) {
         push_instr(new_instr(IR_POP_ARG, EMPTY_OPRND, EMPTY_OPRND, EMPTY_OPRND));
     }
     return dest;

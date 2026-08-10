@@ -21,11 +21,22 @@ void init_stackframe(struct StackFrame* sf, const char* func_ident)
     sf->func_ident = xstrdup(func_ident);
     sf->head = NULL;
     sf->tail = NULL;
+    sf->s_size = 0;
+}
+
+static void free_sfentry_rec(struct SFEntry* head)
+{
+    if (head == NULL) {
+        return;
+    }
+    free_sfentry_rec(head->next);
+    xfree((void**)&head);
 }
 
 void free_stackframe(struct StackFrame* sf)
 {
     xfree((void**)&sf->func_ident);
+    free_sfentry_rec(sf->head);
 }
 
 void use_stackframe(struct StackFrame* sf)
@@ -98,7 +109,7 @@ void resolve_arg_offsets()
 const char* get_func_ident()
 {
     assert(ctx);
-    return xstrdup(ctx->func_ident);
+    return ctx->func_ident;
 }
 
 void print_stackframe(const struct StackFrame* sf, const char* label, int depth)

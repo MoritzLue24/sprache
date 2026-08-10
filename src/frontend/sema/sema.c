@@ -25,9 +25,8 @@ static bool is_modifiable_lvalue(struct Node* node)
 
 // forward decl
 static void check_node(struct Node* node);
-static void check_nodelist(struct NodeList* nl);
 static void check_node_func_def(struct Node* node);
-static void check_block(struct Node* node, const struct NodeList* param_nl);
+static void check_block(struct Node* node, struct Node* param_nl);
 static void check_var_decl(struct Node* node);
 static void check_var_def(struct Node* node);
 static void check_return(struct Node* node);
@@ -52,9 +51,14 @@ void check_sema(struct Node* node, struct ErrorList* errorlist, struct SymTable*
 
 static void check_node(struct Node* node)
 {
+    if (node == NULL) {
+        return;
+    }
+
     switch (node->type) {
         case NODE_PROGRAM:
-            check_nodelist(&node->program.items);
+            check_node(node->program.items_head);
+            //check_nodelist(&node->program.items_head);
             break;
 
         case NODE_FUNC_DEF:
@@ -106,12 +110,9 @@ static void check_node(struct Node* node)
         default:
             assert(0);
     }
-}
 
-static void check_nodelist(struct NodeList* nl)
-{
-    for (size_t i = 0; i < nl->size; i++) {
-        check_node(nl->data[i]);
+    if (node->next != NULL) {
+        check_node(node->next);
     }
 }
 
@@ -122,33 +123,40 @@ static void check_node_func_def(struct Node* node)
     if (existing != NULL) {
         add_redeclaration_error(errors, existing, node->begin);
     }
-    node->func_def.symbol = symtable_declare_func(st, node->func_def.ident, node->begin, node->func_def.params.size);
+    node->func_def.symbol = symtable_declare_func(
+        st,
+        node->func_def.ident,
+        node->begin,
+        nodelist_size(node->func_def.params_head)
+    );
 
     // pass params to declare & check
-    check_block(node->func_def.body, &node->func_def.params);
+    check_block(node->func_def.body, node->func_def.params_head);
 }
 
-static void check_block(struct Node* node, const struct NodeList* param_nl)
+static void check_block(struct Node* node, struct Node* param_nl)
 {
     assert(node->type == NODE_BLOCK);
     symtable_enter_scope(st, 10);
 
-    if (param_nl != NULL) {
-        for (size_t i = 0; i < param_nl->size; i++) {
-            struct Node* param_n = param_nl->data[i];
-            assert(param_n->type == NODE_PARAM);
+    for (; param_nl != NULL; param_nl = param_nl->next) {
+        assert(param_nl->type == NODE_PARAM);
 
-            const struct Symbol* existing = symtable_lookup(st, param_n->param.ident);
-            if (existing != NULL) {
-                add_redeclaration_error(errors, existing, param_n->begin);
-            }
-            else {
-                param_n->param.symbol = symtable_declare(st, SYM_LOCAL, param_n->param.ident, param_n->begin);
-            }
+        const struct Symbol* existing = symtable_lookup(st, param_nl->param.ident);
+        if (existing != NULL) {
+            add_redeclaration_error(errors, existing, param_nl->begin);
+        }
+        else {
+            param_nl->param.symbol = symtable_declare(
+                st,
+                SYM_LOCAL,
+                param_nl->param.ident,
+                param_nl->begin
+            );
         }
     }
 
-    check_nodelist(&node->block.statements);
+    check_node(node->block.statements_head);
     symtable_exit_scope(st);
 }
 
@@ -244,11 +252,12 @@ static void check_call(struct Node* node)
     }
     node->call.symbol = existing;
 
-    if (existing->func.param_count != node->call.args.size) {
+    size_t args_size = nodelist_size(node->call.args_head);
+    if (existing->func.param_count != args_size) {
         add_error(
             errors, ERROR_INVALID_ARG_SIZE, node->begin,
             "Function '%s' expects %li argument(s), got %li",
-            node->call.ident, existing->func.param_count, node->call.args.size
+            node->call.ident, existing->func.param_count, args_size
         );
     }
 }
@@ -268,11 +277,12 @@ static void check_builtin(struct Node* node)
     }
     node->builtin.def = builtin_def;
 
-    if (node->builtin.args.size != builtin_def->param_count) {
+    size_t args_size = nodelist_size(node->builtin.args_head);
+    if (args_size != builtin_def->param_count) {
         add_error(
             errors, ERROR_INVALID_ARG_SIZE, node->begin,
             "Builtin '%s' expects %li argument(s), got %li",
-            node->builtin.ident, builtin_def->param_count, node->builtin.args.size
+            node->builtin.ident, builtin_def->param_count, args_size
         );
     }
 }

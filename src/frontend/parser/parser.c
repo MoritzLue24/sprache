@@ -32,12 +32,15 @@ struct Node* parse(const struct Token* tokens_head, struct ErrorList* errorlist)
     set_ctx(&p);
 
     struct Node* n_program = alloc_node(NODE_PROGRAM, peek()->begin);
-    init_nodelist(&n_program->program.items);
+    // init_nodelist(&n_program->program.items);
+    struct Node* items_head = NULL;
 
     while (peek()->type != TT_END) {
         struct Node* cur_node = parse_top_level_item();
-        nodelist_push(&n_program->program.items, cur_node);
+        items_head = push_node(items_head, cur_node);
+        // nodelist_push(&n_program->program.items, cur_node);
     }
+    n_program->program.items_head = items_head;
 
     unset_ctx();
     return n_program;
@@ -70,8 +73,9 @@ static struct Node* parse_node_func_def()
 
 
     // parameter list
-    struct NodeList params;
-    init_nodelist(&params);
+    // struct NodeList params;
+    // init_nodelist(&params);
+    struct Node* params_head = NULL;
 
     expect(TT_LPAREN);
     if (!check(TT_RPAREN)) {
@@ -88,7 +92,8 @@ static struct Node* parse_node_func_def()
                 param_n = alloc_node(NODE_PARAM, param_t->begin);
                 param_n->param.ident = xstrdup(param_t->value);
             }
-            nodelist_push(&params, param_n);
+            // nodelist_push(&params, param_n);
+            params_head = push_node(params_head, param_n);
 
             if (!check(TT_COMMA))
                 break;
@@ -102,7 +107,7 @@ static struct Node* parse_node_func_def()
 
     struct Node* func_def_n = alloc_node(NODE_FUNC_DEF, begin);
     func_def_n->func_def.ident = xstrdup(ident_t->value);
-    func_def_n->func_def.params = params;
+    func_def_n->func_def.params_head = params_head;
     func_def_n->func_def.body = body_n;
     return func_def_n;
 }
@@ -113,18 +118,20 @@ static struct Node* parse_node_block()
     struct Loc begin = peek()->begin;
     advance();
 
-    struct NodeList nl;
-    init_nodelist(&nl);
+    // struct NodeList nl;
+    // init_nodelist(&nl);
+    struct Node* head = NULL;
 
     while (!check(TT_END) && !check(TT_RBRACE)) {
         struct Node* cur_node = parse_statement();
         assert(!need_sync());   // FIXME: for testing
-        nodelist_push(&nl, cur_node);
+        // nodelist_push(&nl, cur_node);
+        head = push_node(head, cur_node);
     }
     expect(TT_RBRACE);
 
     struct Node* block_n = alloc_node(NODE_BLOCK, begin);
-    block_n->block.statements = nl;
+    block_n->block.statements_head = head;
     return block_n;
 }
 
@@ -286,8 +293,9 @@ static struct Node* parse_node_builtin()
     const struct Token* t = advance();
     assert(t->value);
 
-    struct NodeList args;
-    init_nodelist(&args);
+    // struct NodeList args;
+    // init_nodelist(&args);
+    struct Node* args_head = NULL;
 
     struct Node* node = alloc_node(NODE_BUILTIN, begin);
     node->builtin.ident = xstrdup(t->value);
@@ -297,7 +305,8 @@ static struct Node* parse_node_builtin()
     if (!check(TT_RPAREN)) {
         while (true) {
             struct Node* arg = parse_expr();
-            nodelist_push(&args, arg);
+            // nodelist_push(&args, arg);
+            args_head = push_node(args_head, arg);
 
             if (!check(TT_COMMA))
                 break;
@@ -305,7 +314,7 @@ static struct Node* parse_node_builtin()
         }
     }
     expect(TT_RPAREN);
-    node->builtin.args = args;
+    node->builtin.args_head = args_head;
     return node;
 }
 
@@ -326,8 +335,9 @@ static struct Node* parse_node_call()
     const struct Token* t = advance();
     assert(t->value);
 
-    struct NodeList args;
-    init_nodelist(&args);
+    // struct NodeList args;
+    // init_nodelist(&args);
+    struct Node* args_head = NULL;
 
     struct Node* node = alloc_node(NODE_CALL, t->begin);
     node->call.ident = xstrdup(t->value);
@@ -336,7 +346,8 @@ static struct Node* parse_node_call()
     if (!check(TT_RPAREN)) {
         while (true) {
             struct Node* arg = parse_expr();
-            nodelist_push(&args, arg);
+            // nodelist_push(&args, arg);
+            args_head = push_node(args_head, arg);
 
             if (!check(TT_COMMA))
                 break;
@@ -344,6 +355,6 @@ static struct Node* parse_node_call()
         }
     }
     expect(TT_RPAREN);
-    node->call.args = args;
+    node->call.args_head = args_head;
     return node;
 }

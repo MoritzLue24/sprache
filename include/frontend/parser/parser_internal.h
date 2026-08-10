@@ -4,18 +4,10 @@
 #include "frontend/tokenizer/tokens.h"
 
 
-enum SyncMode {
-    SYNC_COMP_STMT,
-    SYNC_SIMPLE_STMT,
-    SYNC_EXPR,
-    SYNC_PARAM
-};
-
 struct Parser {
     const struct Token* tok_head;
     struct ErrorList* errors;
     bool out_of_sync;
-    enum SyncMode sync_mode;
 };
 
 

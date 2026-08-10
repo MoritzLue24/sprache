@@ -15,7 +15,7 @@ struct IROperand new_func_op(const char* ident)
     return (struct IROperand){
         .none = false,
         .type = OPRND_FUNC,
-        .func.ident = ident
+        .func.ident = xstrdup(ident)
     };
 }
 

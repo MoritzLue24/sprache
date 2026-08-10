@@ -7,7 +7,7 @@ fn horner(x) {
     return result;
 }
 
-fn maain() {
+fn main() {
     var res = horner(7);
     return res;
 }

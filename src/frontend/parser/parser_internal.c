@@ -20,6 +20,7 @@ void init_parser(struct Parser* p, const struct Token* tok_head, struct ErrorLis
 {
     p->tok_head = tok_head;
     p->errors = errorlist;
+    p->out_of_sync = false;
 }
 
 void set_ctx(struct Parser* p)
@@ -94,7 +95,7 @@ void set_need_sync()
 
 bool need_sync()
 {
-    return ctx->out_of_sync;
+    return !ctx || ctx->out_of_sync;
 }
 
 void sync()

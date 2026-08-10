@@ -14,6 +14,7 @@ struct Node* alloc_node(enum NodeType type, struct Loc begin)
     struct Node* n = xmalloc(sizeof(struct Node));
     n->type = type;
     n->begin = begin;
+    n->next = NULL;
     return n;
 }
 
@@ -22,34 +23,26 @@ struct Node* alloc_invalid_node()
     return alloc_node(NODE_INVALID, EMPTY_LOC);
 }
 
-static void expand_nodelist(struct NodeList* nl)
+struct Node* push_node(struct Node* head, struct Node* node)
 {
-    nl->capacity *= 2;
-    nl->data = xrealloc(nl->data, nl->capacity, sizeof(struct Node*));
-}
+    struct Node* real_head = head;
+    struct Node* tail = NULL;
 
-void init_nodelist(struct NodeList* nl)
-{
-    nl->data = calloc(NODELIST_INIT_CAPACITY, sizeof(struct Node*));
-    nl->size = 0;
-    nl->capacity = NODELIST_INIT_CAPACITY;
-}
+    for (; head != NULL && head->next != NULL; head = head->next);
+    tail = head;
 
-bool nodelist_push(struct NodeList* nl, struct Node* node)
-{
-    if (nl->head + nl->size >= nl->capacity)
-        expand_nodelist(nl);
-
-    nl->data[nl->size++] = node;
-    return true;
-}
-
-void free_nodelist(struct NodeList* nl)
-{
-    for (size_t i = 0; i < nl->size; i++) {
-        free_node(nl->data[i]);
+    if (tail == NULL) {
+        return node;
     }
-    xfree((void**)&nl->data);
+    tail->next = node;
+    return real_head;
+}
+
+size_t nodelist_size(const struct Node* head)
+{
+    size_t i = 0;
+    for (; head != NULL; head = head->next) {i++;}
+    return i;
 }
 
 enum OpType tt_to_op(enum TokenType tt)
@@ -90,17 +83,17 @@ static void print_str_field(const char* label, const char* value, int depth)
     printf("%s: '%s'\n", label, value);
 }
 
-static void print_nodelist(const char* label, const struct NodeList* nl, int depth)
+static void print_nodelist(const char* label, const struct Node* nl_head, int depth)
 {
     print_indent(depth);
-    if (nl->size == 0) {
+    if (nl_head == NULL) {
         printf("%s: []\n", label);
         return;
     }
 
     printf("%s: [\n", label);
-    for (size_t i = 0; i < nl->size; i++) {
-        print_node(NULL, nl->data[i], depth + 1);
+    for (const struct Node* cur = nl_head; cur != NULL; cur = cur->next) {
+        print_node(NULL, cur, depth + 1);
     }
     print_indent(depth);
     printf("]\n");
@@ -123,14 +116,14 @@ void print_node(const char* label, const struct Node* node, int depth)
 
         case NODE_PROGRAM:
             printf("PROGRAM {\n");
-            print_nodelist("items", &node->program.items, field_depth);
+            print_nodelist("items", node->program.items_head, field_depth);
             break;
 
         case NODE_FUNC_DEF:
             printf("FUNC_DEF {\n");
             print_str_field("ident", node->func_def.ident, field_depth);
             print_symbol("symbol", node->func_def.symbol, field_depth);
-            print_nodelist("params", &node->func_def.params, field_depth);
+            print_nodelist("params", node->func_def.params_head, field_depth);
             print_node("body", node->func_def.body, field_depth);
             break;
 
@@ -142,7 +135,7 @@ void print_node(const char* label, const struct Node* node, int depth)
 
         case NODE_BLOCK:
             printf("BLOCK {\n");
-            print_nodelist("statements", &node->block.statements, field_depth);
+            print_nodelist("statements", node->block.statements_head, field_depth);
             break;
 
         case NODE_VAR_DECL:
@@ -177,7 +170,7 @@ void print_node(const char* label, const struct Node* node, int depth)
             printf("CALL {\n");
             print_str_field("ident", node->call.ident, field_depth);
             print_symbol("symbol", node->call.symbol, field_depth);
-            print_nodelist("args", &node->call.args, field_depth);
+            print_nodelist("args", node->call.args_head, field_depth);
             break;
 
 		case NODE_BINARY_OP:
@@ -196,7 +189,7 @@ void print_node(const char* label, const struct Node* node, int depth)
             printf("BUILTIN {\n");
             print_str_field("ident", node->builtin.ident, field_depth);
             print_builtin_def("def", node->builtin.def, field_depth);
-            print_nodelist("args", &node->builtin.args, field_depth);
+            print_nodelist("args", node->builtin.args_head, field_depth);
             break;
 
 		default:
@@ -211,19 +204,21 @@ void print_node(const char* label, const struct Node* node, int depth)
 
 void free_node(struct Node* node)
 {
-    assert(node != NULL);
+    if (node == NULL) {
+        return;
+    }
 
     switch (node->type) {
         case NODE_INVALID:
             break;
 
         case NODE_PROGRAM:
-            free_nodelist(&node->program.items);
+            free_node(node->program.items_head);
             break;
 
         case NODE_FUNC_DEF:
             xfree((void**)&node->func_def.ident);
-            free_nodelist(&node->func_def.params);
+            free_node(node->func_def.params_head);
             free_node(node->func_def.body);
             break;
 
@@ -232,7 +227,7 @@ void free_node(struct Node* node)
             break;
 
         case NODE_BLOCK:
-            free_nodelist(&node->block.statements);
+            free_node(node->block.statements_head);
             break;
 
         case NODE_VAR_DECL:
@@ -259,7 +254,7 @@ void free_node(struct Node* node)
 
         case NODE_CALL:
             xfree((void**)&node->call.ident);
-            free_nodelist(&node->call.args);
+            free_node(node->call.args_head);
             break;
 
         case NODE_BINARY_OP:
@@ -273,11 +268,16 @@ void free_node(struct Node* node)
 
         case NODE_BUILTIN:
             xfree((void**)&node->builtin.ident);
-            free_nodelist(&node->builtin.args);
+            free_node(node->builtin.args_head);
             break;
 
         default:
             assert(0);
     }
+
+    if (node->next != NULL) {
+        free_node(node->next);
+    }
+
     xfree((void**)&node);
 }

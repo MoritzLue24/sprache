@@ -40,12 +40,6 @@ enum OpType {
     OP_MUL
 };
 
-struct NodeList {
-    struct Node** data;
-    size_t size;
-    size_t capacity;
-    size_t head;
-};
 
 // forward decl
 struct Symbol;
@@ -54,16 +48,17 @@ struct Builtin;
 struct Node {
     enum NodeType type;
     struct Loc begin;
+    struct Node* next;
 
     union {
         struct {
-            struct NodeList items;
+            struct Node* items_head;
         } program;
 
         struct {
             char* ident;
             const struct Symbol* symbol;
-            struct NodeList params;
+            struct Node* params_head;
             struct Node* body;
         } func_def;
 
@@ -73,7 +68,7 @@ struct Node {
         } param;
 
         struct {
-            struct NodeList statements;
+            struct Node* statements_head;
         } block;
 
         struct {
@@ -112,7 +107,7 @@ struct Node {
         struct {
             char* ident;
             const struct Symbol* symbol;
-            struct NodeList args;
+            struct Node* args_head;
         } call;
 
         struct {
@@ -122,7 +117,7 @@ struct Node {
         struct {
             char* ident;
             const struct BuiltinDef* def;
-            struct NodeList args;
+            struct Node* args_head;
         } builtin;
     };
 };
@@ -131,11 +126,9 @@ struct Node* alloc_node(enum NodeType type, struct Loc begin);
 
 struct Node* alloc_invalid_node();
 
-void init_nodelist(struct NodeList* nl);
+struct Node* push_node(struct Node* head, struct Node* node);
 
-bool nodelist_push(struct NodeList* nl, struct Node* node);
-
-void free_nodelist(struct NodeList* nl);
+size_t nodelist_size(const struct Node* head);
 
 enum OpType tt_to_op(enum TokenType tt);
 
