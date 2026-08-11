@@ -188,6 +188,9 @@ static struct IROperand gen_unary_op(const struct Node* node)
         case OP_MINUS:
             instr = new_instr(IR_NEG, factor, factor, EMPTY_OPRND);
             break;
+        case OP_BW_NOT:
+            instr = new_instr(IR_COM, factor, factor, EMPTY_OPRND);
+            break;
         default:
             assert(0);
     }
@@ -215,6 +218,15 @@ static struct IROperand gen_bin_op(const struct Node* node)
 
     struct IRInstr* instr;
     switch (node->bin_op.op) {
+        case OP_BW_OR:
+            instr = new_instr(IR_OR, dest, lhs, rhs);
+            break;
+        case OP_BW_XOR:
+            instr = new_instr(IR_XOR, dest, lhs, rhs);
+            break;
+        case OP_BW_AND:
+            instr = new_instr(IR_AND, dest, lhs, rhs);
+            break;
         case OP_PLUS:
             instr = new_instr(IR_ADD, dest, lhs, rhs);
             break;

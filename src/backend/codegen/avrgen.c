@@ -75,6 +75,18 @@ static void write_instr(const struct IRInstr* instr)
         case IR_NEG:
             write_unary_op(instr, "neg");
             break;
+        case IR_COM:
+            write_unary_op(instr, "com");
+            break;
+        case IR_OR:
+            write_binop(instr, "or", true);
+            break;
+        case IR_XOR:
+            write_binop(instr, "eor", true);
+            break;
+        case IR_AND:
+            write_binop(instr, "and", true);
+            break;
         case IR_ADD:
             write_binop(instr, "add", true);
             break;

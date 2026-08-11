@@ -59,7 +59,7 @@ int main(int argc, char** argv)
     check_sema(root, &errors, &st);
     symtable_exit_scope(&st);
 
-    print_node(NULL, root, 0);
+    //print_node(NULL, root, 0);
     if (has_errors(&errors)) {
         print_errors(&errors);
         goto done_sema;
@@ -83,7 +83,7 @@ int main(int argc, char** argv)
     fclose(f);
 
 done_ir: __attribute__((unused));
-    //free_irfunc(head);
+    free_irfunc(head);
 done_sema:
     free_symtable(&st);
 done_parser: __attribute__((unused));

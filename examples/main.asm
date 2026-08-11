@@ -16,29 +16,28 @@ main:
 	push r29
 	in r29, SPH
 	in r28, SPL
-	sbiw r28, 0
+	sbiw r28, 2
 	out SPH, r29
 	out SPL, r28
-	; prologue end, stack size = 0
+	; prologue end, stack size = 2
 	ldi r16, 2
-	neg r16
-	ldi r17, 5
-	neg r17
-	mul r16, r17
-	mov r17, r0
-	ldi r18, 56
-	add r17, r18
-	ldi r18, 5
-	ldi r19, 2
+	std Y+1, r16
+	ldi r17, 9
+	std Y+2, r17
+	ldi r17, 2
+	ldi r18, 1
+	ldd r19, Y+2
+	and r18, r19
+	ldd r19, Y+1
 	mov r16, r18
-	add r16, r19
-	neg r16
-	add r16, r17
+	eor r16, r19
+	com r16
+	or r16, r17
 	mov r24, r16
 	jmp _L_main_epilogue
 	; epilogue start
 _L_main_epilogue:
-	adiw r28, 0
+	adiw r28, 2
 	out SPH, r29
 	out SPL, r28
 	pop r29

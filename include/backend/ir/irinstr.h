@@ -23,6 +23,14 @@ enum IROp {
     IR_IMM,
     /// @brief -src1: reg
     IR_NEG,
+    /// @brief ~src1: reg
+    IR_COM,
+    /// @brief dest = src1 | src2
+    IR_OR,
+    /// @brief dest = src1 ^ src2
+    IR_XOR,
+    /// @brief dest = src1 & src2
+    IR_AND,
     /// @brief dest = src1 + src2
     IR_ADD,
     /// @brief dest = src1 - src2

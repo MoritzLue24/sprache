@@ -38,7 +38,11 @@ enum NodeType {
 enum OpType {
     OP_PLUS,
     OP_MINUS,
-    OP_MUL
+    OP_MUL,
+    OP_BW_NOT,
+    OP_BW_AND,
+    OP_BW_OR,
+    OP_BW_XOR
 };
 
 
