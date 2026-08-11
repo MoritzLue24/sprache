@@ -25,6 +25,7 @@ enum NodeType {
 
     // expr
     NODE_ASSIGN_EXPR,
+    NODE_UNARY_OP,
     NODE_BINARY_OP,
     NODE_VAR,
     NODE_CALL,
@@ -92,6 +93,11 @@ struct Node {
             struct Node* expr;
         } assign_expr;
 
+        struct {
+            enum OpType op;
+            struct Node* factor;
+        } unary_op;
+        
         struct {
             enum OpType op;
             struct Node* lhs;

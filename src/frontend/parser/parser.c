@@ -19,6 +19,7 @@ static struct Node* parse_node_return();
 static struct Node* parse_expr();
 static struct Node* parse_sum();
 static struct Node* parse_term();
+static struct Node* parse_unary();
 static struct Node* parse_factor();
 static struct Node* parse_node_builtin();
 static struct Node* parse_node_var();
@@ -238,11 +239,11 @@ static struct Node* parse_sum()
 
 static struct Node* parse_term()
 {
-    struct Node* node = parse_factor();
+    struct Node* node = parse_unary();
 
     while (check(TT_STAR)) {
         const struct Token* op_t = advance();
-        struct Node* rhs = parse_factor();
+        struct Node* rhs = parse_unary();
 
         struct Node* n = alloc_node(NODE_BINARY_OP, node->begin);
         n->bin_op.op = tt_to_op(op_t->type);
@@ -251,6 +252,22 @@ static struct Node* parse_term()
         node = n;
     }
     return node;
+}
+
+static struct Node* parse_unary()
+{
+    if (check(TT_MINUS)) {
+        const struct Token* op_t = advance();
+        struct Node* rhs = parse_unary();
+
+        struct Node* n = alloc_node(NODE_UNARY_OP, op_t->begin);
+        n->unary_op.op = tt_to_op(op_t->type);
+        n->unary_op.factor = rhs;
+        return n;
+    }
+    else {
+        return parse_factor();
+    }
 }
 
 static struct Node* parse_factor()

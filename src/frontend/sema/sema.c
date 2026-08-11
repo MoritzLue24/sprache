@@ -31,6 +31,7 @@ static void check_var_decl(struct Node* node);
 static void check_var_def(struct Node* node);
 static void check_return(struct Node* node);
 static void check_assign_expr(struct Node* node);
+static void check_unary_op(struct Node* node);
 static void check_binop(struct Node* node);
 static void check_var(struct Node* node);
 static void check_call(struct Node* node);
@@ -83,6 +84,10 @@ static void check_node(struct Node* node)
 
         case NODE_ASSIGN_EXPR:
             check_assign_expr(node);
+            break;
+
+        case NODE_UNARY_OP:
+            check_unary_op(node);
             break;
 
         case NODE_BINARY_OP:
@@ -206,6 +211,12 @@ static void check_assign_expr(struct Node* node)
         );
     }
     check_node(node->assign_expr.expr);
+}
+
+static void check_unary_op(struct Node* node)
+{
+    assert(node->type == NODE_UNARY_OP);
+    check_node(node->unary_op.factor);
 }
 
 static void check_binop(struct Node* node)

@@ -8,28 +8,53 @@
 
 /// @note Contains all token types, including all keywords & punctuations
 enum TokenType {
+    // general
     TT_INVALID,
     TT_END,
-
     TT_IDENT,
+    TT_LITERAL,
 
+    // keywords
     TT_FUNC,
     TT_VAR,
     TT_RETURN,
 
+    // general punctuation
     TT_SEMICOLON,
     TT_COMMA,
     TT_AT,
-    TT_EQ,
-    TT_LPAREN,
-    TT_RPAREN,
     TT_LBRACE,
     TT_RBRACE,
+
+    // expression punctuation
+    TT_EQ,
+
+    TT_LPAREN,
+    TT_RPAREN,
+
+    // arithmetic operators
     TT_PLUS,
     TT_MINUS,
     TT_STAR,
 
-    TT_LITERAL,
+    // bitwise operators
+    TT_BW_AND,
+    TT_BW_OR,
+    TT_BW_NOT,
+    TT_BW_XOR
+
+    // comparasion operators
+    /*TT_EQEQ,
+    TT_NEQ,
+    TT_LT,
+    TT_GT,
+    TT_LE,
+    TT_GE,
+
+    // logical operators
+    TT_AND,
+    TT_OR,
+    TT_NOT,*/
 };
 
 struct Token {

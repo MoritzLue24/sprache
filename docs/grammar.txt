@@ -24,7 +24,8 @@
 <expression>            ::= <assigment-expression>
 <assigment-expression>  ::= <sum> { = <sum> }*
 <sum>                   ::= <term> { + <term> | - <term> }*
-<term>                  ::= <factor> { * <factor> }*
+<term>                  ::= <unary> { * <unary> }*
+<unary>                 ::= { - }* <factor>
 <factor>                ::= <call> | <literal> | <builtin> | <ident> | ( <expression> )
 
 <call>          ::= <ident> ( <argument-list>? )

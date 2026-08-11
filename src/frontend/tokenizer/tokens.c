@@ -11,14 +11,30 @@ const struct MatchTypePair punctuations[] =
     {";", TT_SEMICOLON},
     {",", TT_COMMA},
     {"@", TT_AT},
+    {"{", TT_LBRACE},
+    {"}", TT_RBRACE},
     {"=", TT_EQ},
     {"(", TT_LPAREN},
     {")", TT_RPAREN},
-    {"{", TT_LBRACE},
-    {"}", TT_RBRACE},
 	{"+", TT_PLUS},
     {"-", TT_MINUS},
-    {"*", TT_STAR}
+    {"*", TT_STAR},
+    {"&", TT_BW_AND},
+    {"|", TT_BW_OR},
+    {"~", TT_BW_NOT},
+    {"^", TT_BW_XOR}
+
+    /*
+    {"==", TT_EQEQ},
+    {"!=", TT_NEQ},
+    {"<", TT_LT},
+    {">", TT_GT},
+    {"<=", TT_LE},
+    {">=", TT_GE},
+    {"&&", TT_AND},
+    {"||", TT_OR},
+    {"!", TT_NOT}
+    */
 };
 const size_t punctuations_count = sizeof(punctuations) / sizeof((punctuations)[0]);
 
@@ -41,6 +57,8 @@ const char* tt_str(enum TokenType tt)
             return "END";
         case TT_IDENT:
             return "IDENT";
+        case TT_LITERAL:
+            return "LITERAL";
         case TT_FUNC:
             return "FUNC";
         case TT_RETURN:
@@ -53,24 +71,30 @@ const char* tt_str(enum TokenType tt)
             return "COMMA";
         case TT_AT:
             return "AT";
+        case TT_LBRACE:
+            return "LBRACE";
+        case TT_RBRACE:
+            return "RBRACE";
         case TT_EQ:
             return "EQ";
         case TT_LPAREN:
             return "LPAREN";
         case TT_RPAREN:
             return "RPAREN";
-        case TT_LBRACE:
-            return "LBRACE";
-        case TT_RBRACE:
-            return "RBRACE";
         case TT_PLUS:
             return "PLUS";
         case TT_MINUS:
             return "MINUS";
         case TT_STAR:
             return "STAR";
-        case TT_LITERAL:
-            return "LITERAL";
+        case TT_BW_AND:
+            return "BW_AND";
+        case TT_BW_OR:
+            return "BW_OR";
+        case TT_BW_NOT:
+            return "BW_NOT";
+        case TT_BW_XOR:
+            return "BW_XOR";
         default:
             assert(0);
     }

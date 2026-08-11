@@ -21,6 +21,8 @@ enum IROp {
 
     /// @brief dest: imm
     IR_IMM,
+    /// @brief -src1: reg
+    IR_NEG,
     /// @brief dest = src1 + src2
     IR_ADD,
     /// @brief dest = src1 - src2

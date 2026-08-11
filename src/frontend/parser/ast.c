@@ -173,6 +173,12 @@ void print_node(const char* label, const struct Node* node, int depth)
             print_nodelist("args", node->call.args_head, field_depth);
             break;
 
+        case NODE_UNARY_OP:
+            printf("UNARY_OP {\n");
+            print_str_field("op", op_type_str(node->bin_op.op), field_depth);
+            print_node("factor", node->unary_op.factor, field_depth);
+            break;
+
 		case NODE_BINARY_OP:
 			printf("BINARY_OP {\n");
             print_str_field("op", op_type_str(node->bin_op.op), field_depth);
@@ -255,6 +261,10 @@ void free_node(struct Node* node)
         case NODE_CALL:
             xfree((void**)&node->call.ident);
             free_node(node->call.args_head);
+            break;
+
+        case NODE_UNARY_OP:
+            free_node(node->unary_op.factor);
             break;
 
         case NODE_BINARY_OP:
