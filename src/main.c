@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 
     const char* source = read_file(args.input_file);
     if (source == NULL) {
-        return 1;
+        goto done_source;
     }
 
     struct ErrorList errors;
@@ -71,7 +71,7 @@ int main(int argc, char** argv)
         regalloc(cur->instrs);
     }
     //print_irfunc(head);
-    // goto done_ir;
+    //goto done_ir;
 
     // avr generation
     FILE* f = fopen(args.asm_file, "w");
@@ -84,13 +84,14 @@ int main(int argc, char** argv)
 
 done_ir: __attribute__((unused));
     free_irfunc(head);
-done_sema: __attribute__((unused));
+done_sema:
     free_symtable(&st);
 done_parser: __attribute__((unused));
     free_node(root);
 done_lexer: __attribute__((unused));
     free_tokenlist(tok_head);
     free_errorlist(&errors);
+done_source:
     xfree((void**)&source);
     free_args(args);
 }

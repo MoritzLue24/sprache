@@ -23,8 +23,12 @@
 
 <expression>            ::= <assigment-expression>
 <assigment-expression>  ::= <sum> { = <sum> }*
+<bitwise-or>            ::= <bitwise-xor> { "|" <bitwise-xor> }*
+<bitwise-xor>           ::= <bitwise-and> { ^ <bitwise-and> }*
+<bitwise-and>           ::= <sum> { & <sum> }*
 <sum>                   ::= <term> { + <term> | - <term> }*
-<term>                  ::= <factor> { * <factor> }*
+<term>                  ::= <unary> { * <unary> }*
+<unary>                 ::= { - | ~ }* <factor>
 <factor>                ::= <call> | <literal> | <builtin> | <ident> | ( <expression> )
 
 <call>          ::= <ident> ( <argument-list>? )

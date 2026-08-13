@@ -10,7 +10,12 @@ void init_loc(struct Loc* loc, const char* source)
     loc->i = 0;
     loc->ln = 1;
     loc->col = 1;
-    loc->end = false;
+    if (loc->c == '\0') {
+        loc->end = true;
+    }
+    else {
+        loc->end = false;
+    }
 }
 
 static bool advance_char(struct Loc* loc)

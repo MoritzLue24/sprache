@@ -68,6 +68,9 @@ unsigned int vreg_cost(const struct Node* node)
 
     case NODE_LITERAL:
         return 1;
+        
+    case NODE_UNARY_OP:
+        return 1;
 
     case NODE_BINARY_OP:
         return vreg_cost(node->bin_op.lhs) + vreg_cost(node->bin_op.rhs);

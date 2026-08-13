@@ -50,12 +50,18 @@ enum OpType tt_to_op(enum TokenType tt)
     switch (tt) {
         case TT_PLUS:
             return OP_PLUS;
-
         case TT_MINUS:
             return OP_MINUS;
-
         case TT_STAR:
             return OP_MUL;
+        case TT_BW_NOT:
+            return OP_BW_NOT;
+        case TT_BW_AND:
+            return OP_BW_AND;
+        case TT_BW_OR:
+            return OP_BW_OR;
+        case TT_BW_XOR:
+            return OP_BW_XOR;
 
         default:
             assert(0);
@@ -68,6 +74,10 @@ const char* op_type_str(enum OpType type)
         case OP_PLUS:  return "PLUS";
         case OP_MINUS: return "MINUS";
         case OP_MUL:   return "MUL";
+        case OP_BW_NOT: return "BW_NOT";
+        case OP_BW_AND: return "BW_AND";
+        case OP_BW_OR: return "BW_OR";
+        case OP_BW_XOR: return "BW_XOR";
         default: assert(0);
     }
 }
@@ -173,6 +183,12 @@ void print_node(const char* label, const struct Node* node, int depth)
             print_nodelist("args", node->call.args_head, field_depth);
             break;
 
+        case NODE_UNARY_OP:
+            printf("UNARY_OP {\n");
+            print_str_field("op", op_type_str(node->bin_op.op), field_depth);
+            print_node("factor", node->unary_op.factor, field_depth);
+            break;
+
 		case NODE_BINARY_OP:
 			printf("BINARY_OP {\n");
             print_str_field("op", op_type_str(node->bin_op.op), field_depth);
@@ -255,6 +271,10 @@ void free_node(struct Node* node)
         case NODE_CALL:
             xfree((void**)&node->call.ident);
             free_node(node->call.args_head);
+            break;
+
+        case NODE_UNARY_OP:
+            free_node(node->unary_op.factor);
             break;
 
         case NODE_BINARY_OP:

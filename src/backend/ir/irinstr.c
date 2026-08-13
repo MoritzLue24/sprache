@@ -92,6 +92,21 @@ static void print_irlist(const struct IRInstr* head, int depth)
         case IR_IMM:
             printf("%s <- %s\n", dest, src1);
             break;
+        case IR_NEG:
+            printf("%s <- NEG %s\n", dest, src1);
+            break;
+        case IR_COM:
+            printf("%s <- COM %s\n", dest, src1);
+            break;
+        case IR_OR:
+            printf("%s <- %s | %s\n", dest, src1, src2);
+            break;
+        case IR_XOR:
+            printf("%s <- %s ^ %s\n", dest, src1, src2);
+            break;
+        case IR_AND:
+            printf("%s <- %s & %s\n", dest, src1, src2);
+            break;
         case IR_ADD:
             printf("%s <- %s + %s\n", dest, src1, src2);
             break;

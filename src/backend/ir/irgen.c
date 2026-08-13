@@ -15,6 +15,7 @@ static struct IROperand gen_block(const struct Node* node);
 static struct IROperand gen_var_def(const struct Node* node);
 static struct IROperand gen_return(const struct Node* node);
 static struct IROperand gen_assign_expr(const struct Node* node);
+static struct IROperand gen_unary_op(const struct Node* node);
 static struct IROperand gen_bin_op(const struct Node* node);
 static struct IROperand gen_var(const struct Node* node);
 static struct IROperand gen_call(const struct Node* node);
@@ -107,6 +108,8 @@ static struct IROperand gen_instr(const struct Node* node)
             return gen_return(node);
         case NODE_ASSIGN_EXPR:
             return gen_assign_expr(node);
+        case NODE_UNARY_OP:
+            return gen_unary_op(node);
         case NODE_BINARY_OP:
             return gen_bin_op(node);
         case NODE_VAR:
@@ -175,6 +178,26 @@ static struct IROperand gen_assign_expr(const struct Node* node)
     return expr_op;
 }
 
+static struct IROperand gen_unary_op(const struct Node* node)
+{
+    assert(node->type == NODE_UNARY_OP);
+    struct IROperand factor = gen_instr(node->unary_op.factor);
+
+    struct IRInstr* instr;
+    switch (node->unary_op.op) {
+        case OP_MINUS:
+            instr = new_instr(IR_NEG, factor, factor, EMPTY_OPRND);
+            break;
+        case OP_BW_NOT:
+            instr = new_instr(IR_COM, factor, factor, EMPTY_OPRND);
+            break;
+        default:
+            assert(0);
+    }
+    push_instr(instr);
+    return instr->dest;
+}
+
 static struct IROperand gen_bin_op(const struct Node* node)
 {
     assert(node->type == NODE_BINARY_OP);
@@ -195,6 +218,15 @@ static struct IROperand gen_bin_op(const struct Node* node)
 
     struct IRInstr* instr;
     switch (node->bin_op.op) {
+        case OP_BW_OR:
+            instr = new_instr(IR_OR, dest, lhs, rhs);
+            break;
+        case OP_BW_XOR:
+            instr = new_instr(IR_XOR, dest, lhs, rhs);
+            break;
+        case OP_BW_AND:
+            instr = new_instr(IR_AND, dest, lhs, rhs);
+            break;
         case OP_PLUS:
             instr = new_instr(IR_ADD, dest, lhs, rhs);
             break;

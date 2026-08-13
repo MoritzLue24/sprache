@@ -17,6 +17,7 @@ static void write_push_arg(const struct IRInstr* instr);
 static void write_call(const struct IRInstr* instr);
 static void write_pop_arg(const struct IRInstr* instr);
 static void write_imm(const struct IRInstr* instr);
+static void write_unary_op(const struct IRInstr* instr, const char* mnemonic);
 static void write_binop(const struct IRInstr* instr, const char* mnemonic, bool commutative);
 static void write_return(const struct IRInstr* instr);
 static void write_load_local(const struct IRInstr* instr);
@@ -70,6 +71,21 @@ static void write_instr(const struct IRInstr* instr)
             break;
         case IR_IMM:
             write_imm(instr);
+            break;
+        case IR_NEG:
+            write_unary_op(instr, "neg");
+            break;
+        case IR_COM:
+            write_unary_op(instr, "com");
+            break;
+        case IR_OR:
+            write_binop(instr, "or", true);
+            break;
+        case IR_XOR:
+            write_binop(instr, "eor", true);
+            break;
+        case IR_AND:
+            write_binop(instr, "and", true);
             break;
         case IR_ADD:
             write_binop(instr, "add", true);
@@ -154,6 +170,22 @@ static void write_imm(const struct IRInstr* instr)
 
     struct RegsStr regs = get_regs_str(instr);
     fprintf(ctx(), "\tldi %s, %i\n", regs.dest, instr->src1.imm.value);
+}
+
+static void write_unary_op(const struct IRInstr* instr, const char* mnemonic)
+{
+    assert(instr->dest.type == OPRND_REG && instr->dest.reg.regalloc_done);
+    assert(instr->src1.type == OPRND_REG && instr->src1.reg.regalloc_done);
+
+    struct RegsStr regs = get_regs_str(instr);
+    if (strcmp(regs.dest, regs.src1) == 0) {
+        fprintf(ctx(), "\t%s %s\n", mnemonic, regs.src1);
+    }
+    else {
+        fprintf(ctx(), "\tmov r%i, %s\n", target.tmp_reg, regs.src1);
+        fprintf(ctx(), "\t%s r%i\n", mnemonic, target.tmp_reg);
+        fprintf(ctx(), "\tmov %s, r%i\n", regs.dest, target.tmp_reg);
+    }
 }
 
 static void write_binop(const struct IRInstr* instr, const char* mnemonic, bool commutative)

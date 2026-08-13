@@ -7,7 +7,7 @@ char* read_file(const char* path)
 {
 	FILE* file = fopen(path, "rb");
 	if (file == NULL) {
-        fprintf(stderr, "File not found: '%s'", path);
+        fprintf(stderr, "File not found: '%s'\n", path);
 		return NULL;
     }
 

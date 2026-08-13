@@ -11,7 +11,7 @@ static bool is_sync_token()
 {
     return check(TT_END) || check(TT_SEMICOLON) || check(TT_RBRACE)
         || check(TT_COMMA)
-        || check(TT_LBRACE) || check(TT_RPAREN) || check(TT_LPAREN)
+        || check(TT_LBRACE) || check(TT_LPAREN)
         || check(TT_AT) || check(TT_IDENT) || check(TT_RETURN)
         || check(TT_VAR) || check(TT_FUNC);
 }

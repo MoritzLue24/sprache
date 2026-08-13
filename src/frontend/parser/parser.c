@@ -17,8 +17,16 @@ static struct Node* parse_statement();
 static struct Node* parse_node_var_decl_or_def();
 static struct Node* parse_node_return();
 static struct Node* parse_expr();
+static struct Node* parse_binop(
+    enum TokenType t_types[],
+    size_t t_count, 
+    struct Node* (*parse_inner_node)(void));
+static struct Node* parse_bw_or();
+static struct Node* parse_bw_xor();
+static struct Node* parse_bw_and();
 static struct Node* parse_sum();
 static struct Node* parse_term();
+static struct Node* parse_unary();
 static struct Node* parse_factor();
 static struct Node* parse_node_builtin();
 static struct Node* parse_node_var();
@@ -200,7 +208,7 @@ static struct Node* parse_node_return()
 
 static struct Node* parse_expr()
 {
-    struct Node* node = parse_sum();
+    struct Node* node = parse_bw_or();
 
     if (need_sync())
         sync();
@@ -219,38 +227,74 @@ static struct Node* parse_expr()
     return node;
 }
 
+static struct Node* parse_binop(
+    enum TokenType t_types[],
+    size_t t_count, 
+    struct Node* (*parse_inner_node)(void))
+{
+    struct Node* lhs = parse_inner_node();
+
+    bool no_op = true;
+    for (size_t i = 0; i < t_count; i++) {
+        if (check(t_types[i])) {
+            no_op = false;
+            break;
+        }
+    }
+
+    if (no_op) {
+        return lhs;
+    }
+
+    const struct Token* op_t = advance();
+    struct Node* rhs = parse_inner_node();
+    struct Node* binop_n = alloc_node(NODE_BINARY_OP, lhs->begin);
+
+    binop_n->bin_op.op = tt_to_op(op_t->type);
+    binop_n->bin_op.lhs = lhs;
+    binop_n->bin_op.rhs = rhs;
+    return binop_n;
+}
+
+static struct Node* parse_bw_or()
+{
+    return parse_binop((enum TokenType[]){TT_BW_OR}, 1, parse_bw_xor);
+}
+
+static struct Node* parse_bw_xor()
+{
+    return parse_binop((enum TokenType[]){TT_BW_XOR}, 1, parse_bw_and);
+}
+
+static struct Node* parse_bw_and()
+{
+    return parse_binop((enum TokenType[]){TT_BW_AND}, 1, parse_sum);
+}
+
 static struct Node* parse_sum()
 {
-    struct Node* node = parse_term();
-
-    while (check(TT_PLUS) || check(TT_MINUS)) {
-        const struct Token* op_t = advance();
-        struct Node* rhs = parse_term();
-
-        struct Node* n = alloc_node(NODE_BINARY_OP, node->begin);
-        n->bin_op.op = tt_to_op(op_t->type);
-        n->bin_op.lhs = node;
-        n->bin_op.rhs = rhs;
-        node = n;
-    }
-    return node;
+    return parse_binop((enum TokenType[]){TT_PLUS, TT_MINUS}, 2, parse_term);
 }
 
 static struct Node* parse_term()
 {
-    struct Node* node = parse_factor();
+    return parse_binop((enum TokenType[]){TT_STAR}, 1, parse_unary);
+}
 
-    while (check(TT_STAR)) {
+static struct Node* parse_unary()
+{
+    if (check(TT_MINUS) | check(TT_BW_NOT)) {
         const struct Token* op_t = advance();
-        struct Node* rhs = parse_factor();
+        struct Node* rhs = parse_unary();
 
-        struct Node* n = alloc_node(NODE_BINARY_OP, node->begin);
-        n->bin_op.op = tt_to_op(op_t->type);
-        n->bin_op.lhs = node;
-        n->bin_op.rhs = rhs;
-        node = n;
+        struct Node* n = alloc_node(NODE_UNARY_OP, op_t->begin);
+        n->unary_op.op = tt_to_op(op_t->type);
+        n->unary_op.factor = rhs;
+        return n;
     }
-    return node;
+    else {
+        return parse_factor();
+    }
 }
 
 static struct Node* parse_factor()
