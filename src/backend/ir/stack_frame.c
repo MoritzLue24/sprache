@@ -18,6 +18,7 @@ static unsigned int next_rel_arg_offset = 1;
 void init_stackframe(struct StackFrame* sf, const char* func_ident)
 {
     sf_next_offset = 1;
+    next_rel_arg_offset = 1;
     sf->func_ident = xstrdup(func_ident);
     sf->head = NULL;
     sf->tail = NULL;

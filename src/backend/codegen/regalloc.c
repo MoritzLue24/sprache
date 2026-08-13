@@ -20,15 +20,15 @@ static size_t count_vregs(const struct IRInstr* head)
     size_t max = 0;
     bool any = false;
     for (; head != NULL; head = head->next) {
-        if (is_vreg(head->dest) && head->dest.reg.vreg_i > max) {
+        if (is_vreg(head->dest) && head->dest.reg.vreg_i >= max) {
                 max = head->dest.reg.vreg_i;
                 any = true;
             }
-        if (is_vreg(head->src1) && head->src1.reg.vreg_i > max) {
+        if (is_vreg(head->src1) && head->src1.reg.vreg_i >= max) {
                 max = head->src1.reg.vreg_i;
                 any = true;
             }
-        if (is_vreg(head->src2) && head->src2.reg.vreg_i > max) {
+        if (is_vreg(head->src2) && head->src2.reg.vreg_i >= max) {
                 max = head->src2.reg.vreg_i;
                 any = true;
             }
@@ -56,10 +56,10 @@ struct InterfGraph create_interf_graph(const struct IRInstr* head)
         if (is_vreg(inst->dest)) {
             def_idx[inst->dest.reg.vreg_i] = inst_i;
         }
-        if (is_vreg(inst->dest)) {
+        if (is_vreg(inst->src1)) {
             last_use_idx[inst->src1.reg.vreg_i] = inst_i;
         }
-        if (is_vreg(inst->dest)) {
+        if (is_vreg(inst->src2)) {
             last_use_idx[inst->src2.reg.vreg_i] = inst_i;
         }
     }

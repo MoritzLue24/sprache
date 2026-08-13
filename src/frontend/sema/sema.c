@@ -123,12 +123,14 @@ static void check_node_func_def(struct Node* node)
     if (existing != NULL) {
         add_redeclaration_error(errors, existing, node->begin);
     }
-    node->func_def.symbol = symtable_declare_func(
-        st,
-        node->func_def.ident,
-        node->begin,
-        nodelist_size(node->func_def.params_head)
-    );
+    else {
+        node->func_def.symbol = symtable_declare_func(
+            st,
+            node->func_def.ident,
+            node->begin,
+            nodelist_size(node->func_def.params_head)
+        );
+    }
 
     // pass params to declare & check
     check_block(node->func_def.body, node->func_def.params_head);
