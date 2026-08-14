@@ -50,6 +50,19 @@ static void bitwise_mixed_returns_expected_value()
     );
 }
 
+static void bitwise_or_chained_returns_expected_value()
+{
+    /*
+    2 | 4: 0b00000010 | 0b00000100 = 0b00000110 = 6
+    6 | 3: 0b00000110 | 0b00000011 = 0b00000111 = 7
+    7 | 20: 0b00000111 | 0b00010100 = 0b00010111 = 0x17
+    */
+    TST_ASSERT_AVR_RETURNS(
+        0x17,
+        "fn main() { return 2 | 4 | 3 | 20 ; }"
+    );
+}
+
 int main()
 {
     TST_RUN(bitwise_and_returns_expected_value);
@@ -57,6 +70,7 @@ int main()
     TST_RUN(bitwise_xor_returns_expected_value);
     TST_RUN(bitwise_not_returns_complement);
     TST_RUN(bitwise_mixed_returns_expected_value);
+    TST_RUN(bitwise_or_chained_returns_expected_value);
     TST_SUMMARY();
     return 0;
 }
