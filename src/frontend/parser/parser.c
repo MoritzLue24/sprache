@@ -234,26 +234,30 @@ static struct Node* parse_binop(
 {
     struct Node* lhs = parse_inner_node();
 
-    bool no_op = true;
-    for (size_t i = 0; i < t_count; i++) {
-        if (check(t_types[i])) {
-            no_op = false;
+    while (true) {
+        bool no_op = true;
+        for (size_t i = 0; i < t_count; i++) {
+            if (check(t_types[i])) {
+                no_op = false;
+                break;
+            }
+        }
+
+        if (no_op) {
             break;
         }
+
+        const struct Token* op_t = advance();
+        struct Node* rhs = parse_inner_node();
+        struct Node* binop_n = alloc_node(NODE_BINARY_OP, lhs->begin);
+
+        binop_n->bin_op.op = tt_to_op(op_t->type);
+        binop_n->bin_op.lhs = lhs;
+        binop_n->bin_op.rhs = rhs;
+        lhs = binop_n;
     }
 
-    if (no_op) {
-        return lhs;
-    }
-
-    const struct Token* op_t = advance();
-    struct Node* rhs = parse_inner_node();
-    struct Node* binop_n = alloc_node(NODE_BINARY_OP, lhs->begin);
-
-    binop_n->bin_op.op = tt_to_op(op_t->type);
-    binop_n->bin_op.lhs = lhs;
-    binop_n->bin_op.rhs = rhs;
-    return binop_n;
+    return lhs;
 }
 
 static struct Node* parse_bw_or()
