@@ -3,7 +3,7 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "tst.h"
-#include "avr_run_fixture.h"
+#include "integration/avr_run_fixture.h"
 
 
 static void addition_returns_expected_value()
