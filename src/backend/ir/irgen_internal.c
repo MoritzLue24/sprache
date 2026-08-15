@@ -78,6 +78,9 @@ unsigned int vreg_cost(const struct Node* node)
     case NODE_RETURN:
         return vreg_cost(node->ret.expr);
 
+    case NODE_CALL:
+        return 1;
+
     default:
         assert(0);
     }
