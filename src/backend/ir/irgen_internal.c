@@ -47,7 +47,6 @@ struct IROperand new_imm_op(int value)
     };
 }
 
-// FIXME: is not optimal, atm its just basic leaves-counting
 // see https://www.geeksforgeeks.org/compiler-design/labeling-algorithm-in-compiler-design/
 unsigned int vreg_cost(const struct Node* node)
 {
@@ -57,12 +56,19 @@ unsigned int vreg_cost(const struct Node* node)
 
     case NODE_LITERAL:
         return 1;
-        
-    case NODE_UNARY_OP:
-        return 1;
 
-    case NODE_BINARY_OP:
-        return vreg_cost(node->bin_op.lhs) + vreg_cost(node->bin_op.rhs);
+    case NODE_UNARY_OP:
+        return vreg_cost(node->unary_op.factor);
+
+    case NODE_BINARY_OP: {
+        unsigned int lhs_cost = vreg_cost(node->bin_op.lhs);
+        unsigned int rhs_cost = vreg_cost(node->bin_op.rhs);
+        // if both sides need the same amount of registers, evaluating either
+        // first forces the other to need one more (to hold the first result)
+        return lhs_cost == rhs_cost
+            ? lhs_cost + 1
+            : (lhs_cost > rhs_cost ? lhs_cost : rhs_cost);
+    }
 
     case NODE_RETURN:
         return vreg_cost(node->ret.expr);
