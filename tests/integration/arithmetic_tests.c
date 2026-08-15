@@ -42,6 +42,17 @@ static void chained_addition_returns_expected_value()
     TST_ASSERT_AVR_RETURNS(10, "fn main() { return 1 + 2 + 3 + 4; }");
 }
 
+/// @brief a balanced (not left-deep) 8-leaf sum, so several partial sums
+/// have to stay live at once instead of accumulating into one running
+/// total - if the compiler ever reused a register that was still holding
+/// a live partial sum, this would silently compute the wrong total.
+static void nested_balanced_expression_returns_expected_value()
+{
+    TST_ASSERT_AVR_RETURNS(36, "fn main() { "
+        "var a=1; var b=2; var c=3; var d=4; var e=5; var f=6; var g=7; var h=8; "
+        "return ((a + b) + (c + d)) + ((e + f) + (g + h)); }");
+}
+
 int main()
 {
     TST_RUN(addition_returns_expected_value);
@@ -50,6 +61,7 @@ int main()
     TST_RUN(unary_minus_returns_expected_value);
     TST_RUN(arithmetic_respects_operator_precedence);
     TST_RUN(chained_addition_returns_expected_value);
+    TST_RUN(nested_balanced_expression_returns_expected_value);
     TST_SUMMARY();
     return 0;
 }

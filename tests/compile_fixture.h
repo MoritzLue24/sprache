@@ -29,7 +29,8 @@ struct CompileResult {
     struct IRFunc* ir_head;
 };
 
-static struct CompileResult compile_source(const char* source)
+/// @brief Generates an IR, but without allocating registers.
+static struct CompileResult gen_ir_from_source(const char* source)
 {
     struct CompileResult r;
     init_errorlist(&r.errors);
@@ -44,11 +45,8 @@ static struct CompileResult compile_source(const char* source)
     symtable_exit_scope(&r.st);
 
     r.ir_head = NULL;
-    if (!has_errors(&r.errors)) {
+    if (!has_errors(&r.errors))
         r.ir_head = gen_ir(r.root);
-        for (struct IRFunc* cur = r.ir_head; cur != NULL; cur = cur->next)
-            regalloc(cur->instrs);
-    }
     return r;
 }
 
@@ -62,15 +60,15 @@ static void free_compile_result(struct CompileResult* r)
     free_errorlist(&r->errors);
 }
 
-/// @brief Runs the IR of `main` through AVR codegen and returns the emitted
+/// @brief Runs the IR through AVR codegen and returns the emitted
 /// assembly as a heap string the caller must free.
-static char* compile_to_asm(const struct IRFunc* ir_head)
+static char* gen_avr_from_result(struct CompileResult res)
 {
     FILE* f = tmpfile();
     if (f == NULL)
         return NULL;
 
-    gen_avr(ir_head, f);
+    gen_avr(res.ir_head, f);
 
     long len = ftell(f);
     rewind(f);

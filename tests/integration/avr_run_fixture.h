@@ -152,14 +152,18 @@ static struct AvrRunResult run_avr(const char* source)
     pid_t sim_pid = -1;
     char dir[] = "/tmp/sprache_avr_XXXXXX";
 
-    struct CompileResult cr = compile_source(source);
+    struct CompileResult cr = gen_ir_from_source(source);
     if (has_errors(&cr.errors) || cr.ir_head == NULL) {
         fprintf(stderr, "run_avr: compilation failed for: %s\n", source);
         free_compile_result(&cr);
         return result;
     }
 
-    char* asm_text = compile_to_asm(cr.ir_head);
+    for (struct IRFunc* f = cr.ir_head; f != NULL; f = f->next) {
+        regalloc(f->instrs);
+    }
+
+    char* asm_text = gen_avr_from_result(cr);
     free_compile_result(&cr);
     if (asm_text == NULL) {
         fprintf(stderr, "run_avr: codegen produced no output\n");
