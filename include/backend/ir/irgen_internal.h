@@ -14,8 +14,6 @@ struct IROperand new_vreg_op();
 
 struct IROperand new_imm_op(int value);
 
-struct IRInstr* new_instr(enum IROp op, struct IROperand dest, struct IROperand src1, struct IROperand src2);
-
 unsigned int vreg_cost(const struct Node* node);
 
 void use_instrlist(struct IRInstr** head_p);

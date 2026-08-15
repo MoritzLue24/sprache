@@ -7,6 +7,17 @@
 #include "utils/xalloc.h"
 
 
+struct IRInstr* new_instr(enum IROp op, struct IROperand dest, struct IROperand src1, struct IROperand src2)
+{
+    struct IRInstr* instr = xmalloc(sizeof(struct IRInstr));
+    instr->op = op;
+    instr->dest = dest;
+    instr->src1 = src1;
+    instr->src2 = src2;
+    instr->next = NULL;
+    return instr;
+}
+
 char* oprnd_str(struct IROperand oprnd)
 {
     if (oprnd.none) {
@@ -64,7 +75,7 @@ char* oprnd_str(struct IROperand oprnd)
     }
 }
 
-static void print_irlist(const struct IRInstr* head, int depth)
+void print_irlist(const struct IRInstr* head, int depth)
 {
     assert(head);
 
@@ -148,7 +159,7 @@ void print_irfunc(const struct IRFunc* func)
         print_irfunc(func->next);
 }
 
-static void free_irlist(struct IRInstr* head)
+void free_irlist(struct IRInstr* head)
 {
     if (head->dest.type == OPRND_FUNC) {
         xfree((void**)&head->dest.func.ident);

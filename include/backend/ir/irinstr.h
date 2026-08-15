@@ -104,10 +104,16 @@ struct IRFunc {
     struct IRFunc* next;
 };
 
+struct IRInstr* new_instr(enum IROp op, struct IROperand dest, struct IROperand src1, struct IROperand src2);
+
 /// @note needs freeing 
 char* oprnd_str(struct IROperand oprnd);
 
+void print_irlist(const struct IRInstr* head, int depth);
+
 void print_irfunc(const struct IRFunc* funclist);
+
+void free_irlist(struct IRInstr* head);
 
 void free_irfunc(struct IRFunc* func);
 

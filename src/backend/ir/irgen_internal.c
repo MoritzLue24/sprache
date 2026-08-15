@@ -47,17 +47,6 @@ struct IROperand new_imm_op(int value)
     };
 }
 
-struct IRInstr* new_instr(enum IROp op, struct IROperand dest, struct IROperand src1, struct IROperand src2)
-{
-    struct IRInstr* instr = xmalloc(sizeof(struct IRInstr));
-    instr->op = op;
-    instr->dest = dest;
-    instr->src1 = src1;
-    instr->src2 = src2;
-    instr->next = NULL;
-    return instr;
-}
-
 // FIXME: is not optimal, atm its just basic leaves-counting
 // see https://www.geeksforgeeks.org/compiler-design/labeling-algorithm-in-compiler-design/
 unsigned int vreg_cost(const struct Node* node)
