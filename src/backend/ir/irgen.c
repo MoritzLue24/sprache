@@ -139,7 +139,7 @@ static struct IROperand gen_var_def(const struct Node* node)
     assert(node->type == NODE_VAR_DEF);
     assert(node->var_def.target->type == NODE_VAR);
 
-    struct SFEntry* sf_entry = stackframe_push(node->var_decl.target->var.symbol, false);
+    struct SFEntry* sf_entry = stackframe_push(node->var_def.target->var.symbol, false);
 
     struct IROperand expr_op = gen_instr(node->var_def.expr);
     push_instr(new_instr(
@@ -258,9 +258,11 @@ static struct IROperand gen_var(const struct Node* node)
 
 static void gen_push_arg_rev(const struct Node* args_head)
 {
-    if (args_head->next) {
-        gen_push_arg_rev(args_head->next);
+    if (args_head == NULL) {
+        return;
     }
+    gen_push_arg_rev(args_head->next);
+
     struct IROperand src = gen_instr(args_head);
     push_instr(new_instr(IR_PUSH_ARG, EMPTY_OPRND, src, EMPTY_OPRND));
 }
