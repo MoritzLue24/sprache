@@ -76,9 +76,12 @@ static struct Node* parse_node_func_def()
     struct Loc begin = peek()->begin;
     advance();
 
-    const struct Token* ident_t = advance();
+    const struct Token* ident_t = expect(TT_IDENT);
+    if (ident_t == NULL) {
+        set_need_sync();
+        return alloc_invalid_node();
+    }
     assert(ident_t->value);
-
 
     // parameter list
     // struct NodeList params;
@@ -99,6 +102,7 @@ static struct Node* parse_node_func_def()
             else {
                 param_n = alloc_node(NODE_PARAM, param_t->begin);
                 param_n->param.ident = xstrdup(param_t->value);
+                param_n->param.symbol = NULL;   // set by sema
             }
             // nodelist_push(&params, param_n);
             params_head = push_node(params_head, param_n);
@@ -117,24 +121,26 @@ static struct Node* parse_node_func_def()
     func_def_n->func_def.ident = xstrdup(ident_t->value);
     func_def_n->func_def.params_head = params_head;
     func_def_n->func_def.body = body_n;
+    func_def_n->func_def.symbol = NULL;
     return func_def_n;
 }
 
 static struct Node* parse_node_block()
 {
-    assert(check(TT_LBRACE));
     struct Loc begin = peek()->begin;
-    advance();
-
-    // struct NodeList nl;
-    // init_nodelist(&nl);
+    if (expect(TT_LBRACE) == NULL) {
+        set_need_sync();
+        return alloc_invalid_node();
+    }
     struct Node* head = NULL;
 
     while (!check(TT_END) && !check(TT_RBRACE)) {
+        const struct Token* before = peek();
         struct Node* cur_node = parse_statement();
-        assert(!need_sync());   // FIXME: for testing
-        // nodelist_push(&nl, cur_node);
         head = push_node(head, cur_node);
+        if (peek() == before) {
+            advance();
+        }
     }
     expect(TT_RBRACE);
 
@@ -338,7 +344,11 @@ static struct Node* parse_node_builtin()
     struct Loc begin = peek()->begin;
     advance();
 
-    const struct Token* t = advance();
+    const struct Token* t = expect(TT_IDENT);
+    if (t == NULL) {
+        set_need_sync();
+        return alloc_invalid_node();
+    }
     assert(t->value);
 
     // struct NodeList args;
@@ -374,6 +384,7 @@ static struct Node* parse_node_var()
 
     struct Node* node = alloc_node(NODE_VAR, t->begin);
     node->var.ident = xstrdup(t->value);
+    node->var.symbol = NULL;    // set by sema
     return node;
 }
 
@@ -389,6 +400,7 @@ static struct Node* parse_node_call()
 
     struct Node* node = alloc_node(NODE_CALL, t->begin);
     node->call.ident = xstrdup(t->value);
+    node->call.symbol = NULL;   // set by sema
 
     expect(TT_LPAREN);
     if (!check(TT_RPAREN)) {
