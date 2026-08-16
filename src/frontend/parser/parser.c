@@ -24,6 +24,8 @@ static struct Node* parse_binop(
 static struct Node* parse_bw_or();
 static struct Node* parse_bw_xor();
 static struct Node* parse_bw_and();
+static struct Node* parse_equality();
+static struct Node* parse_relational();
 static struct Node* parse_sum();
 static struct Node* parse_term();
 static struct Node* parse_unary();
@@ -278,7 +280,27 @@ static struct Node* parse_bw_xor()
 
 static struct Node* parse_bw_and()
 {
-    return parse_binop((enum TokenType[]){TT_BW_AND}, 1, parse_sum);
+    return parse_binop((enum TokenType[]){TT_BW_AND}, 1, parse_equality);
+}
+
+static struct Node* parse_equality()
+{
+    return parse_binop(
+        (enum TokenType[]){
+            TT_EQEQ, TT_NEQ
+        }, 2,
+        parse_relational
+    );
+}
+
+static struct Node* parse_relational()
+{
+    return parse_binop(
+        (enum TokenType[]){
+            TT_LT, TT_LE, TT_GT, TT_GE
+        }, 4,
+        parse_sum
+    );
 }
 
 static struct Node* parse_sum()

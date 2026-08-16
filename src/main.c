@@ -49,6 +49,7 @@ int main(int argc, char** argv)
 
     // syntax & semantic
     struct Token* tok_head = lex(source);
+    print_tokenlist(tok_head);
     struct Node* root = parse(tok_head, &errors);
 
     struct SymTable st;
@@ -59,11 +60,11 @@ int main(int argc, char** argv)
     check_sema(root, &errors, &st);
     symtable_exit_scope(&st);
 
-    //print_node(NULL, root, 0);
+    print_node(NULL, root, 0);
     if (has_errors(&errors)) {
         print_errors(&errors);
-        goto done_sema;
     }
+    goto done_sema;
 
     // ir & regalloc
     struct IRFunc* head = gen_ir(root);

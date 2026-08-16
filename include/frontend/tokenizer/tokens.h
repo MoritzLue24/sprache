@@ -41,10 +41,10 @@ enum TokenType {
     TT_BW_AND,
     TT_BW_OR,
     TT_BW_NOT,
-    TT_BW_XOR
+    TT_BW_XOR,
 
     // comparasion operators
-    /*TT_EQEQ,
+    TT_EQEQ,
     TT_NEQ,
     TT_LT,
     TT_GT,
@@ -52,7 +52,7 @@ enum TokenType {
     TT_GE,
 
     // logical operators
-    TT_AND,
+    /*TT_AND,
     TT_OR,
     TT_NOT,*/
 };

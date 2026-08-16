@@ -23,9 +23,14 @@
 
 <expression>            ::= <assigment-expression>
 <assigment-expression>  ::= <bitwise-or> { = <bitwise-or> }*
+
 <bitwise-or>            ::= <bitwise-xor> { "|" <bitwise-xor> }*
 <bitwise-xor>           ::= <bitwise-and> { ^ <bitwise-and> }*
-<bitwise-and>           ::= <sum> { & <sum> }*
+<bitwise-and>           ::= <equality> { & <equality> }*
+
+<equality>              ::= <relational> { == <relational> | != <relational> }*
+<relational>            ::= <sum> { "<" <sum> | ">" <sum> | "<=" <sum> | ">=" <sum> }*
+
 <sum>                   ::= <term> { + <term> | - <term> }*
 <term>                  ::= <unary> { * <unary> }*
 <unary>                 ::= { - | ~ }* <factor>

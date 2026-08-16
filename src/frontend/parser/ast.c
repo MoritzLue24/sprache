@@ -54,6 +54,18 @@ enum OpType tt_to_op(enum TokenType tt)
             return OP_MINUS;
         case TT_STAR:
             return OP_MUL;
+        case TT_EQEQ:
+            return OP_EQ;
+        case TT_NEQ:
+            return OP_NEQ;
+        case TT_LT:
+            return OP_LT;
+        case TT_LE:
+            return OP_LE;
+        case TT_GT:
+            return OP_GT;
+        case TT_GE:
+            return OP_GE;
         case TT_BW_NOT:
             return OP_BW_NOT;
         case TT_BW_AND:
@@ -71,9 +83,15 @@ enum OpType tt_to_op(enum TokenType tt)
 const char* op_type_str(enum OpType type)
 {
     switch (type) {
-        case OP_PLUS:  return "PLUS";
+        case OP_PLUS: return "PLUS";
         case OP_MINUS: return "MINUS";
-        case OP_MUL:   return "MUL";
+        case OP_MUL: return "MUL";
+        case OP_EQ: return "EQ";
+        case OP_NEQ: return "NEQ";
+        case OP_LT: return "LT";
+        case OP_LE: return "LE";
+        case OP_GT: return "GT";
+        case OP_GE: return "GE";
         case OP_BW_NOT: return "BW_NOT";
         case OP_BW_AND: return "BW_AND";
         case OP_BW_OR: return "BW_OR";

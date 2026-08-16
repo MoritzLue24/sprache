@@ -22,15 +22,14 @@ const struct MatchTypePair punctuations[] =
     {"&", TT_BW_AND},
     {"|", TT_BW_OR},
     {"~", TT_BW_NOT},
-    {"^", TT_BW_XOR}
-
-    /*
+    {"^", TT_BW_XOR},
     {"==", TT_EQEQ},
     {"!=", TT_NEQ},
     {"<", TT_LT},
     {">", TT_GT},
     {"<=", TT_LE},
-    {">=", TT_GE},
+    {">=", TT_GE}
+    /*
     {"&&", TT_AND},
     {"||", TT_OR},
     {"!", TT_NOT}
@@ -87,6 +86,18 @@ const char* tt_str(enum TokenType tt)
             return "MINUS";
         case TT_STAR:
             return "STAR";
+        case TT_EQEQ:
+            return "EQEQ";
+        case TT_NEQ:
+            return "NEQ";
+        case TT_LT:
+            return "LT";
+        case TT_LE:
+            return "LE";
+        case TT_GT:
+            return "GT";
+        case TT_GE:
+            return "GE";
         case TT_BW_AND:
             return "BW_AND";
         case TT_BW_OR:

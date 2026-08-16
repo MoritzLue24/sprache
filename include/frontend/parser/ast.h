@@ -39,6 +39,14 @@ enum OpType {
     OP_PLUS,
     OP_MINUS,
     OP_MUL,
+
+    OP_EQ,
+    OP_NEQ,
+    OP_LT,
+    OP_LE,
+    OP_GT,
+    OP_GE,
+
     OP_BW_NOT,
     OP_BW_AND,
     OP_BW_OR,
