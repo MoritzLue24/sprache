@@ -85,6 +85,9 @@ void print_errors(const struct ErrorList* errors)
             case ERROR_NOT_CALLABLE:
                 type = "NOT_CALLABLE";
                 break;
+            case ERROR_NOT_A_VALUE:
+                type = "NOT_A_VALUE";
+                break;
             case ERROR_INVALID_BUILTIN:
                 type = "INVALID_BUILTIN";
                 break;

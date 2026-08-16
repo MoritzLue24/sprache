@@ -129,6 +129,9 @@ struct Symbol* symtable_declare(struct SymTable* st, enum SymbolType type, const
 struct Symbol* symtable_declare_func(struct SymTable* st, const char* ident, struct Loc loc_decl, size_t param_count)
 {
     struct Symbol* sym = symtable_declare(st, SYM_FUNC, ident, loc_decl);
+    if (sym == NULL) {
+        return NULL;
+    }
     sym->func.param_count = param_count;
     return sym;
 

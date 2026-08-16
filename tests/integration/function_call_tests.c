@@ -6,6 +6,15 @@
 #include "integration/avr_run_fixture.h"
 
 
+static void call_with_no_parameters()
+{
+    TST_ASSERT_AVR_RETURNS(
+        2,
+        "fn two() { return 1 + 1; }"
+        "fn main() { return two(); }"
+    );
+}
+
 static void call_with_two_parameters_returns_expected_value()
 {
     TST_ASSERT_AVR_RETURNS(
@@ -46,6 +55,7 @@ static void nested_call_returns_expected_value()
 
 int main()
 {
+    TST_RUN(call_with_no_parameters);
     TST_RUN(call_with_two_parameters_returns_expected_value);
     TST_RUN(call_passes_arguments_in_declared_order);
     TST_RUN(call_with_three_parameters_returns_expected_value);

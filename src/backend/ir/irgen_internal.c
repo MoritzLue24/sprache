@@ -57,6 +57,9 @@ unsigned int vreg_cost(const struct Node* node)
     case NODE_LITERAL:
         return 1;
 
+    case NODE_ASSIGN_EXPR:
+        return vreg_cost(node->assign_expr.expr);
+
     case NODE_UNARY_OP:
         return vreg_cost(node->unary_op.factor);
 
@@ -74,6 +77,9 @@ unsigned int vreg_cost(const struct Node* node)
         return vreg_cost(node->ret.expr);
 
     case NODE_CALL:
+        return 1;
+
+    case NODE_BUILTIN:
         return 1;
 
     default:
