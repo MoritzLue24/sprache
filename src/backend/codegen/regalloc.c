@@ -68,7 +68,7 @@ struct InterfGraph create_interf_graph(const struct IRInstr* head)
     // unsigned int* degree = calloc(n, sizeof(unsigned int));
     // adj-matrix: adj[i*n + j]: "i is adjacent to j"
     // (symmetric)
-    bool* adj = calloc(n * n, sizeof(bool));
+    bool* adj = xcalloc(n * n, sizeof(bool));
 
     // i, j : indices of vregs
     for (size_t i = 0; i < n; i++) {
@@ -123,7 +123,7 @@ void regalloc(struct IRInstr* head)
 
     for (size_t i = 0; i < g.n; i++) {
         // adj_uses_pregs[i] = true <-> "preg i is used by neighbor"
-        bool* adj_uses_preg = calloc(target.oprnd_reg_num, sizeof(bool));
+        bool* adj_uses_preg = xcalloc(target.oprnd_reg_num, sizeof(bool));
 
         // Loop through neighbors
         // set 'adj_uses_pregs'
