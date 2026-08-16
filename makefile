@@ -13,6 +13,10 @@ BUILD_DIR ?= build
 
 CFLAGS += -I$(HEADER_DIR)
 
+ifdef ASAN
+	CFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer
+endif
+
 ifdef DEFINES
 	CFLAGS += $(DEFINES)
 endif
