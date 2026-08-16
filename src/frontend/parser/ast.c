@@ -185,7 +185,7 @@ void print_node(const char* label, const struct Node* node, int depth)
 
         case NODE_UNARY_OP:
             printf("UNARY_OP {\n");
-            print_str_field("op", op_type_str(node->bin_op.op), field_depth);
+            print_str_field("op", op_type_str(node->unary_op.op), field_depth);
             print_node("factor", node->unary_op.factor, field_depth);
             break;
 
