@@ -57,6 +57,7 @@ static struct IRFunc* gen_func_def(const struct Node* node)
     use_stackframe(&fn->sf);
 
     // instr: alloc sf
+    reset_vreg_cnt();
     use_instrlist(&fn->instrs);
     struct IRInstr* alloc_sf_instr = new_instr(
         IR_ALLOC_SF, EMPTY_OPRND, new_imm_op(0), EMPTY_OPRND

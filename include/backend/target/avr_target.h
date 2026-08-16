@@ -17,7 +17,11 @@ struct AVRTarget {
     unsigned int ret_addr_size_bytes;
 
     size_t symbol_count;
-    struct Symbol symbols[];
+    /// @brief Not owned: points to the symbol array of the preset this target
+    /// was copied from. Must NOT be a flexible array member: `target` is
+    /// assigned from a preset, and a struct assignment only copies
+    /// `sizeof(struct AVRTarget)` - which excludes a flexible array member.
+    const struct Symbol* symbols;
 };
 
 extern const struct AVRTarget atmega16;

@@ -10,6 +10,11 @@ static struct IRInstr** head;
 static struct IRInstr* tail;
 
 
+void reset_vreg_cnt()
+{
+    vreg_cnt = 0;
+}
+
 struct IROperand new_func_op(const char* ident)
 {
     return (struct IROperand){

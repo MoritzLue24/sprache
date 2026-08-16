@@ -6,6 +6,8 @@
 #include "backend/ir/stack_frame.h"
 
 
+void reset_vreg_cnt();
+
 struct IROperand new_func_op(const char* ident);
 
 struct IROperand new_var_op(struct SFEntry* sf_entry);
