@@ -3,7 +3,7 @@
 #include "args.h"
 #include "utils/file.h"
 #include "utils/xalloc.h"
-#include "frontend/core/error.h"
+#include "core/error.h"
 #include "frontend/tokenizer/lexer.h"
 #include "frontend/parser/parser.h"
 #include "frontend/sema/sema.h"

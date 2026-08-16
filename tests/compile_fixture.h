@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "frontend/core/error.h"
+#include "core/error.h"
 #include "frontend/tokenizer/lexer.h"
 #include "frontend/tokenizer/tokens.h"
 #include "frontend/parser/parser.h"

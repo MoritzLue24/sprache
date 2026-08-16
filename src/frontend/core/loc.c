@@ -1,4 +1,4 @@
-#include "frontend/core/loc.h"
+#include "core/loc.h"
 
 #include <stdio.h>  // printf
 

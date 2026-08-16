@@ -6,7 +6,7 @@
 #include <ctype.h>
 
 #include "utils/xalloc.h"
-#include "frontend/core/loc.h"
+#include "core/loc.h"
 
 
 static struct Token* tail = NULL;

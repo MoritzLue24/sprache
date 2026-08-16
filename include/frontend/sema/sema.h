@@ -1,7 +1,7 @@
 #ifndef SEMA_H
 #define SEMA_H
 
-#include "frontend/core/error.h"
+#include "core/error.h"
 #include "frontend/parser/ast.h"
 #include "frontend/sema/symbols.h"
 

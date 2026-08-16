@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-#include "frontend/core/loc.h"
+#include "core/loc.h"
 #include "frontend/tokenizer/tokens.h"
 
 #define NODELIST_INIT_CAPACITY 10

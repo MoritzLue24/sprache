@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "frontend/core/loc.h"
-#include "frontend/core/error.h"
+#include "core/loc.h"
+#include "core/error.h"
 
 
 enum SymbolType {

@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "utils/xalloc.h"
-#include "frontend/core/loc.h"
+#include "core/loc.h"
 #include "frontend/parser/ast.h"
 
 

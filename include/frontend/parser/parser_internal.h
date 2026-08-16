@@ -1,6 +1,6 @@
 #ifndef PARSER_INTERNAL_H
 
-#include "frontend/core/error.h"
+#include "core/error.h"
 #include "frontend/tokenizer/tokens.h"
 
 
