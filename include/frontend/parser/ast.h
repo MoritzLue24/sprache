@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "core/loc.h"
+#include "core/type.h"
 #include "frontend/tokenizer/tokens.h"
 
 #define NODELIST_INIT_CAPACITY 10
@@ -36,6 +37,8 @@ enum NodeType {
 };
 
 enum OpType {
+    OP_INVALID,
+
     OP_PLUS,
     OP_MINUS,
     OP_MUL,
@@ -70,13 +73,15 @@ struct Node {
 
         struct {
             char* ident;
-            const struct Symbol* symbol;
             struct Node* params_head;
+            enum Type ret_type;
             struct Node* body;
+            const struct Symbol* symbol;
         } func_def;
 
         struct {
             char* ident;
+            enum Type typekind;
             const struct Symbol* symbol;
         } param;
 
@@ -87,11 +92,13 @@ struct Node {
         struct {
             // type: NODE_VAR
             struct Node* target;
+            enum Type typekind;
         } var_decl;
 
         struct {
             // type: NODE_VAR
             struct Node* target;
+            enum Type typekind;
             struct Node* expr;
         } var_def;
 
@@ -109,7 +116,7 @@ struct Node {
             enum OpType op;
             struct Node* factor;
         } unary_op;
-        
+
         struct {
             enum OpType op;
             struct Node* lhs;

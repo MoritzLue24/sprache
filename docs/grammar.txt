@@ -1,10 +1,8 @@
 <program>               ::= { <top-level-item> }*
 <top-level-item>        ::= <function-definition>
-                            | <global-definition>
 
-<function-definition>   ::= fn <ident> ( <parameter-list>? ) <block>
-<global-definition>     ::= global <ident> = <expression> ;
-<parameter-list>        ::= <ident> { , <parameter-list> }
+<function-definition>   ::= fn <ident> ( <parameter-list>? ) -> <type> <block>
+<parameter-list>        ::= <ident>: <type> { , <parameter-list> }
 
 <block>                 ::= "{" { <statement> }* "}"
 
@@ -17,9 +15,11 @@
                             | <return-statement>
 
 <expression-statement>              ::= <expression> ;
-<variable-declaration-statement>    ::= var <ident> ;
-<variable-definition-statement>     ::= var <ident> = <expression> ;
+<variable-declaration-statement>    ::= var: <type> <ident> ;
+<variable-definition-statement>     ::= var: <type> <ident> = <expression> ;
 <return-statement>                  ::= return <expression> ;
+
+<type>  ::= uint8 | int8
 
 <expression>            ::= <assigment-expression>
 <assigment-expression>  ::= <bitwise-or> { = <bitwise-or> }*

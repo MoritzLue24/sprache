@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "core/loc.h"
+#include "core/type.h"
 
 
 /// @note Contains all token types, including all keywords & punctuations
@@ -17,11 +18,15 @@ enum TokenType {
     // keywords
     TT_FUNC,
     TT_VAR,
+    TT_UINT8,
+    TT_INT8,
     TT_RETURN,
 
     // general punctuation
     TT_SEMICOLON,
     TT_COMMA,
+    TT_COLON,
+    TT_ARROW,
     TT_AT,
     TT_LBRACE,
     TT_RBRACE,
@@ -86,5 +91,7 @@ void print_tokenlist(struct Token* head);
 
 /// @brief Frees all token `value`s, and each token itself
 void free_tokenlist(struct Token* head);
+
+enum Type tt_to_typekind(enum TokenType tt);
 
 #endif

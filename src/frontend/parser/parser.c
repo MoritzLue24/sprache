@@ -86,29 +86,35 @@ static struct Node* parse_node_func_def()
     assert(ident_t->value);
 
     // parameter list
-    // struct NodeList params;
-    // init_nodelist(&params);
     struct Node* params_head = NULL;
 
     expect(TT_LPAREN);
     if (!check(TT_RPAREN)) {
         while (true) {
             const struct Token* param_t = expect(TT_IDENT);
-
-            struct Node* param_n;
             if (param_t == NULL) {
                 advance();
                 set_need_sync();
-                param_n = alloc_invalid_node();
+                params_head = push_node(params_head, alloc_invalid_node());
+                continue;
             }
-            else {
-                param_n = alloc_node(NODE_PARAM, param_t->begin);
-                param_n->param.ident = xstrdup(param_t->value);
-                param_n->param.symbol = NULL;   // set by sema
-            }
-            // nodelist_push(&params, param_n);
-            params_head = push_node(params_head, param_n);
 
+            enum Type typekind = TYPE_INVALID;
+            if (expect(TT_COLON) != NULL) {
+                if ((typekind = tt_to_typekind(peek()->type)) != TYPE_INVALID) {
+                    advance();
+                }
+                else {
+                    add_error(errors_ptr(), ERROR_SYNTAX, peek()->begin, "Type expected");
+                }
+            }
+
+            struct Node* param_n = alloc_node(NODE_PARAM, param_t->begin);
+            param_n->param.ident = xstrdup(param_t->value);
+            param_n->param.typekind = typekind;
+            param_n->param.symbol = NULL;   // set by sema
+
+            params_head = push_node(params_head, param_n);
             if (!check(TT_COMMA))
                 break;
             advance();  // ,
@@ -116,12 +122,24 @@ static struct Node* parse_node_func_def()
     }
     expect(TT_RPAREN);
 
+    // type
+    enum Type ret_type = TYPE_INVALID;
+    if (expect(TT_ARROW) != NULL) {
+        if ((ret_type = tt_to_typekind(peek()->type)) != TYPE_INVALID) {
+            advance();
+        }
+        else {
+            add_error(errors_ptr(), ERROR_SYNTAX, peek()->begin, "Type expected");
+        }
+    }
+
     // body
     struct Node* body_n = parse_node_block();
 
     struct Node* func_def_n = alloc_node(NODE_FUNC_DEF, begin);
     func_def_n->func_def.ident = xstrdup(ident_t->value);
     func_def_n->func_def.params_head = params_head;
+    func_def_n->func_def.ret_type = ret_type;
     func_def_n->func_def.body = body_n;
     func_def_n->func_def.symbol = NULL;
     return func_def_n;
@@ -184,11 +202,21 @@ static struct Node* parse_node_var_decl_or_def()
     advance();
 
     struct Node* target = parse_node_var();
-    struct Node* node;
 
+    expect(TT_COLON);
+    enum Type typekind = TYPE_INVALID;
+    if ((typekind = tt_to_typekind(peek()->type)) != TYPE_INVALID) {
+        advance();
+    }
+    else {
+        add_error(errors_ptr(), ERROR_SYNTAX, peek()->begin, "Type expected");
+    }
+
+    struct Node* node;
     if (check(TT_SEMICOLON)) {
         node = alloc_node(NODE_VAR_DECL, begin);
         node->var_decl.target = target;
+        node->var_decl.typekind = typekind;
     }
     else {
         expect(TT_EQ);
@@ -196,6 +224,7 @@ static struct Node* parse_node_var_decl_or_def()
         struct Node* expr = parse_expr();
         node = alloc_node(NODE_VAR_DEF, begin);
         node->var_def.target = target;
+        node->var_def.typekind = typekind;
         node->var_def.expr = expr;
     }
     expect(TT_SEMICOLON);

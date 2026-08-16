@@ -48,41 +48,28 @@ size_t nodelist_size(const struct Node* head)
 enum OpType tt_to_op(enum TokenType tt)
 {
     switch (tt) {
-        case TT_PLUS:
-            return OP_PLUS;
-        case TT_MINUS:
-            return OP_MINUS;
-        case TT_STAR:
-            return OP_MUL;
-        case TT_EQEQ:
-            return OP_EQ;
-        case TT_NEQ:
-            return OP_NEQ;
-        case TT_LT:
-            return OP_LT;
-        case TT_LE:
-            return OP_LE;
-        case TT_GT:
-            return OP_GT;
-        case TT_GE:
-            return OP_GE;
-        case TT_BW_NOT:
-            return OP_BW_NOT;
-        case TT_BW_AND:
-            return OP_BW_AND;
-        case TT_BW_OR:
-            return OP_BW_OR;
-        case TT_BW_XOR:
-            return OP_BW_XOR;
-
+        case TT_PLUS: return OP_PLUS;
+        case TT_MINUS: return OP_MINUS;
+        case TT_STAR: return OP_MUL;
+        case TT_EQEQ: return OP_EQ;
+        case TT_NEQ: return OP_NEQ;
+        case TT_LT: return OP_LT;
+        case TT_LE: return OP_LE;
+        case TT_GT: return OP_GT;
+        case TT_GE: return OP_GE;
+        case TT_BW_NOT: return OP_BW_NOT;
+        case TT_BW_AND: return OP_BW_AND;
+        case TT_BW_OR: return OP_BW_OR;
+        case TT_BW_XOR: return OP_BW_XOR;
         default:
-            assert(0);
     }
+    return OP_INVALID;
 }
 
 const char* op_type_str(enum OpType type)
 {
     switch (type) {
+        case OP_INVALID: return "INVALID";
         case OP_PLUS: return "PLUS";
         case OP_MINUS: return "MINUS";
         case OP_MUL: return "MUL";
@@ -96,8 +83,9 @@ const char* op_type_str(enum OpType type)
         case OP_BW_AND: return "BW_AND";
         case OP_BW_OR: return "BW_OR";
         case OP_BW_XOR: return "BW_XOR";
-        default: assert(0);
     }
+    assert(0);
+    return NULL;
 }
 
 static void print_indent(int depth)
@@ -150,14 +138,16 @@ void print_node(const char* label, const struct Node* node, int depth)
         case NODE_FUNC_DEF:
             printf("FUNC_DEF {\n");
             print_str_field("ident", node->func_def.ident, field_depth);
-            print_symbol("symbol", node->func_def.symbol, field_depth);
+            print_str_field("ret_type", type_str(node->func_def.ret_type), field_depth);
             print_nodelist("params", node->func_def.params_head, field_depth);
             print_node("body", node->func_def.body, field_depth);
+            print_symbol("symbol", node->func_def.symbol, field_depth);
             break;
 
         case NODE_PARAM:
             printf("PARAM {\n");
             print_str_field("ident", node->param.ident, field_depth);
+            print_str_field("typekind", type_str(node->param.typekind), field_depth);
             print_symbol("symbol", node->param.symbol, field_depth);
             break;
 
@@ -169,11 +159,13 @@ void print_node(const char* label, const struct Node* node, int depth)
         case NODE_VAR_DECL:
             printf("VAR_DECL {\n");
             print_node("target", node->var_decl.target, field_depth);
+            print_str_field("typekind", type_str(node->var_decl.typekind), field_depth);
             break;
 
         case NODE_VAR_DEF:
             printf("VAR_DEF {\n");
             print_node("target", node->var_def.target, field_depth);
+            print_str_field("typekind", type_str(node->var_def.typekind), field_depth);
             print_node("expr", node->var_def.expr, field_depth);
             break;
 
@@ -225,9 +217,6 @@ void print_node(const char* label, const struct Node* node, int depth)
             print_builtin_def("def", node->builtin.def, field_depth);
             print_nodelist("args", node->builtin.args_head, field_depth);
             break;
-
-		default:
-			assert(0);
 	}
 
     if (node->type != NODE_INVALID) {
@@ -308,9 +297,6 @@ void free_node(struct Node* node)
             xfree((void**)&node->builtin.ident);
             free_node(node->builtin.args_head);
             break;
-
-        default:
-            assert(0);
     }
 
     if (node->next != NULL) {
