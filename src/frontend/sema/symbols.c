@@ -73,7 +73,7 @@ void print_symbol(const char* label, const struct Symbol* s, int depth)
 void init_symtable(struct SymTable* st, size_t arena_capacity)
 {
     st->current = NULL;
-    st->arena = xcalloc(arena_capacity, sizeof(struct Symbol));
+    st->arena = xcalloc(arena_capacity, sizeof(struct Symbol*));
     st->arena_size = 0;
     st->arena_capacity = arena_capacity;
 }
