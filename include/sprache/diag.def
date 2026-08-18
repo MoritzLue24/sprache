@@ -1,0 +1,2 @@
+// DIAG(name, format)
+DIAG(DIAG_UNEXPECTED_TOKEN, "expected '%s', got '%s'")

@@ -4,7 +4,8 @@
             "name": "Ubuntu",
             "includePath": [
                 "${workspaceFolder}/include",
-                "${workspaceFolder}/tests"
+                "${workspaceFolder}/tests",
+                "${workspaceFolder}/src"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
