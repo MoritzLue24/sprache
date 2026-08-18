@@ -13,8 +13,8 @@ struct Arena {
 void arena_init(struct Arena* a);
 void arena_free(struct Arena* a);
 
-void* arena_calloc(struct Arena* a, size_t size);
+void* arena_calloc(struct Arena* a, size_t size, size_t align);
 
-#define ARENA_CALLOC(a, T) ((T*)arena_calloc((a), sizeof(T)))
+#define ARENA_CALLOC(a, T) ((T*)arena_calloc((a), sizeof(T), _Alignof(T)))
 
 #endif

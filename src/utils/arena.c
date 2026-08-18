@@ -5,7 +5,6 @@
 #include <string.h>
 
 #define ARENA_BLOCK_SIZE ((size_t)4096)
-#define ARENA_ALIGNMENT  (sizeof(max_align_t))
 
 struct ArenaBlock {
     struct ArenaBlock* next;
@@ -46,9 +45,9 @@ void arena_free(struct Arena* a)
     a->current = NULL;
 }
 
-void* arena_calloc(struct Arena* a, size_t size)
+void* arena_calloc(struct Arena* a, size_t size, size_t align)
 {
-    size_t aligned = align_up(size, ARENA_ALIGNMENT);
+    size_t aligned = align_up(size, align);
 
     if (!a->current || a->current->used + aligned > a->current->capacity) {
         size_t capacity = aligned > ARENA_BLOCK_SIZE ? aligned : ARENA_BLOCK_SIZE;
