@@ -5,10 +5,14 @@
             "includePath": [
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/tests",
-                "${workspaceFolder}/src"
+                "${workspaceFolder}/src",
+                "/usr/lib/gcc/x86_64-linux-gnu/15/include",
+                "/usr/local/include",
+                "/usr/include/x86_64-linux-gnu",
+                "/usr/include"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/gcc",
+            "compilerPath": "",
             "cStandard": "c17",
             "cppStandard": "gnu++17",
             "intelliSenseMode": "linux-gcc-x64"

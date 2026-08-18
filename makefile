@@ -9,7 +9,7 @@ HEADER_DIR ?= include
 TEST_DIR   ?= tests
 BUILD_DIR  ?= build
 
-CPPFLAGS += -I$(HEADER_DIR) -MMD -MP
+CPPFLAGS += -I$(HEADER_DIR) -I$(SRC_DIR) -MMD -MP
 CPPFLAGS += $(DEFINES)
 
 ifdef ASAN
@@ -47,9 +47,9 @@ $(BUILD_DIR)/tests/%: $(TEST_DIR)/%.c $(LIB)
 	$(CC) $(CPPFLAGS) -I$(TEST_DIR) $(CFLAGS) $< $(LIB) -o $@ $(LDFLAGS)
 
 test: $(TEST_BINS)
-    for t in $(TEST_BINS); do \
-    	./$$t; \
-    done;
+	for t in $(TEST_BINS); do \
+		./$$t; \
+	done;
 
 asan:
 	@$(MAKE) ASAN=1 BUILD_DIR=$(BUILD_DIR)-asan all test
