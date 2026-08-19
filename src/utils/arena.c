@@ -1,6 +1,5 @@
 #include "utils/arena.h"
 #include "utils/xalloc.h"
-
 #include <stdlib.h>
 #include <string.h>
 
@@ -20,20 +19,20 @@ static size_t align_up(size_t n, size_t align)
 
 static struct ArenaBlock* arena_block_new(size_t capacity)
 {
-    struct ArenaBlock* block = xmalloc(sizeof(struct ArenaBlock) + capacity);
+    struct ArenaBlock* block = xmalloc(sizeof(struct ArenaBlock) + capacity);\
     block->next     = NULL;
     block->capacity = capacity;
     block->used     = 0;
     return block;
 }
 
-void arena_init(struct Arena* a)
+void init_arena(struct Arena* a)
 {
     a->head    = NULL;
     a->current = NULL;
 }
 
-void arena_free(struct Arena* a)
+void free_arena(struct Arena* a)
 {
     struct ArenaBlock* block = a->head;
     while (block) {
@@ -47,10 +46,10 @@ void arena_free(struct Arena* a)
 
 void* arena_calloc(struct Arena* a, size_t size, size_t align)
 {
-    size_t aligned = align_up(size, align);
+    size_t offset = a->current ? align_up(a->current->used, align) : 0;
 
-    if (!a->current || a->current->used + aligned > a->current->capacity) {
-        size_t capacity = aligned > ARENA_BLOCK_SIZE ? aligned : ARENA_BLOCK_SIZE;
+    if (!a->current || offset + size > a->current->capacity) {
+        size_t capacity = size > ARENA_BLOCK_SIZE ? size : ARENA_BLOCK_SIZE;
         struct ArenaBlock* block = arena_block_new(capacity);
 
         if (a->current)
@@ -58,10 +57,11 @@ void* arena_calloc(struct Arena* a, size_t size, size_t align)
         else
             a->head = block;
         a->current = block;
+        offset = 0;
     }
 
-    void* ptr = a->current->data + a->current->used;
-    a->current->used += aligned;
+    void* ptr = a->current->data + offset;
+    a->current->used = offset + size;
     memset(ptr, 0, size);
     return ptr;
 }

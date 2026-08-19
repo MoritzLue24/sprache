@@ -2,11 +2,10 @@
 #define DIAG_INTERNAL_H
 
 #include "sprache/diag.h"
+#include "utils/arena.h"
 
-void diag_list_init(struct DiagList* dl);
-void diag_list_free(struct DiagList* dl);
-
-void diag_add(struct DiagList* dl, enum DiagCode code,
+void diag_list_init(struct Arena* a, struct DiagList* dl);
+void diag_add(struct Arena* a, struct DiagList* dl, enum DiagCode code,
               struct SourceLoc loc, ...);
 
 #endif
