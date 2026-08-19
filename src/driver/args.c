@@ -58,7 +58,7 @@ bool parse_args(struct Arguments* args, struct Arena* a, int argc, char** argv)
         return false;
     }
     if (!ends_with(args->input_file, ".s")) {
-        fprintf(stderr, "Invalid file format, '.s' expected\n");
+        fprintf(stderr, "Error: Invalid file format, '.s' expected\n");
         return false;
     }
     if (args->sprache_stage == SPRACHE_STAGE_INVALID) {
@@ -73,5 +73,18 @@ bool parse_args(struct Arguments* args, struct Arena* a, int argc, char** argv)
 
 void print_help(FILE* out)
 {
-    fprintf(out, "help");
+    fprintf(out,
+        "Usage: sprache <file> [options]\n\n"
+        "Options:\n"
+        "\t-h, --help\t\t\tShows this message\n"
+        "\t-o, --output <out-file>\t\tSpecifies the output-file. If not supplied, <file>.tok/ast/ir/asm/..\n"
+        "\t-s, --stage <stage>\t\tSpecifies the stage after which the compiler should stop\n"
+        "\t\t\t\t\tAvailable stages: "
+    );
+#define STAGE(name, str, file_ext) fprintf(out, str ", ");
+#include "sprache/stage.def"
+#undef STAGE
+    fprintf(out, "(default: ASM)\n"
+        "\t--stdout\t\t\tRedirects the output to the command-line\n"
+    );
 }

@@ -4,7 +4,7 @@
 
 static void xalloc_fail(void)
 {
-    fprintf(stderr, "out of memory\n");
+    fprintf(stderr, "Error: out of memory\n");
     exit(1);
 }
 

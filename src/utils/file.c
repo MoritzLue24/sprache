@@ -15,7 +15,7 @@ const char* read_file(struct Arena* a, const char* path)
 {
     FILE* file = fopen(path, "rb");
 	if (file == NULL) {
-        fprintf(stderr, "File not found: '%s'\n", path);
+        fprintf(stderr, "Error: File not found: '%s'\n", path);
         exit(1);
     }
 

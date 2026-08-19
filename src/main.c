@@ -11,6 +11,7 @@ int main(int argc, char** argv)
 
     struct Arguments args;
     if (!parse_args(&args, &a, argc, argv)) {
+        printf("Try '--help' for more information\n");
         ret = 1;
         goto done;
     }
