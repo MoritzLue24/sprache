@@ -6,7 +6,7 @@
 
 enum SpracheStage {
     SPRACHE_STAGE_INVALID,
-#define STAGE(name, str, file_ext) name,
+#define STAGE(name, spellig, file_ext) name,
 #include "stage.def"
 #undef STAGE
 };
@@ -27,7 +27,9 @@ struct CompileResult {
     struct DiagList diags;
 };
 
-struct CompileResult sprache_compile(struct CompileOptions options);
-void                 sprache_free_result(struct CompileResult* r);
+struct Arena;
+
+struct CompileResult sprache_compile(struct Arena* a,
+                                     struct CompileOptions options);
 
 #endif

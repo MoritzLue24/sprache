@@ -26,6 +26,12 @@ int main(int argc, char** argv)
         .out        = args.std_out ? stdout : openw_file(args.out_file)
     };
 
+    struct CompileResult res = sprache_compile(&a, opt);
+    if (!res.ok) {
+        diag_dump_all(&res.diags, stdout);
+        ret = 1;
+    }
+
     if (opt.out != stdout) {
         fclose(opt.out);
     }

@@ -17,6 +17,8 @@ enum DiagCode {
 #undef DIAG
 };
 
+const char* diag_code_str(enum DiagCode code);
+
 struct Diag {
     enum DiagCode    code;
     struct SourceLoc loc;
@@ -29,10 +31,9 @@ struct DiagList {
     size_t       capacity;
 };
 
-bool        diag_has_errors(const struct DiagList* dl);
-const char* diag_code_str(enum DiagCode code);
+bool diag_has_errors(const struct DiagList* dl);
 
-void diag_render(const struct Diag* d, FILE* out);
-void diag_render_all(const struct DiagList* dl, FILE* out);
+void diag_dump(const struct Diag* d, FILE* out);
+void diag_dump_all(const struct DiagList* dl, FILE* out);
 
 #endif
