@@ -14,19 +14,19 @@ FILE* openw_file(const char* filename)
 const char* read_file(struct Arena* a, const char* path)
 {
     FILE* file = fopen(path, "rb");
-	if (file == NULL) {
+    if (file == NULL) {
         fprintf(stderr, "Error: File not found: '%s'\n", path);
         exit(1);
     }
 
-	fseek(file, 0, SEEK_END);
+    fseek(file, 0, SEEK_END);
     size_t size = ftell(file);
-	fseek(file, 0, SEEK_SET);
+    fseek(file, 0, SEEK_SET);
 
     char* source = ARENA_CALLOC_LIST(a, size + 1, char);
-	fread(source, sizeof(char), size, file);
-	source[size] = '\0';
+    fread(source, sizeof(char), size, file);
+    source[size] = '\0';
 
-	fclose(file);
-	return source;
+    fclose(file);
+    return source;
 }

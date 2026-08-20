@@ -24,7 +24,8 @@ static void lex_punct_prefers_longest_match()
     // == != <= >= ->
     struct TokenList tkl = lex(&a, "== != <= >= ->");
 
-    enum TokenKind expected[] = {TK_EQEQ, TK_NEQ, TK_LE, TK_GE, TK_ARROW, TK_END};
+    enum TokenKind expected[] = { TK_EQEQ, TK_NEQ,   TK_LE,
+                                  TK_GE,   TK_ARROW, TK_END };
     for (size_t k = 0; k < sizeof(expected) / sizeof(*expected); k++) {
         TST_ASSERT_EQ(expected[k], tkl.items[k].kind);
     }
@@ -39,7 +40,8 @@ static void lex_punct_single_char_tokens()
     // = ( ) < >
     struct TokenList tkl = lex(&a, "= ( ) < >");
 
-    enum TokenKind expected[] = {TK_EQ, TK_LPAREN, TK_RPAREN, TK_LT, TK_GT, TK_END};
+    enum TokenKind expected[] = { TK_EQ, TK_LPAREN, TK_RPAREN,
+                                  TK_LT, TK_GT,     TK_END };
     for (size_t k = 0; k < sizeof(expected) / sizeof(*expected); k++) {
         TST_ASSERT_EQ(expected[k], tkl.items[k].kind);
     }

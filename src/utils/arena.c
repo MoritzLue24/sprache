@@ -7,9 +7,9 @@
 
 struct ArenaBlock {
     struct ArenaBlock* next;
-    size_t             capacity;
-    size_t             used;
-    unsigned char      data[];
+    size_t capacity;
+    size_t used;
+    unsigned char data[];
 };
 
 static size_t align_up(size_t n, size_t align)
@@ -19,16 +19,16 @@ static size_t align_up(size_t n, size_t align)
 
 static struct ArenaBlock* arena_block_new(size_t capacity)
 {
-    struct ArenaBlock* block = xmalloc(sizeof(struct ArenaBlock) + capacity);\
-    block->next     = NULL;
+    struct ArenaBlock* block = xmalloc(sizeof(struct ArenaBlock) + capacity);
+    block->next = NULL;
     block->capacity = capacity;
-    block->used     = 0;
+    block->used = 0;
     return block;
 }
 
 void init_arena(struct Arena* a)
 {
-    a->head    = NULL;
+    a->head = NULL;
     a->current = NULL;
 }
 
@@ -40,7 +40,7 @@ void free_arena(struct Arena* a)
         free(block);
         block = next;
     }
-    a->head    = NULL;
+    a->head = NULL;
     a->current = NULL;
 }
 

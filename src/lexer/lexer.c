@@ -10,27 +10,32 @@
 /// @note Does not skip whitespace. Returns '\0' at end of input without
 /// advancing further.
 static char loc_step(const char* source, size_t* i, struct SourceLoc* loc);
-/// @brief Tokenizes the current literal (assumes the current char is a digit) 
-static struct Token lex_literal(struct Arena* a, const char* source, size_t* i,
-                                struct SourceLoc* loc);
+/// @brief Tokenizes the current literal (assumes the current char is a digit)
+static struct Token lex_literal(
+    struct Arena* a, const char* source, size_t* i, struct SourceLoc* loc
+);
 /// @brief Tokenizes the current identifier OR keyword
 /// (Assumes the current char is a '_' or alpha)
-static struct Token lex_ident_kw(struct Arena* a, const char* source, size_t* i,
-                                 struct SourceLoc* loc);
+static struct Token lex_ident_kw(
+    struct Arena* a, const char* source, size_t* i, struct SourceLoc* loc
+);
 /// @brief Finds the longest TC_PUNCT spelling matching at source+i.
 /// @return The matched token kind, or TK_INVALID if none matches.
 /// @param out_len set to the length of the match (undefined if TK_INVALID)
-static enum TokenKind match_punct(const char* source, const size_t* i,
-                                  size_t* out_len);
+static enum TokenKind
+match_punct(const char* source, const size_t* i, size_t* out_len);
 
 struct TokenList lex(struct Arena* a, const char* source)
 {
     struct TokenList tkl;
     DARRAY_INIT(a, &tkl, TOKENLIST_INIT_CAPACITY);
 
-    size_t i             = 0;
-    struct SourceLoc loc = {.line = 1, .col = 1};
-    char c               = source[i];
+    size_t i = 0;
+    char c = source[i];
+    struct SourceLoc loc = {
+        .line = 1,
+        .col = 1,
+    };
 
     while (c != '\0') {
         c = source[i];
@@ -45,36 +50,45 @@ struct TokenList lex(struct Arena* a, const char* source)
             loc_step(source, &i, &loc);
         }
         else {
-            size_t out_len             = 0;
+            size_t out_len = 0;
             enum TokenKind punct_match = match_punct(source, &i, &out_len);
 
             if (punct_match != TK_INVALID) {
-                DARRAY_ADD(a, &tkl, ((struct Token){
-                    .kind = punct_match,
-                    .loc = loc,
-                    .value = NULL
-                }));
+                DARRAY_ADD(
+                    a, &tkl,
+                    ((struct Token){
+                        .kind = punct_match,
+                        .loc = loc,
+                        .value = NULL,
+                    })
+                );
                 for (size_t j = 0; j < out_len; j++) {
                     loc_step(source, &i, &loc);
                 }
             }
             else {
-                DARRAY_ADD(a, &tkl, ((struct Token){
-                    .kind = TK_INVALID,
-                    .loc = loc,
-                    .value = NULL
-                }));
+                DARRAY_ADD(
+                    a, &tkl,
+                    ((struct Token){
+                        .kind = TK_INVALID,
+                        .loc = loc,
+                        .value = NULL,
+                    })
+                );
                 loc_step(source, &i, &loc);
             }
         }
         c = source[i];
     }
 
-    DARRAY_ADD(a, &tkl, ((struct Token){
-        .kind  = TK_END,
-        .loc   = loc,
-        .value = NULL
-    }));
+    DARRAY_ADD(
+        a, &tkl,
+        ((struct Token){
+            .kind = TK_END,
+            .loc = loc,
+            .value = NULL,
+        })
+    );
     return tkl;
 }
 
@@ -89,21 +103,23 @@ static char loc_step(const char* source, size_t* i, struct SourceLoc* loc)
     if (c == '\n') {
         loc->line++;
         loc->col = 1;
-    } else {
+    }
+    else {
         loc->col++;
     }
 
     return c;
 }
 
-static struct Token lex_literal(struct Arena* a, const char* source, size_t* i,
-                                struct SourceLoc* loc)
+static struct Token lex_literal(
+    struct Arena* a, const char* source, size_t* i, struct SourceLoc* loc
+)
 {
     assert(isdigit((unsigned char)source[*i]));
 
     struct SourceLoc start = *loc;
-    const char* start_ptr  = source + *i;
-    size_t len             = 0;
+    const char* start_ptr = source + *i;
+    size_t len = 0;
 
     while (isdigit((unsigned char)source[*i])) {
         loc_step(source, i, loc);
@@ -115,20 +131,21 @@ static struct Token lex_literal(struct Arena* a, const char* source, size_t* i,
     value[len] = '\0';
 
     return (struct Token){
-        .kind  = TK_LITERAL,
+        .kind = TK_LITERAL,
         .value = value,
-        .loc   = start
+        .loc = start,
     };
 }
 
-static struct Token lex_ident_kw(struct Arena* a, const char* source, size_t* i,
-                                 struct SourceLoc* loc)
+static struct Token lex_ident_kw(
+    struct Arena* a, const char* source, size_t* i, struct SourceLoc* loc
+)
 {
     assert(isalpha((unsigned char)source[*i]) || source[*i] == '_');
 
     struct SourceLoc start = *loc;
-    const char* start_ptr  = source + *i;
-    size_t len             = 0;
+    const char* start_ptr = source + *i;
+    size_t len = 0;
 
     while (isalnum((unsigned char)source[*i]) || source[*i] == '_') {
         loc_step(source, i, loc);
@@ -142,21 +159,21 @@ static struct Token lex_ident_kw(struct Arena* a, const char* source, size_t* i,
     enum TokenKind kw_kind = str_token_kind(value);
     if (token_kind_is_kw(kw_kind)) {
         return (struct Token){
-            .kind  = kw_kind,
+            .kind = kw_kind,
             .value = NULL,
-            .loc   = start
+            .loc = start,
         };
     }
 
     return (struct Token){
         .kind = TK_IDENT,
         .value = value,
-        .loc = start
+        .loc = start,
     };
 }
 
-static enum TokenKind match_punct(const char* source, const size_t* i,
-                                  size_t* out_len)
+static enum TokenKind
+match_punct(const char* source, const size_t* i, size_t* out_len)
 {
     enum TokenKind match = TK_INVALID;
     size_t longest_len = 0;

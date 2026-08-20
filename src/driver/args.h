@@ -7,10 +7,10 @@
 #include "sprache/compile.h"
 
 struct Arguments {
-    bool  show_help;
+    bool show_help;
     char* input_file;
     char* out_file;
-    bool  std_out;
+    bool std_out;
     enum SpracheStage sprache_stage;
 };
 

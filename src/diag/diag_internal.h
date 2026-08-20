@@ -4,7 +4,9 @@
 #include "sprache/diag.h"
 #include "utils/arena.h"
 
-void diag_add(struct Arena* a, struct DiagList* dl, enum DiagCode code,
-              struct SourceLoc loc, ...);
+void diag_add(
+    struct Arena* a, struct DiagList* dl, enum DiagCode code,
+    struct SourceLoc loc, ...
+);
 
 #endif

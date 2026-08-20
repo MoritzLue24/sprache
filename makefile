@@ -28,7 +28,9 @@ TEST_BINS := $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/tests/%,$(TEST_SRCS))
 
 DEPS := $(OBJ_FILES:.o=.d) $(TEST_BINS:=.d)
 
-.PHONY: all test clean asan run docs
+FMT_FILES := $(shell find $(SRC_DIR) $(HEADER_DIR) $(TEST_DIR) -name '*.c' -o -name '*.h')
+
+.PHONY: all test clean asan run docs format format-check
 
 all: $(BUILD_DIR)/$(TARGET)
 
@@ -59,5 +61,11 @@ clean:
 
 run: all
 	@./$(BUILD_DIR)/$(TARGET) $(ARGS)
+
+format:
+	clang-format -i $(FMT_FILES)
+
+format-check:
+	clang-format --dry-run --Werror $(FMT_FILES)
 
 -include $(DEPS)

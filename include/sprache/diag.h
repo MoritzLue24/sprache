@@ -20,15 +20,15 @@ enum DiagCode {
 const char* diag_code_str(enum DiagCode code);
 
 struct Diag {
-    enum DiagCode    code;
+    enum DiagCode code;
     struct SourceLoc loc;
-    const char*      message;
+    const char* message;
 };
 
 struct DiagList {
     struct Diag* items;
-    size_t       count;
-    size_t       capacity;
+    size_t count;
+    size_t capacity;
 };
 
 bool diag_has_errors(const struct DiagList* dl);

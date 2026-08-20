@@ -2,8 +2,10 @@
 
 void dump_token(const struct Token* tok, FILE* out)
 {
-    fprintf(out, "%-15s %5i:%-5i '%s'\n",
-        token_kind_str(tok->kind), tok->loc.line, tok->loc.col, tok->value);
+    fprintf(
+        out, "%-15s %5i:%-5i '%s'\n", token_kind_str(tok->kind), tok->loc.line,
+        tok->loc.col, tok->value
+    );
 }
 
 void dump_all_tokens(const struct TokenList* tokl, FILE* out)

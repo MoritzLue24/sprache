@@ -21,9 +21,9 @@ int main(int argc, char** argv)
     }
 
     struct CompileOptions opt = {
-        .source     = read_file(&a, args.input_file),
+        .source = read_file(&a, args.input_file),
         .stop_after = args.sprache_stage,
-        .out        = args.std_out ? stdout : openw_file(args.out_file)
+        .out = args.std_out ? stdout : openw_file(args.out_file),
     };
 
     struct CompileResult res = sprache_compile(&a, opt);
