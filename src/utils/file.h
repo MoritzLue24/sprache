@@ -1,10 +1,11 @@
 #ifndef FILE_H
 #define FILE_H
 
-#include "utils/arena.h"
 #include <stdio.h>
 
-FILE* openw_file(const char* path);
-const char* read_file(struct Arena* a, const char* path);
+struct Arena;
+
+FILE* file_openw(const char* path);
+const char* file_read(struct Arena* a, const char* path);
 
 #endif

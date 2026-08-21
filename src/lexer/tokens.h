@@ -18,7 +18,7 @@ enum TokenKind {
 };
 
 const char* token_kind_str(enum TokenKind tok_kind);
-enum TokenKind str_token_kind(const char* s);
+enum TokenKind token_kind_from_str(const char* s);
 bool token_kind_is_kw(enum TokenKind tok_kind);
 bool token_kind_is_punct(enum TokenKind tok_kind);
 
@@ -34,7 +34,7 @@ struct TokenList {
     size_t capacity;
 };
 
-void dump_token(const struct Token* tok, FILE* out);
-void dump_all_tokens(const struct TokenList* tokl, FILE* out);
+void token_dump(const struct Token* tok, FILE* out);
+void token_dump_all(const struct TokenList* tokl, FILE* out);
 
 #endif

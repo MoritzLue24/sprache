@@ -1,14 +1,14 @@
 // TOKEN(kind, spelling, class)
-// spelling is NULL for tokens without a fixed, single spelling (identifiers,
+// spelling is "" for tokens without a fixed, single spelling (identifiers,
 // literals, ...)
-TOKEN(TK_END,     "", TC_OTHER)
-TOKEN(TK_IDENT,   "", TC_OTHER)
+TOKEN(TK_END, "", TC_OTHER)
+TOKEN(TK_IDENT, "", TC_OTHER)
 TOKEN(TK_LITERAL, "", TC_OTHER)
 
-TOKEN(TK_FUNC,   "fn",     TC_KW)
-TOKEN(TK_VAR,    "var",     TC_KW)
-TOKEN(TK_UINT8,  "uint8",     TC_KW)
-TOKEN(TK_INT8,   "int8",     TC_KW)
+TOKEN(TK_FUNC, "fn", TC_KW)
+TOKEN(TK_VAR, "var", TC_KW)
+TOKEN(TK_UINT8, "uint8", TC_KW)
+TOKEN(TK_INT8, "int8", TC_KW)
 TOKEN(TK_RETURN, "return", TC_KW)
 
 TOKEN(TK_SEMICOLON, ";", TC_PUNCT)

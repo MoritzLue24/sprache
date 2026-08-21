@@ -1,7 +1,7 @@
 #include "utils/arena.h"
-#include "utils/xalloc.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #define ARENA_BLOCK_SIZE (size_t)4096
 
@@ -12,27 +12,17 @@ struct ArenaBlock {
     unsigned char data[];
 };
 
-static size_t align_up(size_t n, size_t align)
-{
-    return (n + align - 1) & ~(align - 1);
-}
+static void alloc_fail();
+static size_t align_up(size_t n, size_t align);
+static struct ArenaBlock* arena_block_new(size_t capacity);
 
-static struct ArenaBlock* arena_block_new(size_t capacity)
-{
-    struct ArenaBlock* block = xmalloc(sizeof(struct ArenaBlock) + capacity);
-    block->next = NULL;
-    block->capacity = capacity;
-    block->used = 0;
-    return block;
-}
-
-void init_arena(struct Arena* a)
+void arena_init(struct Arena* a)
 {
     a->head = NULL;
     a->current = NULL;
 }
 
-void free_arena(struct Arena* a)
+void arena_free(struct Arena* a)
 {
     struct ArenaBlock* block = a->head;
     while (block) {
@@ -66,4 +56,28 @@ void* arena_calloc(struct Arena* a, size_t size, size_t align)
     a->current->used = offset + size;
     memset(ptr, 0, size);
     return ptr;
+}
+
+static void alloc_fail(void)
+{
+    fprintf(stderr, "Error: out of memory\n");
+    exit(1);
+}
+
+static size_t align_up(size_t n, size_t align)
+{
+    return (n + align - 1) & ~(align - 1);
+}
+
+static struct ArenaBlock* arena_block_new(size_t capacity)
+{
+    struct ArenaBlock* block = malloc(sizeof(struct ArenaBlock) + capacity);
+    if (!block) {
+        alloc_fail();
+    }
+
+    block->next = NULL;
+    block->capacity = capacity;
+    block->used = 0;
+    return block;
 }

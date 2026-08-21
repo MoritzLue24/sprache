@@ -1,17 +1,18 @@
 #include "utils/file.h"
+#include "utils/arena.h"
 #include <stdlib.h>
 
-FILE* openw_file(const char* filename)
+FILE* file_openw(const char* filename)
 {
     FILE* f = fopen(filename, "w");
     if (!f) {
-        perror("fopen");
+        fprintf(stderr, "Error: File not found: '%s'\n", filename);
         exit(1);
     }
     return f;
 }
 
-const char* read_file(struct Arena* a, const char* path)
+const char* file_read(struct Arena* a, const char* path)
 {
     FILE* file = fopen(path, "rb");
     if (file == NULL) {

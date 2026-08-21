@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdarg.h>
 
-#define DIAG_INIT_CAPACITY 10
+static const char* diag_code_format(enum DiagCode code);
 
 const char* diag_code_str(enum DiagCode code)
 {
@@ -23,18 +23,6 @@ bool diag_has_errors(const struct DiagList* dl)
     return dl->count > 0;
 }
 
-static const char* diag_code_format(enum DiagCode code)
-{
-    switch (code) {
-        case DIAG_INVALID:
-            break;
-#define DIAG(name, format) case name: return format;
-#include "sprache/diag.def"
-#undef DIAG
-    }
-    return NULL;
-}
-
 void diag_add(
     struct Arena* a, struct DiagList* dl, enum DiagCode code,
     struct SourceLoc loc, ...
@@ -47,23 +35,30 @@ void diag_add(
     // calculate message length
     va_list copy;
     va_copy(copy, args);
-
-    size_t length = vsnprintf(
-        NULL, 0, format,
-        copy
-    ); // returns length without writing anywhere
+    
+    // returns length without writing anywhere
+    size_t length = vsnprintf(NULL, 0, format, copy);
     va_end(copy);
 
     // write message
     char* message = ARENA_CALLOC_LIST(a, length + 1, char);
-    vsnprintf(message, length + 1, format, args); // sets nullbyte automatically
+    // sets nullbyte automatically
+    vsnprintf(message, length + 1, format, args);
     va_end(args);
 
     DARRAY_ADD(
-        a, dl, ((struct Diag){
-            .code = code,
-            .loc = loc,
-            .message = message
-        })
+        a, dl, ((struct Diag){ .code = code, .loc = loc, .message = message })
     );
+}
+
+static const char* diag_code_format(enum DiagCode code)
+{
+    switch (code) {
+        case DIAG_INVALID:
+            break;
+#define DIAG(name, format) case name: return format;
+#include "sprache/diag.def"
+#undef DIAG
+    }
+    return NULL;
 }

@@ -3,11 +3,13 @@
 
 #include "sprache/diag.h"
 #include <stdio.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 enum SpracheStage {
     SPRACHE_STAGE_INVALID,
 #define STAGE(name, spellig, file_ext) name,
-#include "stage.def"
+#include "sprache/stage.def"
 #undef STAGE
 };
 

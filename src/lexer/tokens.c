@@ -13,7 +13,7 @@ const char* token_kind_str(enum TokenKind tok_kind)
     return "TK_INVALID";
 }
 
-enum TokenKind str_token_kind(const char* s)
+enum TokenKind token_kind_from_str(const char* s)
 {
 #define TOKEN(kind, spelling, class) if (strcmp(s, spelling) == 0) return kind;
 #include "lexer/tokens.def"

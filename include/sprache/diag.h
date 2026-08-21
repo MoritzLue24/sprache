@@ -5,11 +5,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-struct SourceLoc {
-    unsigned line;
-    unsigned col;
-};
-
 enum DiagCode {
     DIAG_INVALID,
 #define DIAG(name, format) name,
@@ -18,6 +13,11 @@ enum DiagCode {
 };
 
 const char* diag_code_str(enum DiagCode code);
+
+struct SourceLoc {
+    unsigned line;
+    unsigned col;
+};
 
 struct Diag {
     enum DiagCode code;

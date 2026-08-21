@@ -9,6 +9,9 @@ HEADER_DIR ?= include
 TEST_DIR   ?= tests
 BUILD_DIR  ?= build
 
+DOXYFILE ?= Doxyfile
+DOCS_DIR ?= docs/doxygen
+
 CPPFLAGS += -I$(HEADER_DIR) -I$(SRC_DIR) -MMD -MP
 CPPFLAGS += $(DEFINES)
 
@@ -30,7 +33,7 @@ DEPS := $(OBJ_FILES:.o=.d) $(TEST_BINS:=.d)
 
 FMT_FILES := $(shell find $(SRC_DIR) $(HEADER_DIR) $(TEST_DIR) -name '*.c' -o -name '*.h')
 
-.PHONY: all test clean asan run docs format format-check
+.PHONY: all test clean asan run docs
 
 all: $(BUILD_DIR)/$(TARGET)
 
@@ -54,18 +57,20 @@ test: $(TEST_BINS)
 	done;
 
 asan:
-	@$(MAKE) ASAN=1 BUILD_DIR=$(BUILD_DIR)-asan all test
+	@$(MAKE) ASAN=1 BUILD_DIR=$(BUILD_DIR)-asan all
 
 clean:
-	rm -rf $(BUILD_DIR) $(BUILD_DIR)-asan
+	rm -rf $(BUILD_DIR) $(BUILD_DIR)-asan $(DOCS_DIR)
 
 run: all
 	@./$(BUILD_DIR)/$(TARGET) $(ARGS)
 
-format:
-	clang-format -i $(FMT_FILES)
-
-format-check:
-	clang-format --dry-run --Werror $(FMT_FILES)
+docs:
+	@command -v doxygen >/dev/null 2>&1 \
+		|| { echo "Error: 'doxygen' not found in PATH"; exit 1; }
+	@command -v dot >/dev/null 2>&1 \
+		|| { echo "Error: 'dot' not found in PATH"; exit 1; }
+	doxygen $(DOXYFILE)
+	@echo "Generated $(DOCS_DIR)/html/index.html"
 
 -include $(DEPS)

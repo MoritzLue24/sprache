@@ -81,11 +81,7 @@ struct TokenList lex(struct Arena* a, const char* source)
     }
 
     DARRAY_ADD(
-        a, &tkl, ((struct Token){
-            .kind = TK_END,
-            .loc = loc,
-            .value = NULL,
-        })
+        a, &tkl, ((struct Token){ .kind = TK_END, .loc = loc, .value = NULL })
     );
     return tkl;
 }
@@ -127,11 +123,7 @@ static struct Token lex_literal(
     strncpy(value, start_ptr, len);
     value[len] = '\0';
 
-    return (struct Token){
-        .kind = TK_LITERAL,
-        .value = value,
-        .loc = start,
-    };
+    return (struct Token){ .kind = TK_LITERAL, .value = value, .loc = start };
 }
 
 static struct Token lex_ident_kw(
@@ -152,20 +144,12 @@ static struct Token lex_ident_kw(
     strncpy(value, start_ptr, len);
     value[len] = '\0';
 
-    enum TokenKind kw_kind = str_token_kind(value);
+    enum TokenKind kw_kind = token_kind_from_str(value);
     if (token_kind_is_kw(kw_kind)) {
-        return (struct Token){
-            .kind = kw_kind,
-            .value = NULL,
-            .loc = start,
-        };
+        return (struct Token){ .kind = kw_kind, .value = NULL, .loc = start };
     }
 
-    return (struct Token){
-        .kind = TK_IDENT,
-        .value = value,
-        .loc = start,
-    };
+    return (struct Token){ .kind = TK_IDENT, .value = value, .loc = start };
 }
 
 static enum TokenKind match_punct(
@@ -175,7 +159,7 @@ static enum TokenKind match_punct(
     size_t longest_len = 0;
 
 #define TOKEN(kind, spelling, class) \
-    if ((class) == TC_PUNCT && spelling != NULL) { \
+    if ((class) == TC_PUNCT) { \
         size_t len = strlen(spelling); \
         if (strncmp(source + *i, spelling, len) == 0 && len > longest_len) { \
             longest_len = len; \

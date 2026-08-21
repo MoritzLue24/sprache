@@ -1,17 +1,18 @@
 #include "utils/str.h"
+#include "utils/arena.h"
 #include <stddef.h>
 #include <string.h>
 #include <ctype.h>
 
-char* strupper(char* s)
+char* str_upper(char* s)
 {
     for (char* p = s; *p; p++) {
-        *p = toupper(*p);
+        *p = toupper((unsigned char)*p);
     }
     return s;
 }
 
-bool ends_with(const char* s, const char* suffix)
+bool str_ends_with(const char* s, const char* suffix)
 {
     size_t string_len = strlen(s);
     size_t suffix_len = strlen(suffix);
@@ -22,7 +23,7 @@ bool ends_with(const char* s, const char* suffix)
     return strcmp(s + string_len - suffix_len, suffix) == 0;
 }
 
-char* replace_last(
+char* str_replace_last(
     struct Arena* a, const char* s, const char* substr, const char* new_substr
 ) {
     const char* substr_ptr = NULL;

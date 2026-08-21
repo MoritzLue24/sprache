@@ -8,10 +8,19 @@ The binding style guide for all C code in `src/`, `include/` and `tests/`.
 
 Two parts:
 
-| Part | Covers |
-| --- | --- |
-| **[Part 1](#part-1--formatting)** §1–§5 | Braces, blank lines, initialisers, wrapping — the mechanical layer |
-| **[Part 2](#part-2--conventions)** §6–§15 | Naming, headers, X-macros, memory, error handling, tests |
+| Part | Sections | Covers |
+| --- | --- | --- |
+| **[Part 1](#part-1--formatting)** | §1–§4 | Braces, blank lines, initialisers, wrapping — the mechanical layer |
+| **[Part 2](#part-2--conventions-beyond-formatting)** | §5–§12 | Naming, types, files, X-macros, comments, memory, errors, tests |
+
+| § | Section | | § | Section |
+| --- | --- | --- | --- | --- |
+| [1](#1-braces-and-indentation) | Braces and indentation | | [7](#7-files-and-headers) | Files and headers |
+| [2](#2-blank-lines) | Blank lines | | [8](#8-x-macro-def-files) | X-macro `.def` files |
+| [3](#3-struct-initialisers) | Struct initialisers | | [9](#9-comments) | Comments |
+| [4](#4-exceeding-the-column-limit) | Exceeding the column limit | | [10](#10-memory) | Memory |
+| [5](#5-naming) | Naming | | [11](#11-error-handling) | Error handling |
+| [6](#6-types-and-declarations) | Types and declarations | | [12](#12-tests) | Tests |
 
 ---
 
@@ -67,23 +76,7 @@ Same goes for one-line if statements, but its not necessary:
 if (strcmp(a, b) == 0) return a;
 ```
 
-(On why there is no `default:` here, see §9.)
-
-### 1.1 Braces are mandatory
-
-Every `if`, `else`, `for`, `while` and `do` body gets braces — no exceptions,
-not even for a single statement.
-
-```c
-// WRONG
-if (strcmp(a, b) == 0)
-    return a;
-
-// CORRECT
-if (strcmp(a, b) == 0) {
-    return a;
-}
-```
+(On why there is no `default:` here, see §8.)
 
 ## 2. Blank lines
 
@@ -94,8 +87,7 @@ if (strcmp(a, b) == 0) {
 - One blank line after every `struct` definition.
 - One blank line after every function definition (not declaration).
 - No blank line between consecutive function declarations — but only when
-  neither carries a comment. As soon as theres a comment between the 
-  declarations, separate the them.
+    theres no comment between them.
 
 ```c
 #ifndef TOKENS_H
@@ -104,42 +96,16 @@ if (strcmp(a, b) == 0) {
 #include "lexer/tokens.h"
 #include <stddef.h>
 
-void f(void);
-void g(void);
+void f();
+void g();
 
 /// @brief doc
-void h(void);
+void h();
 
 #endif
 ```
 
-## 3. File structure
-
-All top-level-items have to follow the following order,
-the file is structured as followed.
-
-At first, pre-processor-directives, always at the top of the file:
-1. (Implemented headers, for source-files)
-2. Other project headers
-3. System headers
-4. Macro definitions
-
-### 3.1 Header-specific
-1. Enum definitions
-2. Struct definitions
-3. Common functions (grouped by context)
-
-After each enum / struct definition, closed context functions related
-to this object has to follow first. Then the order above continues.
-
-### 3.2 Source-specific
-1. Static variables
-2. Static function forward-declarations
-    (not optional, always forward-decl static functions)
-3. Implemented functions, included from header
-4. Static function implementation (same order as declarations)
-
-## 4. Struct initialisers
+## 3. Struct initialisers
 
 If line length not exceeded: all at the same line.
 If line length exceeds: every field gets its own line:
@@ -149,16 +115,16 @@ return (struct Error){ .kind }
 return (struct Token){
     .kind = TK_IDENT,
     .value = value,
-    .loc = start,
+    .loc = start
 };
 ```
 
-## 5. Exceeding the column limit
+## 4. Exceeding the column limit
 
 The 80-column limit is hard. What to do when a construct does not fit depends on
 the construct.
 
-### 5.1 Function declarations and definitions
+### 4.1 Function declarations and definitions
 
 The function name always stays on the same line as the return type. Never break
 after the return type — wrap the parameters instead.
@@ -167,7 +133,7 @@ Declaration: parameters block-indented, `)` and `;` on their own line.
 
 ```c
 void myfunc(
-    int a, int a1, int a2, int b3,
+    int a, int a1, int a2, int a3,
     int b, int b1, int b2, int b3,
     int c
 );
@@ -188,7 +154,7 @@ void diag_add(
 }
 ```
 
-### 5.2 Function and macro calls
+### 4.2 Function and macro calls
 
 Same principle: block-indent the arguments, `)` on its own line.
 
@@ -208,7 +174,7 @@ DARRAY_ADD(
 );
 ```
 
-### 5.3 Expressions
+### 4.3 Expressions
 
 Break *before* the operator, indent one level, do not align.
 
@@ -219,7 +185,7 @@ int a = strcmp(argv[i], "-o") == 0
 
 For a condition, §4.4 gives the correct form.
 
-### 5.4 Compound statements
+### 4.4 Compound statements
 
 Nothing after the `(`; the condition is block-indented and wrapped per §4.3;
 the `)` shares its line with the `{`.
@@ -250,7 +216,7 @@ for (
 }
 ```
 
-### 5.5 Macro definitions
+### 4.5 Macro definitions
 
 The body can start on the identifier's line,
 only if the column limit is not exceeded.
@@ -268,7 +234,7 @@ For "body-wrapped" macros, like the following example, no identation is needed
 
 # Part 2 — Conventions beyond formatting
 
-## 6. Naming
+## 5. Naming
 
 | Kind | Convention | Examples |
 | --- | --- | --- |
@@ -280,7 +246,7 @@ For "body-wrapped" macros, like the following example, no identation is needed
 | Compile-time constant | `#define` + `UPPER_SNAKE` | `ARENA_BLOCK_SIZE`, `DIAG_INIT_CAPACITY` |
 | File | `lower_snake_case.c/.h/.def` | `tokens_dump.c`, `diag_internal.h` |
 
-### 6.1 Prefixes
+### 5.1 Prefixes
 
 - **Every enumerator carries a short prefix derived from its enum**:
   `TokenKind` → `TK_`, `TokenClass` → `TC_`, `DiagCode` → `DIAG_`,
@@ -289,14 +255,16 @@ For "body-wrapped" macros, like the following example, no identation is needed
     and the subject comes first:
     `diag_dump`, `diag_dump_all`, `arena_calloc`, `token_kind_is_kw`.
     Prefer `<subject>_<verb>` over `<verb>_<subject>`.
+    It is not strict. If the subject is not a struct, or enum,
+    it is not necessary.
 - **The public API in `include/sprache/` uses the `sprache_` prefix** when the
     name would otherwise be generic: `sprache_compile`, `sprache_stage_from_str`.
     A name that is already namespaced by its own type (`diag_*`) does not need it.
 - **Macros are prefixed by their module**: `ARENA_*`, `DARRAY_*`, `TST_*`.
 - **Identifiers a macro introduces into the caller's scope get an underscore
-    prefix** so they cannot collide: `_tst_exp`, `_tst_act`.
+    suffix** so they cannot collide: `tst_exp_`, `tst_act_`.
 
-### 6.2 Short names
+### 5.2 Short names
 
 Short names are fine — and preferred — for tightly scoped locals with an
 obvious meaning: `a` (arena), `i`, `j` (index), `c` (current char), `dl`
@@ -305,7 +273,7 @@ or crosses a function boundary gets a full name.
 
 `a` is the conventional name for a `struct Arena*` parameter.
 
-### 6.3 Out-parameters
+### 5.3 Out-parameters
 
 Pointer parameters that exist to return a value are prefixed `out_`, and their
 meaning is documented with `@param`:
@@ -317,7 +285,7 @@ static enum TokenKind match_punct(
 );
 ```
 
-## 7. Types and declarations
+## 6. Types and declarations
 
 - **No `typedef` for structs or enums.** Always spell out `struct Token`,
     `enum TokenKind`. This is deliberate — the tag makes the kind of type visible
@@ -340,15 +308,71 @@ static enum TokenKind match_punct(
   };
   ```
 
-## 8. Headers
+### 6.1 Passing and returning structs
 
-### 8.1 Layout
+Structs are values. Prefer by value wherever it is possible.
+
+- **Return by value, always.** `lex` returns a `struct TokenList`, `lex_literal`
+    a `struct Token`, `sprache_compile` a `struct CompileResult`. No struct
+    out-parameter, and no arena allocation just to hand an aggregate back.
+- **Take by value** what the function only consumes and does not need to reach
+    back into: `struct CompileOptions options`, `struct SourceLoc loc`.
+- **Take `const struct X*`** when the caller already owns the object and the
+    function only inspects it — the list and node types in particular:
+    `diag_has_errors(const struct DiagList* dl)`,
+    `token_dump(const struct Token* tok, FILE* out)`.
+- **Take `struct X*`** only where the function writes through the pointer:
+    `struct Arena* a`, `struct Arguments* args`, the lexer's
+    `struct SourceLoc* loc`.
+
+A pointer means mutation, ownership, or an object that already lives somewhere
+else. It is not the default for "this struct could get big".
+
+## 7. Files and headers
+
+### 7.1 Layout
 
 - Public API lives in `include/sprache/` and is included as `"sprache/diag.h"`.
 - Everything else lives next to its `.c` file in `src/` and is included by its
   path from `src/`: `"lexer/tokens.h"`, `"utils/arena.h"`.
 
-### 8.2 Include guards
+### 7.2 One responsibility per source file
+
+A `.c` file does exactly one job, and its name says which one. Several `.c`
+files may implement the same header; a single `.c` file never picks up a second
+concern just because it is already open.
+
+Presentation is the clearest case: rendering a type as text is its own
+responsibility and gets its own file next to the one that builds the type.
+
+| Builds it | Prints it | Shared header |
+| --- | --- | --- |
+| `lexer/tokens.c` | `lexer/tokens_dump.c` | `lexer/tokens.h` |
+| `diag/diag.c` | `diag/diag_dump.c` | `sprache/diag.h` |
+
+Split as soon as a file serves two audiences — construction against
+presentation, a pipeline against the enum helpers it happens to call, argument
+parsing against the usage text it prints.
+
+### 7.3 Headers split by visibility
+
+Headers are cut along a different line than source files: not by
+responsibility, but by who may see the declaration.
+
+- `include/sprache/<x>.h` — the public surface: everything a consumer of the
+    library is allowed to call.
+- `src/<module>/<x>_internal.h` — declarations other parts of the compiler need
+    but that are not public API.
+
+`diag` is the pair to copy. `include/sprache/diag.h` declares the types plus
+`diag_has_errors` and `diag_dump*`, which the driver prints results with;
+`src/diag/diag_internal.h` declares `diag_add`, which only compiler stages ever
+call. The same `.c` files implement both.
+
+A module whose entire surface is internal needs no `_internal` suffix — the
+header sits in `src/` and that is visibility enough (`lexer/tokens.h`).
+
+### 7.4 Include guards
 
 `#ifndef` guards, never `#pragma once`. The macro is the file's basename in
 upper case plus `_H`, with no path component and no trailing comment on
@@ -363,7 +387,7 @@ upper case plus `_H`, with no path component and no trailing comment on
 #endif
 ```
 
-### 8.3 Self-containedness and forward declarations
+### 7.5 Self-containedness and forward declarations
 
 Every header compiles on its own and includes what it uses. When only a pointer
 to a type is needed, forward-declare the tag instead of including its header:
@@ -376,7 +400,33 @@ struct CompileResult sprache_compile(
 );
 ```
 
-## 9. X-macro `.def` files
+### 7.6 Order of top-level items
+
+All top-level-items have to follow the following order,
+the file is structured as followed.
+
+At first, pre-processor-directives, always at the top of the file:
+1. (Implemented headers, for source-files)
+2. Other project headers
+3. System headers
+4. Macro definitions
+
+**In a header**
+1. Enum definitions
+2. Struct definitions
+3. Common functions (grouped by context)
+
+After each enum / struct definition, closed context functions related
+to this object has to follow first. Then the order above continues.
+
+**In a source file**
+1. Static variables
+2. Static function forward-declarations
+    (not optional, always forward-decl static functions)
+3. Implemented functions, included from header
+4. Static function implementation (same order as declarations)
+
+## 8. X-macro `.def` files
 
 Token kinds, diagnostics and compiler stages are single-sourced in `.def` files.
 This is the project's central extension mechanism — respect it.
@@ -405,7 +455,8 @@ Always the full three-step dance, with the `#undef` immediately after the
 - A new token / diagnostic / stage is added **only** in the `.def` file. If
     adding one requires editing a `switch`, that `switch` is written wrong.
 - The enum declares an explicit `*_INVALID` member as its first (zero) value,
-    outside the `.def`.
+    outside the `.def`. Doesnt has to be `*_INVALID`, but it has to be clear,
+    that this variant acts as the default case.
 - A `switch` over such an enum handles `*_INVALID` explicitly and has **no
     `default:` label**, so `-Wswitch` reports unhandled cases. The fallback goes
     after the switch:
@@ -423,7 +474,7 @@ Always the full three-step dance, with the `#undef` immediately after the
   return "<invalid diag code>";
   ```
 
-## 10. Comments
+## 9. Comments
 
 - **Doxygen `///` for API documentation**, using `@brief`, `@note`, `@param`,
     `@return`. `Doxyfile` is checked in; `make docs` renders it.
@@ -441,14 +492,13 @@ Always the full three-step dance, with the `#undef` immediately after the
   ```
 
 - **`//` for implementation notes** inside function bodies. Trailing `//`
-    comments are allowed; align them into a column within a single block, one
-    space after the code at minimum.
+    comments are allowed.
 - Comments say *why*, or state a non-obvious contract. Do not restate the code.
 - English, always — including commit-adjacent notes in `.def` files.
 - Keep comments true. A stale comment is worse than none; when behaviour
     changes, the comment changes in the same edit.
 
-## 11. Memory
+## 10. Memory
 
 The arena owns everything. There is exactly one lifetime in the compiler:
 the arena created in `main` and released by `free_arena` when the process is
@@ -456,21 +506,19 @@ done.
 
 - **Allocate with `ARENA_CALLOC(a, T)` / `ARENA_CALLOC_LIST(a, n, T)`.**
 - **Never call `malloc`, `calloc`, `realloc` or `free` in compiler code.** Raw
-    allocation exists only inside `src/utils/arena.c`, and only through the
-    `xmalloc` / `xcalloc` / `xrealloc` wrappers, which abort on failure so callers
-    never check for `NULL`.
+    allocation exists only inside `src/utils/arena.c`.
 - **Do not write `free_*` / destructor functions** for arena-allocated types,
     and do not document them as needing to be freed. Nothing that comes out of the
     arena is individually released.
-- **The arena is the first parameter after the context-parameter**, named `a`,
+- **The arena is the first parameter**, named `a`,
     of any function that allocates.
 - **Growable lists use `DARRAY_INIT` / `DARRAY_ADD`** with a `#define`d initial
     capacity constant (`TOKENLIST_INIT_CAPACITY`, `DIAG_INIT_CAPACITY`).
 - Returned strings and lists are arena-owned and borrowed by the caller; they
-    stay valid until `free_arena`. Say so in the doc comment when it is not
+    stay valid until `arena_free`. Say so in the doc comment when it is not
     obvious.
 
-## 13. Error handling
+## 11. Error handling
 
 Three distinct mechanisms — pick by who made the mistake.
 
@@ -493,8 +541,8 @@ fprintf(stderr, "Error: Unexpected argument '%s'\n", argv[i]);
 return false;
 ```
 
-A predicate-style function (`parse_args`) prints the message itself and returns
-`false`; unrecoverable failures deep in a utility (`read_file`, `xmalloc`)
+A predicate-style function (`args_parse`) prints the message itself and returns
+`false`; unrecoverable failures deep in a utility (`file_read`, etc.)
 print and `exit(1)`.
 
 **Assertions.** Use `assert` for preconditions a caller inside this codebase
@@ -504,9 +552,7 @@ must uphold, and state the same thing in the doc comment:
 assert(isdigit((unsigned char)source[*i]));
 ```
 
-## 14. Tests
-
-See the `write-tests` skill for the full workflow. Style rules:
+## 12. Tests
 
 - Unit tests live in `tests/unit/<module>/<module>_tests.c`. The filename
   **must** end in `_tests.c` — the makefile globs for it.
@@ -516,8 +562,8 @@ See the `write-tests` skill for the full workflow. Style rules:
   sentence describing that behaviour:
   `lex_punct_prefers_longest_match`,
   `lex_literal_stops_before_trailing_punct`.
-- Each test sets up and tears down its own arena — `init_arena` at the top,
-  `free_arena` at the bottom. No shared state between tests.
+- Each test sets up and tears down its own arena — `arena_init` at the top,
+  `arena_free` at the bottom. No shared state between tests.
 - Put the input under test in a comment above the call when it contains escapes
   or is otherwise hard to read.
 - `main` is just `TST_RUN` per test, in declaration order, then `TST_SUMMARY()`.

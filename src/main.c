@@ -1,34 +1,35 @@
 #include "driver/args.h"
 #include "sprache/compile.h"
 #include "utils/file.h"
+#include "utils/arena.h"
 #include <stdio.h>
 
 int main(int argc, char** argv)
 {
     int ret = 0;
     struct Arena a;
-    init_arena(&a);
+    arena_init(&a);
 
     struct Arguments args;
-    if (!parse_args(&args, &a, argc, argv)) {
-        printf("Try '--help' for more information\n");
+    if (!args_parse(&a, &args, argc, argv)) {
+        fprintf(stderr, "Try '--help' for more information\n");
         ret = 1;
         goto done;
     }
     if (args.show_help) {
-        print_help(stdout);
+        args_print_help();
         goto done;
     }
 
     struct CompileOptions opt = {
-        .source = read_file(&a, args.input_file),
+        .source = file_read(&a, args.input_file),
         .stop_after = args.sprache_stage,
-        .out = args.std_out ? stdout : openw_file(args.out_file),
+        .out = args.std_out ? stdout : file_openw(args.out_file),
     };
 
     struct CompileResult res = sprache_compile(&a, opt);
     if (!res.ok) {
-        diag_dump_all(&res.diags, stdout);
+        diag_dump_all(&res.diags, stderr);
         ret = 1;
     }
 
@@ -36,6 +37,6 @@ int main(int argc, char** argv)
         fclose(opt.out);
     }
 done:
-    free_arena(&a);
+    arena_free(&a);
     return ret;
 }

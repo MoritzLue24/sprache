@@ -18,14 +18,14 @@ static bool tst_current_failed;
 static bool tst_header_printed = false;
 
 #define TST_ASSERT_EQ(expected, actual) do { \
-    __typeof__(actual) _tst_exp = (expected); \
-    __typeof__(actual) _tst_act = (actual); \
-    if (_tst_exp != _tst_act) { \
+    __typeof__(actual) tst_exp_ = (expected); \
+    __typeof__(actual) tst_act_ = (actual); \
+    if (tst_exp_ != tst_act_) { \
         tst_current_failed = true; \
         printf( \
             TST_RED "%*sFAILED: \"%s\" (%s:%d)\n%*sexpected %d, got %d\n" \
             TST_RESET, 2, "", tst_current_name, __FILE__, __LINE__, 4, "", \
-            (int)_tst_exp, (int)_tst_act \
+            (int)tst_exp_, (int)tst_act_ \
         ); \
     } \
 } while (0)
@@ -42,15 +42,15 @@ static bool tst_header_printed = false;
 } while (0)
 
 #define TST_ASSERT_STR_CONTAINS(haystack, needle) do { \
-    const char* _tst_hay = (haystack); \
-    const char* _tst_ndl = (needle); \
-    if (strstr(_tst_hay, _tst_ndl) == NULL) { \
+    const char* tst_hay_ = (haystack); \
+    const char* tst_ndl_ = (needle); \
+    if (strstr(tst_hay_, tst_ndl_) == NULL) { \
         tst_current_failed = true; \
         printf( \
             TST_RED \
             "%*sFAILED: \"%s\" (%s:%d)\n%*sexpected to find \"%s\" in:\n%s\n" \
             TST_RESET, 2, "", tst_current_name, __FILE__, __LINE__, 4, "", \
-            _tst_ndl, _tst_hay \
+            tst_ndl_, tst_hay_ \
         ); \
     } \
 } while (0)

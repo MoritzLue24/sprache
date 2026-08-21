@@ -4,6 +4,8 @@
 #include "sprache/diag.h"
 #include "utils/arena.h"
 
+#define DIAG_INIT_CAPACITY 10
+
 /// @brief Adds a formatted diagnostic using the format specified in "diag.def"
 void diag_add(
     struct Arena* a, struct DiagList* dl, enum DiagCode code,

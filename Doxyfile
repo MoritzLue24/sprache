@@ -8,7 +8,7 @@ EXTRACT_ALL            = YES
 EXTRACT_STATIC         = NO
 GENERATE_TODOLIST      = YES
 
-INPUT                  = 
+INPUT                  = include src
 RECURSIVE              = YES
 
 GENERATE_HTML          = YES
