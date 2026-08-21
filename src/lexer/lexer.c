@@ -10,20 +10,24 @@
 /// @note Does not skip whitespace. Returns '\0' at end of input without
 /// advancing further.
 static char loc_step(const char* source, size_t* i, struct SourceLoc* loc);
+
 /// @brief Tokenizes the current literal (assumes the current char is a digit)
 static struct Token lex_literal(
     struct Arena* a, const char* source, size_t* i, struct SourceLoc* loc
 );
+
 /// @brief Tokenizes the current identifier OR keyword
 /// (Assumes the current char is a '_' or alpha)
 static struct Token lex_ident_kw(
     struct Arena* a, const char* source, size_t* i, struct SourceLoc* loc
 );
+
 /// @brief Finds the longest TC_PUNCT spelling matching at source+i.
 /// @return The matched token kind, or TK_INVALID if none matches.
 /// @param out_len set to the length of the match (undefined if TK_INVALID)
-static enum TokenKind
-match_punct(const char* source, const size_t* i, size_t* out_len);
+static enum TokenKind match_punct(
+    const char* source, const size_t* i, size_t* out_len
+);
 
 struct TokenList lex(struct Arena* a, const char* source)
 {
@@ -32,10 +36,7 @@ struct TokenList lex(struct Arena* a, const char* source)
 
     size_t i = 0;
     char c = source[i];
-    struct SourceLoc loc = {
-        .line = 1,
-        .col = 1,
-    };
+    struct SourceLoc loc = { .line = 1, .col = 1 };
 
     while (c != '\0') {
         c = source[i];
@@ -55,8 +56,7 @@ struct TokenList lex(struct Arena* a, const char* source)
 
             if (punct_match != TK_INVALID) {
                 DARRAY_ADD(
-                    a, &tkl,
-                    ((struct Token){
+                    a, &tkl, ((struct Token){
                         .kind = punct_match,
                         .loc = loc,
                         .value = NULL,
@@ -68,8 +68,7 @@ struct TokenList lex(struct Arena* a, const char* source)
             }
             else {
                 DARRAY_ADD(
-                    a, &tkl,
-                    ((struct Token){
+                    a, &tkl, ((struct Token){
                         .kind = TK_INVALID,
                         .loc = loc,
                         .value = NULL,
@@ -82,8 +81,7 @@ struct TokenList lex(struct Arena* a, const char* source)
     }
 
     DARRAY_ADD(
-        a, &tkl,
-        ((struct Token){
+        a, &tkl, ((struct Token){
             .kind = TK_END,
             .loc = loc,
             .value = NULL,
@@ -113,8 +111,7 @@ static char loc_step(const char* source, size_t* i, struct SourceLoc* loc)
 
 static struct Token lex_literal(
     struct Arena* a, const char* source, size_t* i, struct SourceLoc* loc
-)
-{
+) {
     assert(isdigit((unsigned char)source[*i]));
 
     struct SourceLoc start = *loc;
@@ -139,8 +136,7 @@ static struct Token lex_literal(
 
 static struct Token lex_ident_kw(
     struct Arena* a, const char* source, size_t* i, struct SourceLoc* loc
-)
-{
+) {
     assert(isalpha((unsigned char)source[*i]) || source[*i] == '_');
 
     struct SourceLoc start = *loc;
@@ -172,9 +168,9 @@ static struct Token lex_ident_kw(
     };
 }
 
-static enum TokenKind
-match_punct(const char* source, const size_t* i, size_t* out_len)
-{
+static enum TokenKind match_punct(
+    const char* source, const size_t* i, size_t* out_len
+) {
     enum TokenKind match = TK_INVALID;
     size_t longest_len = 0;
 

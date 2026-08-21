@@ -1,8 +1,8 @@
 #ifndef COMPILE_H
 #define COMPILE_H
 
-#include <stdio.h>
 #include "sprache/diag.h"
+#include <stdio.h>
 
 enum SpracheStage {
     SPRACHE_STAGE_INVALID,
@@ -14,6 +14,9 @@ enum SpracheStage {
 /// @brief Converts 's' to the according 'str' of 'stage.def'.
 /// @note UPPERS s
 enum SpracheStage sprache_stage_from_str(char* s);
+
+/// @brief Get the file extension, related to the stage,
+/// of the resulting "out" file (includes the dot)
 const char* sprache_stage_get_file_ext(enum SpracheStage stage);
 
 struct CompileOptions {
@@ -29,7 +32,8 @@ struct CompileResult {
 
 struct Arena;
 
-struct CompileResult
-sprache_compile(struct Arena* a, struct CompileOptions options);
+struct CompileResult sprache_compile(
+    struct Arena* a, struct CompileOptions options
+);
 
 #endif

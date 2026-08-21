@@ -5,8 +5,9 @@
 
 char* strupper(char* s)
 {
-    for (char* p = s; *p; p++)
+    for (char* p = s; *p; p++) {
         *p = toupper(*p);
+    }
     return s;
 }
 
@@ -23,8 +24,7 @@ bool ends_with(const char* s, const char* suffix)
 
 char* replace_last(
     struct Arena* a, const char* s, const char* substr, const char* new_substr
-)
-{
+) {
     const char* substr_ptr = NULL;
     const char* search = s;
 

@@ -1,10 +1,10 @@
 #ifndef ARGS_H
 #define ARGS_H
 
-#include <stdbool.h>
-#include <stdio.h>
 #include "utils/arena.h"
 #include "sprache/compile.h"
+#include <stdbool.h>
+#include <stdio.h>
 
 struct Arguments {
     bool show_help;
@@ -17,7 +17,9 @@ struct Arguments {
 /// @brief Parses the cli arguments into the `Arguments` struct.
 /// If no asm file is specified, uses input file as asm file.
 /// @return 0 on success, a positive int otherwise (prints error message)
-bool parse_args(struct Arguments* args, struct Arena* a, int argc, char** argv);
+bool parse_args(
+    struct Arguments* args, struct Arena* a, int argc, char** argv
+);
 void print_help(FILE* out);
 
 #endif

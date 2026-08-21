@@ -1,10 +1,14 @@
 #ifndef TOKENS_H
 #define TOKENS_H
 
-#include <stdio.h>
 #include "sprache/diag.h"
+#include <stdio.h>
 
-enum TokenClass { TC_OTHER, TC_KW, TC_PUNCT };
+enum TokenClass {
+    TC_OTHER,
+    TC_KW,
+    TC_PUNCT
+};
 
 enum TokenKind {
     TK_INVALID,

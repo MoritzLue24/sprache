@@ -1,7 +1,7 @@
-#include <stdio.h>
 #include "driver/args.h"
 #include "sprache/compile.h"
 #include "utils/file.h"
+#include <stdio.h>
 
 int main(int argc, char** argv)
 {

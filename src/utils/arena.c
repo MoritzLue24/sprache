@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ARENA_BLOCK_SIZE ((size_t)4096)
+#define ARENA_BLOCK_SIZE (size_t)4096
 
 struct ArenaBlock {
     struct ArenaBlock* next;
@@ -52,10 +52,12 @@ void* arena_calloc(struct Arena* a, size_t size, size_t align)
         size_t capacity = size > ARENA_BLOCK_SIZE ? size : ARENA_BLOCK_SIZE;
         struct ArenaBlock* block = arena_block_new(capacity);
 
-        if (a->current)
+        if (a->current) {
             a->current->next = block;
-        else
+        }
+        else {
             a->head = block;
+        }
         a->current = block;
         offset = 0;
     }

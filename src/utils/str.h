@@ -1,8 +1,8 @@
 #ifndef STR_H
 #define STR_H
 
-#include <stdbool.h>
 #include "utils/arena.h"
+#include <stdbool.h>
 
 /// @brief Modifies 's' to UPPERCASE, also returns the new s.
 char* strupper(char* s);

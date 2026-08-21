@@ -1,5 +1,5 @@
-#include <stdlib.h>
 #include "utils/file.h"
+#include <stdlib.h>
 
 FILE* openw_file(const char* filename)
 {

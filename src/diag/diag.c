@@ -11,9 +11,7 @@ const char* diag_code_str(enum DiagCode code)
     switch (code) {
         case DIAG_INVALID:
             break;
-#define DIAG(name, format) \
-    case name: \
-        return #name;
+#define DIAG(name, format) case name: return #name;
 #include "sprache/diag.def"
 #undef DIAG
     }
@@ -30,9 +28,7 @@ static const char* diag_code_format(enum DiagCode code)
     switch (code) {
         case DIAG_INVALID:
             break;
-#define DIAG(name, format) \
-    case name: \
-        return format;
+#define DIAG(name, format) case name: return format;
 #include "sprache/diag.def"
 #undef DIAG
     }
@@ -42,8 +38,7 @@ static const char* diag_code_format(enum DiagCode code)
 void diag_add(
     struct Arena* a, struct DiagList* dl, enum DiagCode code,
     struct SourceLoc loc, ...
-)
-{
+) {
     const char* format = diag_code_format(code);
 
     va_list args;
@@ -65,6 +60,10 @@ void diag_add(
     va_end(args);
 
     DARRAY_ADD(
-        a, dl, ((struct Diag){ .code = code, .loc = loc, .message = message })
+        a, dl, ((struct Diag){
+            .code = code,
+            .loc = loc,
+            .message = message
+        })
     );
 }

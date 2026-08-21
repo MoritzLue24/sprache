@@ -32,7 +32,6 @@ struct DiagList {
 };
 
 bool diag_has_errors(const struct DiagList* dl);
-
 void diag_dump(const struct Diag* d, FILE* out);
 void diag_dump_all(const struct DiagList* dl, FILE* out);
 
