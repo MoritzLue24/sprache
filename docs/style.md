@@ -35,7 +35,7 @@ Two parts:
 | Column limit | 80, hard, comments included |
 | Preprocessor `#` | always column 1, even inside a function or switch |
 | Case labels | indented one level inside the `switch` |
-| File ending | exactly one trailing newline |
+| File ending | trailing newline not necessary |
 
 After *every* curly brace follows either a newline or a space:
 ```c
@@ -87,7 +87,8 @@ if (strcmp(a, b) == 0) return a;
 - One blank line after every `struct` definition.
 - One blank line after every function definition (not declaration).
 - No blank line between consecutive function declarations — but only when
-    theres no comment between them. Is not necessary when grouping.
+    theres no comment between them. If theres a comment, its optional.
+    Is not necessary when grouping multiple declarations.
 
 ```c
 #ifndef TOKENS_H
@@ -459,8 +460,9 @@ Always the full three-step dance, with the `#undef` immediately after the
     outside the `.def`. Doesnt has to be `*_INVALID`, but it has to be clear,
     that this variant acts as the default case.
 - A `switch` over such an enum handles `*_INVALID` explicitly and has **no
-    `default:` label**, so `-Wswitch` reports unhandled cases. The fallback goes
-    after the switch:
+    `default:` label**, so `-Wswitch` reports unhandled cases.
+    The fallback goes after the switch
+    (not needed for cases that only handles a sub area):
 
   ```c
   switch (code) {
