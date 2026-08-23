@@ -106,10 +106,10 @@ static void parse_var_definition_with_init()
     TST_ASSERT_EQ((size_t)0, p.dl.count);
 
     // NOTE: NODE_VAR_DEF exists in node.def but the parser does not emit
-    // it yet -- a definition still comes back as NODE_VAR_DECL with a
+    // it yet -- a definition still comes back as NODE_VAR_DEF with a
     // non-NULL init. Update this assertion when that is split.
     const struct Node* v = fn_stmt(&p.root, 0, 0);
-    TST_ASSERT_EQ(NODE_VAR_DECL, v->kind);
+    TST_ASSERT_EQ(NODE_VAR_DEF, v->kind);
     TST_ASSERT(strcmp(val(v), "a") == 0);
     TST_ASSERT_EQ(NODE_BINARY, some(v->var.init)->kind);
     TST_ASSERT_EQ(OP_PLUS, some(v->var.init)->op);

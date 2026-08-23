@@ -99,7 +99,7 @@ static void recover_keeps_node_when_only_separator_is_missing()
 
     TST_ASSERT_EQ((size_t)1, p.dl.count);
     TST_ASSERT_EQ((size_t)2, fn_body(&p.root, 0)->block.nl.count);
-    TST_ASSERT_EQ(NODE_VAR_DECL, fn_stmt(&p.root, 0, 0)->kind);
+    TST_ASSERT_EQ(NODE_VAR_DEF, fn_stmt(&p.root, 0, 0)->kind);
     TST_ASSERT_EQ(NODE_RETURN, fn_stmt(&p.root, 0, 1)->kind);
 
     parsed_free(&p);
