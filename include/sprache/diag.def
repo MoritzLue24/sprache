@@ -1,2 +1,4 @@
 // DIAG(name, format)
-DIAG(DIAG_UNEXPECTED_TOKEN, "expected '%s', got '%s'")
+DIAG(DIAG_UNEXPECTED_TOKEN, "unexpected token: '%s'")
+DIAG(DIAG_DIFFERENT_TOKEN_EXPECTED, "expected: '%s', got: '%s'")
+DIAG(DIAG_EXPRESSION_EXPECTED, "expected an expression, got: '%s'")
