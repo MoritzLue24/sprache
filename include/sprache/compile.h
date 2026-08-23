@@ -8,7 +8,7 @@
 
 enum SpracheStage {
     SPRACHE_STAGE_INVALID,
-#define STAGE(name, spellig, file_ext) name,
+#define STAGE(name, spelling, file_ext) name,
 #include "sprache/stage.def"
 #undef STAGE
 };

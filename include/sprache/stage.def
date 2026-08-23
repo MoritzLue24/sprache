@@ -1,4 +1,4 @@
-// STAGE(name, spellig, file_ext)
+// STAGE(name, spelling, file_ext)
 STAGE(SPRACHE_STAGE_TOKENS, "TOKENS", ".tok")
 STAGE(SPRACHE_STAGE_AST, "AST", ".ast")
 STAGE(SPRACHE_STAGE_SEMA, "SEMA", ".ast.sema")
