@@ -1,7 +1,8 @@
 #include "sprache/compile.h"
-#include "lexer/lexer.h"
-#include "utils/darray.h"
 #include "diag/diag_internal.h"
+#include "utils/darray.h"
+#include "lexer/lexer.h"
+#include "parser/parser.h"
 
 struct CompileResult sprache_compile(
     struct Arena* a, struct CompileOptions options
@@ -12,6 +13,12 @@ struct CompileResult sprache_compile(
     struct TokenList tkl = lex(a, options.source);
     if (options.stop_after == SPRACHE_STAGE_TOKENS) {
         token_dump_all(&tkl, options.out);
+        goto done;
+    }
+
+    struct Node root = parse(a, &tkl, &res.diags);
+    if (options.stop_after == SPRACHE_STAGE_AST) {
+        node_dump(&root, options.out);
         goto done;
     }
 
