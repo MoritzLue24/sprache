@@ -1,3 +1,80 @@
+// The parser turns the flat token list from the lexer into the tree
+// described in "parser/ast.h". It is a hand-written recursive
+// parser; only the binary operators use precedence climbing, because
+// writing one function per precedence level does not scale with a table
+// that grows by one line per operator.
+//
+//
+// LAYOUT
+//
+// struct Parser, the recovery levels, then forward declarations for every
+// static function in the order they are defined below. The definitions
+// follow the grammar top down: parse() -> func_def -> block -> stmt ->
+// expr -> binary -> unary -> factor, so reading the file straight
+// through reads the grammar. The cursor primitives, error() and sync()
+// sit at the bottom, since they are machinery, not grammar.
+//
+//
+// TABLES VS SWITCHES
+//
+// Precedence and associativity live in "parser/binop.def", the prefix
+// operators in "parser/unop.def". parse_binary() and parse_unary() only
+// ask op_kind_binary_prec() / _assoc() / _from_token(), they contain no
+// operator names at all. Adding an operator is one line in a .def file;
+// touching this file means the *mechanics* changed, not the operator set.
+//
+//
+// CURSOR
+//
+// peek(), check(), advance() and expect() are the only functions that
+// read or move p->i. advance() clamps on the last token, and the lexer
+// always appends TK_END, so the cursor can never run off the list and
+// every loop can rely on seeing TK_END forever once it gets there.
+//
+//
+// ERROR RECOVERY
+//
+// Rests on two separate mechanisms.
+//
+//   p->panic  suppresses REPORTING, so one broken construct yields one
+//             diagnostic instead of a dozen. Only error() sets it to
+//             true; only sync() and the collecting loops clear it.
+//   sync()    moves the CURSOR to a token where parsing can resume. Only
+//             the collecting loops call it. parse_func_def(), parse_stmt()
+//             and everything below them report and return NULL, and leave
+//             the decision where to resume to their caller, otherwise
+//             two levels would fight over the same cursor.
+//
+// A collecting loop clears p->panic at the top of each iteration: the
+// first token of a fresh item is solid ground, and whatever went wrong in
+// the previous item must not silence the next one.
+//
+// sync() distinguishes two kinds of tokens. A TERMINATOR closes the broken
+// unit (the ';' of a statement) and is consumed. A STOP token opens the
+// next one ('fn', 'var', '}') and is left for the caller, which is about
+// to dispatch on it. TK_FUNC stops every level, it is the strongest
+// anchor the language has.
+//
+//
+// TWO INVARIANTS
+//
+// A node-returning function returns NULL only with p->panic set. That
+// lets the loops test p->panic instead of the return value, which also
+// covers a node that survived while its separator did not.
+//
+// Every collecting loop consumes at least one token per iteration. This
+// is the only thing standing between a malformed input and an endless
+// loop, so each loop below carries the argument for why it holds.
+//
+//
+// WHEN A NODE SURVIVES
+//
+// An error that leaves the meaning of a construct open discards its node.
+// An error that only concerns a separator is reported, and the node
+// stays -- "a = 1 b = 2" is two understood statements and one missing
+// semicolon, and later stages are better served by the two statements
+// than by a hole.
+
 #include "parser/parser.h"
 #include "utils/arena.h"
 #include "sprache/diag.h"
@@ -24,24 +101,6 @@ enum SyncLevel {
     SYNC_PARAM,
     SYNC_ARG,
 };
-
-// Error recovery rests on two separate mechanisms.
-//
-//   p->panic  suppresses REPORTING, so one broken construct yields one
-//             diagnostic instead of a dozen. Only error() sets it to
-//             true; only sync() and the collecting loops clear it.
-//   sync()    moves the CURSOR to a token where parsing can resume. Only
-//             the collecting loops call it. parse_func_def(), parse_stmt()
-//             and everything below them report and return NULL, and leave
-//             the decision where to resume to their caller -- otherwise
-//             two levels would fight over the same cursor.
-//
-// Invariant: a node-returning function returns NULL only with p->panic
-// set. That lets the loops test p->panic instead of the return value,
-// which also covers a node that survived while its separator did not.
-//
-// Every collecting loop must consume at least one token per iteration.
-// Each loop below carries the argument for why it does.
 
 static struct Node* parse_func_def(struct Parser* p);
 static struct NodeList parse_params(struct Parser* p);
@@ -127,7 +186,7 @@ static struct Node* parse_func_def(struct Parser* p)
     n->func_def.body = parse_block(p);
     // A function without a usable body is not worth keeping: propagating
     // NULL sends parse() into sync(SYNC_TOPLEVEL), which skips to the next
-    // 'fn'. This function never calls sync() itself -- resuming is the
+    // 'fn'. This function never calls sync() itself, resuming is the
     // caller's decision.
     if (n->func_def.body == NULL) return NULL;
 
@@ -182,7 +241,7 @@ static struct Node* parse_block(struct Parser* p)
     // TK_END. TK_LBRACE / TK_VAR / TK_RETURN need no exit here,
     // because parse_stmt()'s dispatch always eats them. Get this
     // wrong and sync() returns without consuming while the loop
-    // retries the same token -- an endless loop.
+    // retries the same token.
     while (
         !check(p, TK_RBRACE) && !check(p, TK_FUNC) && !check(p, TK_END)
     ) {
@@ -235,13 +294,16 @@ static struct Node* parse_var_decl_or_def(struct Parser* p)
     // TODO: type
 
     struct Node* n = ARENA_CALLOC(p->a, struct Node);
-    node_init(n, NODE_VAR_DECL, tk_var.loc, OP_INVALID, tk_ident.value);
 
     if (!check(p, TK_SEMICOLON)) {
+        node_init(n, NODE_VAR_DEF, tk_var.loc, OP_INVALID, tk_ident.value);
         if (expect(p, TK_EQ).kind == TK_INVALID) return NULL;
         struct Node* expr = parse_expr(p);
         if (expr == NULL) return NULL;
         n->var.init = expr;
+    }
+    else {
+        node_init(n, NODE_VAR_DECL, tk_var.loc, OP_INVALID, tk_ident.value);
     }
     // Separator error: report and keep the node (see parse_stmt).
     expect(p, TK_SEMICOLON);
@@ -259,7 +321,6 @@ static struct Node* parse_return(struct Parser* p)
     n->ret.expr = parse_expr(p);
     if (n->ret.expr == NULL) return NULL;
 
-    // Separator error: report and keep the node (see parse_stmt).
     expect(p, TK_SEMICOLON);
     return n;
 }
@@ -301,9 +362,6 @@ static struct Node* parse_unary(struct Parser* p)
     if (op == OP_INVALID) return parse_factor(p);
 
     struct SourceLoc loc = advance(p).loc;
-
-    // Recursing into parse_unary (not parse_factor) is what makes
-    // prefix chains like "- ~ x" right-associative.
     struct Node* operand = parse_unary(p);
     if (operand == NULL) return NULL;
 
@@ -389,9 +447,6 @@ static struct NodeList parse_args(struct Parser* p)
 
             struct Node* arg = parse_expr(p);
             if (arg != NULL) DARRAY_ADD(p->a, &args, arg);
-
-            // Progress comes from the break below; sync() is here to put
-            // the cursor back on a ',' or ')' instead of on the junk.
             if (p->panic) sync(p, SYNC_ARG);
 
             if (!check(p, TK_COMMA))
@@ -460,7 +515,7 @@ static void sync(struct Parser* p, enum SyncLevel lvl)
     }
 }
 
-/// @brief A terminator belongs to the broken unit -- consume it and stop.
+/// @brief A terminator belongs to the broken unit, consume it and stop.
 static bool sync_is_terminator(enum SyncLevel lvl, enum TokenKind tk)
 {
     switch (lvl) {
@@ -472,10 +527,7 @@ static bool sync_is_terminator(enum SyncLevel lvl, enum TokenKind tk)
     return false;
 }
 
-/// @brief A stop token starts the next unit -- leave it for the caller.
-/// @note TK_FUNC stops every level. It is the strongest anchor the
-///       language has, and recovery must never run past one, or a broken
-///       body swallows the function that follows it.
+/// @brief A stop token starts the next unit, leave it for the caller.
 static bool sync_is_stop(enum SyncLevel lvl, enum TokenKind tk)
 {
     switch (lvl) {
