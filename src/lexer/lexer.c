@@ -4,8 +4,6 @@
 #include <assert.h>
 #include <string.h>
 
-#define TOKENLIST_INIT_CAPACITY 50
-
 /// @brief Advances by exactly one character and returns it.
 /// @note Does not skip whitespace. Returns '\0' at end of input without
 /// advancing further.

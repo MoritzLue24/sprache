@@ -4,6 +4,13 @@
 #include "sprache/diag.h"
 #include <stdio.h>
 
+#define TOKENLIST_INIT_CAPACITY 50
+#define TOKEN_NULL ((struct Token){ \
+    .kind = TK_INVALID, \
+    .value = NULL, \
+    .loc = SOURCE_LOC_NULL \
+})
+
 enum TokenClass {
     TC_OTHER,
     TC_KW,
