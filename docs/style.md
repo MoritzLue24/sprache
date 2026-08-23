@@ -87,7 +87,7 @@ if (strcmp(a, b) == 0) return a;
 - One blank line after every `struct` definition.
 - One blank line after every function definition (not declaration).
 - No blank line between consecutive function declarations — but only when
-    theres no comment between them.
+    theres no comment between them. Is not necessary when grouping.
 
 ```c
 #ifndef TOKENS_H
@@ -256,7 +256,7 @@ For "body-wrapped" macros, like the following example, no identation is needed
     `diag_dump`, `diag_dump_all`, `arena_calloc`, `token_kind_is_kw`.
     Prefer `<subject>_<verb>` over `<verb>_<subject>`.
     It is not strict. If the subject is not a struct, or enum,
-    it is not necessary.
+    it is not necessary. If the function is static, this rule does not apply.
 - **The public API in `include/sprache/` uses the `sprache_` prefix** when the
     name would otherwise be generic: `sprache_compile`, `sprache_stage_from_str`.
     A name that is already namespaced by its own type (`diag_*`) does not need it.
@@ -312,7 +312,7 @@ static enum TokenKind match_punct(
 
 Structs are values. Prefer by value wherever it is possible.
 
-- **Return by value, always.** `lex` returns a `struct TokenList`, `lex_literal`
+- **Return by value, always.** `lex` returns a `struct TokenList`, `lex_literal`. Does not apply on static functions.
     a `struct Token`, `sprache_compile` a `struct CompileResult`. No struct
     out-parameter, and no arena allocation just to hand an aggregate back.
 - **Take by value** what the function only consumes and does not need to reach
@@ -420,11 +420,12 @@ After each enum / struct definition, closed context functions related
 to this object has to follow first. Then the order above continues.
 
 **In a source file**
-1. Static variables
-2. Static function forward-declarations
+1. Enum & struct definitions
+2. Static variables
+3. Static function forward-declarations
     (not optional, always forward-decl static functions)
-3. Implemented functions, included from header
-4. Static function implementation (same order as declarations)
+4. Implemented functions, included from header
+5. Static function implementation (same order as declarations)
 
 ## 8. X-macro `.def` files
 
