@@ -1,0 +1,3 @@
+// UNOP(kind, tok)
+UNOP(OP_NEG, TK_MINUS)
+UNOP(OP_BW_NOT, TK_BW_NOT)
