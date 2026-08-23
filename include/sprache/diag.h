@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#define SOURCE_LOC_NULL ((struct SourceLoc){ .line = 0, .col = 0 })
+
 enum DiagCode {
     DIAG_INVALID,
 #define DIAG(name, format) name,
