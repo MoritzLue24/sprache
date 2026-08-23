@@ -3,6 +3,8 @@
 
 #include "sprache/diag.h"
 #include <stdio.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 #define TOKENLIST_INIT_CAPACITY 50
 #define TOKEN_NULL ((struct Token){ \

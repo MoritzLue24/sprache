@@ -123,7 +123,9 @@ static struct Token expect(struct Parser* p, enum TokenKind tk);
 
 static void error(struct Parser* p, enum DiagCode code, ...);
 static void sync(struct Parser* p, enum SyncLevel lvl);
+/// @brief A terminator belongs to the broken unit, consume it and stop.
 static bool sync_is_terminator(enum SyncLevel lvl, enum TokenKind tk);
+/// @brief A stop token starts the next unit, leave it for the caller.
 static bool sync_is_stop(enum SyncLevel lvl, enum TokenKind tk);
 
 struct Node parse(
@@ -485,14 +487,14 @@ static struct Token expect(struct Parser* p, enum TokenKind tk)
     return TOKEN_NULL;
 }
 
-// NOTE: forwards to diag_vadd, not diag_add. C cannot pass '...' on to
-// another variadic function, so the arguments travel as a va_list. The
-// format itself stays bound to the code in "sprache/diag.def".
 static void error(struct Parser* p, enum DiagCode code, ...)
 {
     if (p->panic) return;
     p->panic = true;
-
+    
+    // forwards to diag_vadd, not diag_add. C cannot pass '...' on to
+    // another variadic function, so the arguments travel as a va_list. The
+    // format itself stays bound to the code in "sprache/diag.def".
     va_list args;
     va_start(args, code);
     diag_vadd(p->a, p->dl, code, peek(p).loc, args);
@@ -515,7 +517,6 @@ static void sync(struct Parser* p, enum SyncLevel lvl)
     }
 }
 
-/// @brief A terminator belongs to the broken unit, consume it and stop.
 static bool sync_is_terminator(enum SyncLevel lvl, enum TokenKind tk)
 {
     switch (lvl) {
@@ -527,7 +528,6 @@ static bool sync_is_terminator(enum SyncLevel lvl, enum TokenKind tk)
     return false;
 }
 
-/// @brief A stop token starts the next unit, leave it for the caller.
 static bool sync_is_stop(enum SyncLevel lvl, enum TokenKind tk)
 {
     switch (lvl) {

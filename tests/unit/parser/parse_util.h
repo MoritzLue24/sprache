@@ -34,7 +34,7 @@ static inline void parsed_free(struct Parsed* p)
 // and every child NULL. Navigating past a missing node therefore keeps
 // yielding this node instead of dereferencing NULL, and a failing test
 // reports a kind mismatch instead of taking the whole run down.
-static const struct Node node_none = {0};
+static const struct Node node_none = { 0 };
 
 /// @brief The i-th entry of 'nl', or node_none if the list is shorter.
 static inline const struct Node* at(const struct NodeList* nl, size_t i)

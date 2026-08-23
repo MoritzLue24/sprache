@@ -1,6 +1,7 @@
 #include "utils/str.h"
 #include "utils/arena.h"
 #include <stddef.h>
+#include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -29,7 +30,7 @@ char* str_replace_last(
     const char* substr_ptr = NULL;
     const char* search = s;
 
-    while (1) {
+    while (true) {
         const char* next = strstr(search, substr);
         if (next == NULL) {
             break;

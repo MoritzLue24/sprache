@@ -2,11 +2,11 @@
 #include "utils/arena.h"
 #include <stdlib.h>
 
-FILE* file_openw(const char* filename)
+FILE* file_openw(const char* path)
 {
-    FILE* f = fopen(filename, "w");
+    FILE* f = fopen(path, "w");
     if (!f) {
-        fprintf(stderr, "Error: File not found: '%s'\n", filename);
+        fprintf(stderr, "Error: File not found: '%s'\n", path);
         exit(1);
     }
     return f;

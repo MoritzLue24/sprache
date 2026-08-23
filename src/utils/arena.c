@@ -58,7 +58,7 @@ void* arena_calloc(struct Arena* a, size_t size, size_t align)
     return ptr;
 }
 
-static void alloc_fail(void)
+static void alloc_fail()
 {
     fprintf(stderr, "Error: out of memory\n");
     exit(1);

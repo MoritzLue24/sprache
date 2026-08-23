@@ -71,7 +71,12 @@ static void node_dump_depth(
         case NODE_BUILTIN:
             node_dump_all_depth("args", &n->builtin.args, out, fd);
             break;
-        default:
+
+        // These nodes does not have union fields, no need to dump them
+        case NODE_PARAM:
+        case NODE_VAR_DECL:
+        case NODE_LITERAL:
+        case NODE_IDENT:
             break;
     }
     fprintf(out, "%*s", depth * TABSIZE, "");
