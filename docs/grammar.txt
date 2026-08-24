@@ -19,7 +19,7 @@
 <variable-definition-statement>     ::= var <ident>: <type> = <expression> ;
 <return-statement>                  ::= return <expression> ;
 
-<type>  ::= uint8 | int8
+<type>  ::= <ident> // uint8, int8 are pre-declared, and the only valid types
 
 <expression>            ::= <assigment-expression>
 <assigment-expression>  ::= <bitwise-or> { = <bitwise-or> }*
