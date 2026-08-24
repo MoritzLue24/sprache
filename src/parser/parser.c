@@ -104,6 +104,7 @@ enum SyncLevel {
 
 static struct Node* parse_func_def(struct Parser* p);
 static struct NodeList parse_params(struct Parser* p);
+/// @brief Parses a NODE_TYPE, consumes an TK_IDENT 
 static struct Node* parse_type(struct Parser* p);
 static struct Node* parse_block(struct Parser* p);
 static struct Node* parse_stmt(struct Parser* p);
@@ -311,7 +312,7 @@ static struct Node* parse_var_decl_or_def(struct Parser* p)
     if (expect(p, TK_COLON).kind == TK_INVALID) return NULL;
     struct Node* n_type = parse_type(p);
     if (n_type == NULL) return NULL;
-    
+
     struct Node* n = ARENA_CALLOC(p->a, struct Node);
 
     if (!check(p, TK_SEMICOLON)) {
@@ -510,7 +511,7 @@ static void error(struct Parser* p, enum DiagCode code, ...)
 {
     if (p->panic) return;
     p->panic = true;
-    
+
     // forwards to diag_vadd, not diag_add. C cannot pass '...' on to
     // another variadic function, so the arguments travel as a va_list. The
     // format itself stays bound to the code in "sprache/diag.def".
