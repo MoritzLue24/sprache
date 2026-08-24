@@ -20,7 +20,7 @@ static void parse_empty_program()
 static void parse_function_with_empty_body()
 {
     struct Parsed p;
-    parsed_init(&p, "fn main() { }");
+    parsed_init(&p, "fn main() -> uint8 { }");
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
     TST_ASSERT_EQ((size_t)1, p.root.program.nl.count);
@@ -38,7 +38,9 @@ static void parse_function_with_empty_body()
 static void parse_multiple_top_level_functions()
 {
     struct Parsed p;
-    parsed_init(&p, "fn a() { } fn b() { } fn c() { }");
+    parsed_init(
+        &p, "fn a() -> uint8 { } fn b() -> uint8 { } fn c() -> uint8 { }"
+    );
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
     TST_ASSERT_EQ((size_t)3, p.root.program.nl.count);
@@ -52,7 +54,7 @@ static void parse_multiple_top_level_functions()
 static void parse_parameter_list()
 {
     struct Parsed p;
-    parsed_init(&p, "fn f(a, b, c) { }");
+    parsed_init(&p, "fn f(a: uint8, b: int8, c: bool) -> uint8 { }");
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
 
@@ -66,10 +68,101 @@ static void parse_parameter_list()
     parsed_free(&p);
 }
 
+static void parse_function_return_type()
+{
+    struct Parsed p;
+    parsed_init(&p, "fn f() -> int8 { }");
+
+    TST_ASSERT_EQ((size_t)0, p.dl.count);
+
+    const struct Node* type = some(at(&p.root.program.nl, 0)->func_def.type);
+    TST_ASSERT_EQ(NODE_TYPE, type->kind);
+    TST_ASSERT(strcmp(val(type), "int8") == 0);
+
+    parsed_free(&p);
+}
+
+static void parse_parameter_types()
+{
+    struct Parsed p;
+    parsed_init(&p, "fn f(a: uint8, b: int8) -> bool { }");
+
+    TST_ASSERT_EQ((size_t)0, p.dl.count);
+
+    const struct Node* fn = at(&p.root.program.nl, 0);
+    TST_ASSERT_EQ((size_t)2, fn->func_def.params.count);
+
+    const struct Node* a = some(at(&fn->func_def.params, 0)->param.type);
+    TST_ASSERT_EQ(NODE_TYPE, a->kind);
+    TST_ASSERT(strcmp(val(a), "uint8") == 0);
+
+    const struct Node* b = some(at(&fn->func_def.params, 1)->param.type);
+    TST_ASSERT(strcmp(val(b), "int8") == 0);
+
+    parsed_free(&p);
+}
+
+static void parse_type_is_an_ordinary_ident()
+{
+    struct Parsed p;
+    // Types are no longer keywords, so the parser takes whatever
+    // identifier it finds and never decides whether it names a type --
+    // that is sema's job.
+    parsed_init(&p, "fn f(a: Led) -> Matrix { var b: whatever; }");
+
+    TST_ASSERT_EQ((size_t)0, p.dl.count);
+
+    const struct Node* fn = at(&p.root.program.nl, 0);
+    const struct Node* param = at(&fn->func_def.params, 0);
+    const struct Node* v = fn_stmt(&p.root, 0, 0);
+
+    TST_ASSERT(strcmp(val(some(fn->func_def.type)), "Matrix") == 0);
+    TST_ASSERT(strcmp(val(some(param->param.type)), "Led") == 0);
+    TST_ASSERT(strcmp(val(some(v->var_decl.type)), "whatever") == 0);
+
+    parsed_free(&p);
+}
+
+static void parse_type_names_are_not_reserved()
+{
+    struct Parsed p;
+    // 'uint8' lexes as TK_IDENT like any other name, so nothing stops it
+    // from naming a variable. Rejecting that is sema's call, not the
+    // parser's.
+    parsed_init(&p, "fn main() -> uint8 { var uint8: uint8; }");
+
+    TST_ASSERT_EQ((size_t)0, p.dl.count);
+
+    const struct Node* v = fn_stmt(&p.root, 0, 0);
+    TST_ASSERT_EQ(NODE_VAR_DECL, v->kind);
+    TST_ASSERT(strcmp(val(v), "uint8") == 0);
+    TST_ASSERT(strcmp(val(some(v->var_decl.type)), "uint8") == 0);
+
+    parsed_free(&p);
+}
+
+static void parse_type_tracks_source_location()
+{
+    struct Parsed p;
+    // The type node points at the name itself, not at the '->' or ':'
+    // that introduced it: col 14 is 'uint8', col 29 is 'int8'.
+    parsed_init(&p, "fn main() -> uint8 { var a: int8; }");
+
+    TST_ASSERT_EQ((size_t)0, p.dl.count);
+
+    const struct Node* fn = at(&p.root.program.nl, 0);
+    TST_ASSERT_EQ(14u, some(fn->func_def.type)->loc.col);
+
+    const struct Node* v = fn_stmt(&p.root, 0, 0);
+    TST_ASSERT_EQ(29u, some(v->var_decl.type)->loc.col);
+
+    parsed_free(&p);
+}
+
 static void parse_nested_blocks()
 {
     struct Parsed p;
-    parsed_init(&p, "fn main() { { { 1; } } }");
+    parsed_init(&p, "fn main() -> uint8 { { { 1; } } }");
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
 
@@ -86,14 +179,15 @@ static void parse_nested_blocks()
 static void parse_var_declaration_without_init()
 {
     struct Parsed p;
-    parsed_init(&p, "fn main() { var a; }");
+    parsed_init(&p, "fn main() -> uint8 { var a: int8; }");
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
 
     const struct Node* v = fn_stmt(&p.root, 0, 0);
     TST_ASSERT_EQ(NODE_VAR_DECL, v->kind);
     TST_ASSERT(strcmp(val(v), "a") == 0);
-    TST_ASSERT(v->var.init == NULL);
+    TST_ASSERT_EQ(NODE_TYPE, some(v->var_decl.type)->kind);
+    TST_ASSERT(strcmp(val(some(v->var_decl.type)), "int8") == 0);
 
     parsed_free(&p);
 }
@@ -101,18 +195,16 @@ static void parse_var_declaration_without_init()
 static void parse_var_definition_with_init()
 {
     struct Parsed p;
-    parsed_init(&p, "fn main() { var a = 1 + 2; }");
+    parsed_init(&p, "fn main() -> uint8 { var a: uint8 = 1 + 2; }");
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
 
-    // NOTE: NODE_VAR_DEF exists in node.def but the parser does not emit
-    // it yet -- a definition still comes back as NODE_VAR_DEF with a
-    // non-NULL init. Update this assertion when that is split.
     const struct Node* v = fn_stmt(&p.root, 0, 0);
     TST_ASSERT_EQ(NODE_VAR_DEF, v->kind);
     TST_ASSERT(strcmp(val(v), "a") == 0);
-    TST_ASSERT_EQ(NODE_BINARY, some(v->var.init)->kind);
-    TST_ASSERT_EQ(OP_PLUS, some(v->var.init)->op);
+    TST_ASSERT(strcmp(val(some(v->var_def.type)), "uint8") == 0);
+    TST_ASSERT_EQ(NODE_BINARY, some(v->var_def.init)->kind);
+    TST_ASSERT_EQ(OP_PLUS, some(v->var_def.init)->op);
 
     parsed_free(&p);
 }
@@ -120,7 +212,7 @@ static void parse_var_definition_with_init()
 static void parse_return_statement()
 {
     struct Parsed p;
-    parsed_init(&p, "fn main() { return 1; }");
+    parsed_init(&p, "fn main() -> uint8 { return 1; }");
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
 
@@ -135,7 +227,7 @@ static void parse_return_statement()
 static void parse_expression_statement()
 {
     struct Parsed p;
-    parsed_init(&p, "fn main() { 42; }");
+    parsed_init(&p, "fn main() -> uint8 { 42; }");
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
 
@@ -149,7 +241,7 @@ static void parse_expression_statement()
 static void parse_ident_is_not_a_call()
 {
     struct Parsed p;
-    parsed_init(&p, "fn main() { a; a(); }");
+    parsed_init(&p, "fn main() -> uint8 { a; a(); }");
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
     TST_ASSERT_EQ(NODE_IDENT, fn_stmt(&p.root, 0, 0)->kind);
@@ -162,7 +254,7 @@ static void parse_ident_is_not_a_call()
 static void parse_call_arguments()
 {
     struct Parsed p;
-    parsed_init(&p, "fn main() { g(1); h(1, a, 2 + 3); }");
+    parsed_init(&p, "fn main() -> uint8 { g(1); h(1, a, 2 + 3); }");
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
 
@@ -183,7 +275,7 @@ static void parse_call_arguments()
 static void parse_builtin_call()
 {
     struct Parsed p;
-    parsed_init(&p, "fn main() { @out(1, 2); }");
+    parsed_init(&p, "fn main() -> uint8 { @out(1, 2); }");
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
 
@@ -198,7 +290,7 @@ static void parse_builtin_call()
 static void parse_unary_operators()
 {
     struct Parsed p;
-    parsed_init(&p, "fn main() { -1; ~a; - ~ b; }");
+    parsed_init(&p, "fn main() -> uint8 { -1; ~a; - ~ b; }");
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
 
@@ -224,7 +316,7 @@ static void parse_unary_operators()
 static void parse_binary_precedence()
 {
     struct Parsed p;
-    parsed_init(&p, "fn main() { 1 + 2 * 3; }");
+    parsed_init(&p, "fn main() -> uint8 { 1 + 2 * 3; }");
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
 
@@ -241,7 +333,7 @@ static void parse_binary_precedence()
 static void parse_left_associativity()
 {
     struct Parsed p;
-    parsed_init(&p, "fn main() { 1 - 2 - 3; }");
+    parsed_init(&p, "fn main() -> uint8 { 1 - 2 - 3; }");
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
 
@@ -262,7 +354,7 @@ static void parse_left_associativity()
 static void parse_right_associativity()
 {
     struct Parsed p;
-    parsed_init(&p, "fn main() { a = b = c; }");
+    parsed_init(&p, "fn main() -> uint8 { a = b = c; }");
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
 
@@ -284,7 +376,7 @@ static void parse_right_associativity()
 static void parse_full_precedence_ladder()
 {
     struct Parsed p;
-    parsed_init(&p, "fn main() { a | b ^ c & d + e * f; }");
+    parsed_init(&p, "fn main() -> uint8 { a | b ^ c & d + e * f; }");
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
 
@@ -310,7 +402,7 @@ static void parse_full_precedence_ladder()
 static void parse_parentheses_override_precedence()
 {
     struct Parsed p;
-    parsed_init(&p, "fn main() { (1 + 2) * 3; }");
+    parsed_init(&p, "fn main() -> uint8 { (1 + 2) * 3; }");
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
 
@@ -325,12 +417,12 @@ static void parse_parentheses_override_precedence()
 static void parse_parenthesis_moves_loc_to_lparen()
 {
     struct Parsed p;
-    // col 13 is '(', col 14 is '1'
-    parsed_init(&p, "fn main() { (1); }");
+    // col 22 is '(', col 23 is '1'
+    parsed_init(&p, "fn main() -> uint8 { (1); }");
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
     TST_ASSERT_EQ(NODE_LITERAL, fn_stmt(&p.root, 0, 0)->kind);
-    TST_ASSERT_EQ(13u, fn_stmt(&p.root, 0, 0)->loc.col);
+    TST_ASSERT_EQ(22u, fn_stmt(&p.root, 0, 0)->loc.col);
 
     parsed_free(&p);
 }
@@ -338,17 +430,17 @@ static void parse_parenthesis_moves_loc_to_lparen()
 static void parse_tracks_source_locations()
 {
     struct Parsed p;
-    // fn main() {
+    // fn main() -> uint8 {
     //     return 1;
     // }
-    parsed_init(&p, "fn main() {\n    return 1;\n}");
+    parsed_init(&p, "fn main() -> uint8 {\n    return 1;\n}");
 
     TST_ASSERT_EQ((size_t)0, p.dl.count);
 
     const struct Node* fn = at(&p.root.program.nl, 0);
     TST_ASSERT_EQ(1u, fn->loc.line);
     TST_ASSERT_EQ(1u, fn->loc.col);
-    TST_ASSERT_EQ(11u, fn_body(&p.root, 0)->loc.col);
+    TST_ASSERT_EQ(20u, fn_body(&p.root, 0)->loc.col);
 
     const struct Node* r = fn_stmt(&p.root, 0, 0);
     TST_ASSERT_EQ(2u, r->loc.line);
@@ -364,6 +456,11 @@ int main()
     TST_RUN(parse_function_with_empty_body);
     TST_RUN(parse_multiple_top_level_functions);
     TST_RUN(parse_parameter_list);
+    TST_RUN(parse_function_return_type);
+    TST_RUN(parse_parameter_types);
+    TST_RUN(parse_type_is_an_ordinary_ident);
+    TST_RUN(parse_type_names_are_not_reserved);
+    TST_RUN(parse_type_tracks_source_location);
     TST_RUN(parse_nested_blocks);
     TST_RUN(parse_var_declaration_without_init);
     TST_RUN(parse_var_definition_with_init);
