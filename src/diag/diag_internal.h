@@ -2,10 +2,11 @@
 #define DIAG_INTERNAL_H
 
 #include "sprache/diag.h"
-#include "utils/arena.h"
 #include <stdarg.h>
 
 #define DIAG_INIT_CAPACITY 10
+
+struct Arena;
 
 /// @brief Adds a formatted diagnostic using the format specified in "diag.def"
 void diag_add(

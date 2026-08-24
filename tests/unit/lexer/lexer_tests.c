@@ -1,5 +1,6 @@
 #include "tst.h"
 #include "lexer/lexer.h"
+#include "utils/arena.h"
 
 static void lex_ident_and_keyword_boundary()
 {

@@ -2,7 +2,8 @@
 #define LEXER_H
 
 #include "lexer/tokens.h"
-#include "utils/arena.h"
+
+struct Arena;
 
 struct TokenList lex(struct Arena* a, const char* source);
 
