@@ -15,8 +15,8 @@
                             | <return-statement>
 
 <expression-statement>              ::= <expression> ;
-<variable-declaration-statement>    ::= var: <type> <ident> ;
-<variable-definition-statement>     ::= var: <type> <ident> = <expression> ;
+<variable-declaration-statement>    ::= var <ident>: <type> ;
+<variable-definition-statement>     ::= var <ident>: <type> = <expression> ;
 <return-statement>                  ::= return <expression> ;
 
 <type>  ::= uint8 | int8
