@@ -46,14 +46,22 @@ static void node_dump_depth(
             node_dump_all_depth("nl", &n->program.nl, out, fd);
             break;
         case NODE_FUNC_DEF:
+            node_dump_depth("type", n->func_def.type, out, fd);
             node_dump_all_depth("params", &n->func_def.params, out, fd);
             node_dump_depth("body", n->func_def.body, out, fd);
+            break;
+        case NODE_PARAM:
+            node_dump_depth("type", n->param.type, out, fd);
             break;
         case NODE_BLOCK:
             node_dump_all_depth("nl", &n->block.nl, out, fd);
             break;
+        case NODE_VAR_DECL:
+            node_dump_depth("type", n->var_decl.type, out, fd);
+            break;
         case NODE_VAR_DEF:
-            node_dump_depth("init", n->var.init, out, fd);
+            node_dump_depth("type", n->var_def.type, out, fd);
+            node_dump_depth("init", n->var_def.init, out, fd);
             break;
         case NODE_RETURN:
             node_dump_depth("expr", n->ret.expr, out, fd);
@@ -73,8 +81,8 @@ static void node_dump_depth(
             break;
 
         // These nodes does not have union fields, no need to dump them
-        case NODE_PARAM:
-        case NODE_VAR_DECL:
+        case NODE_INVALID:
+        case NODE_TYPE:
         case NODE_LITERAL:
         case NODE_IDENT:
             break;

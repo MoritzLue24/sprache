@@ -104,6 +104,7 @@ enum SyncLevel {
 
 static struct Node* parse_func_def(struct Parser* p);
 static struct NodeList parse_params(struct Parser* p);
+static struct Node* parse_type(struct Parser* p);
 static struct Node* parse_block(struct Parser* p);
 static struct Node* parse_stmt(struct Parser* p);
 static struct Node* parse_var_decl_or_def(struct Parser* p);
@@ -182,8 +183,9 @@ static struct Node* parse_func_def(struct Parser* p)
     n->func_def.params = parse_params(p);
     if (expect(p, TK_RPAREN).kind == TK_INVALID) return NULL;
 
-    // TODO: Type
-    // if (expect(p, TK_ARROW).kind == TK_INVALID) return NULL;
+    if (expect(p, TK_ARROW).kind == TK_INVALID) return NULL;
+    n->func_def.type = parse_type(p);
+    if (n->func_def.type == NULL) return NULL;
 
     n->func_def.body = parse_block(p);
     // A function without a usable body is not worth keeping: propagating
@@ -207,14 +209,17 @@ static struct NodeList parse_params(struct Parser* p)
         p->panic = false;
 
         struct Token tk_ident = expect(p, TK_IDENT);
-
         if (tk_ident.kind != TK_INVALID) {
-            struct Node* param = ARENA_CALLOC(p->a, struct Node);
+            struct Node* n_param = ARENA_CALLOC(p->a, struct Node);
             node_init(
-                param, NODE_PARAM, tk_ident.loc, OP_INVALID, tk_ident.value
+                n_param, NODE_PARAM, tk_ident.loc, OP_INVALID, tk_ident.value
             );
-            // TODO: ": <type>" per grammar.txt goes here
-            DARRAY_ADD(p->a, &params, param);
+            if (expect(p, TK_COLON).kind != TK_INVALID) {
+                n_param->param.type = parse_type(p);
+                if (n_param->param.type != NULL) {
+                    DARRAY_ADD(p->a, &params, n_param);
+                }
+            }
         }
         // SYNC_PARAM stops BEFORE the comma, because the comma belongs to
         // the loop below. Progress: if the cursor already sits on one,
@@ -227,6 +232,16 @@ static struct NodeList parse_params(struct Parser* p)
     } while (true);
 
     return params;
+}
+
+static struct Node* parse_type(struct Parser* p)
+{
+    struct Token tk_type = expect(p, TK_IDENT);
+    if (tk_type.kind == TK_INVALID) return NULL;
+
+    struct Node* n = ARENA_CALLOC(p->a, struct Node);
+    node_init(n, NODE_TYPE, tk_type.loc, OP_INVALID, tk_type.value);
+    return n;
 }
 
 static struct Node* parse_block(struct Parser* p)
@@ -293,8 +308,10 @@ static struct Node* parse_var_decl_or_def(struct Parser* p)
     struct Token tk_ident = expect(p, TK_IDENT);
     if (tk_ident.kind == TK_INVALID) return NULL;
 
-    // TODO: type
-
+    if (expect(p, TK_COLON).kind == TK_INVALID) return NULL;
+    struct Node* n_type = parse_type(p);
+    if (n_type == NULL) return NULL;
+    
     struct Node* n = ARENA_CALLOC(p->a, struct Node);
 
     if (!check(p, TK_SEMICOLON)) {
@@ -302,10 +319,12 @@ static struct Node* parse_var_decl_or_def(struct Parser* p)
         if (expect(p, TK_EQ).kind == TK_INVALID) return NULL;
         struct Node* expr = parse_expr(p);
         if (expr == NULL) return NULL;
-        n->var.init = expr;
+        n->var_def.type = n_type;
+        n->var_def.init = expr;
     }
     else {
         node_init(n, NODE_VAR_DECL, tk_var.loc, OP_INVALID, tk_ident.value);
+        n->var_decl.type = n_type;
     }
     // Separator error: report and keep the node (see parse_stmt).
     expect(p, TK_SEMICOLON);

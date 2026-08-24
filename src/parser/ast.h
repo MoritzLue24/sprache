@@ -54,9 +54,15 @@ struct Node {
 
     union {
         struct { struct NodeList nl; } program;
-        struct { struct NodeList params; struct Node* body; } func_def;
+        struct {
+            struct Node* type;
+            struct NodeList params;
+            struct Node* body;
+        } func_def;
+        struct { struct Node* type; } param;
         struct { struct NodeList nl; } block;
-        struct { struct Node* init; } var;
+        struct { struct Node* type; } var_decl;
+        struct { struct Node* type; struct Node* init; } var_def;
         struct { struct Node* expr; } ret;
         struct { struct Node* lhs; struct Node* rhs; } binary;
         struct { struct Node* operand; } unary;
