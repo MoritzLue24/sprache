@@ -1,0 +1,4 @@
+// TYPE(kind, spelling, size, is_signed)
+TYPE(TYPE_NONE, "none", 0, false)
+TYPE(TYPE_UINT8, "uint8", 1, false)
+TYPE(TYPE_INT8, "int8", 1, true)
