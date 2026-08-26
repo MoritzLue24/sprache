@@ -1,0 +1,5 @@
+// BUILTIN(kind, spelling, type, argc, a0, a1, a2, a3)
+BUILTIN(
+    BUILTIN_READ, "read", TYPE_UINT8, 1,
+    TYPE_UINT8, TYPE_INVALID, TYPE_INVALID, TYPE_INVALID
+)
