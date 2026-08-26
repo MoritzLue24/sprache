@@ -10,7 +10,7 @@ void args_print_help()
         "\t-o, --output <out-file>\t\tSpecifies the output-file. If "
         "not supplied, <file>.tok/ast/ir/asm/..\n"
         "\t-s, --stage <stage>\t\tSpecifies the stage after which the "
-        "compiler should stop\n"
+        "compiler should stop (case insensitive)\n"
         "\t\t\t\t\tAvailable stages: "
     );
 

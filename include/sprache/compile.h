@@ -13,7 +13,8 @@ enum SpracheStage {
 #undef STAGE
 };
 
-/// @brief Converts 's' to the according 'str' of 'stage.def'.
+/// @brief Converts 's' to the according 'str' of 'stage.def',
+/// case insensitive.
 /// @note UPPERS s
 enum SpracheStage sprache_stage_from_str(char* s);
 
@@ -34,6 +35,9 @@ struct CompileResult {
 
 struct Arena;
 
+/// @brief Compiles the supplied source code into 
+/// the product of the given state.
+/// @note Does not output diagnostics on its own.
 struct CompileResult sprache_compile(
     struct Arena* a, struct CompileOptions options
 );

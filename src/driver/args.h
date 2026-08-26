@@ -15,6 +15,7 @@ struct Arguments {
 };
 
 /// @brief Parses the cli arguments into the `Arguments` struct.
+/// @note sprache_stage is case insensitive
 /// @return true on success, false otherwise (prints error message)
 bool args_parse(
     struct Arena* a, struct Arguments* args, int argc, char** argv

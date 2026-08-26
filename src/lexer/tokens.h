@@ -26,8 +26,12 @@ enum TokenKind {
 #undef TOKEN
 };
 
+/// @returns the Token kind as a string.
+/// On invalid builtin (not TK_INVALID), return NULL.
 const char* token_kind_str(enum TokenKind tok_kind);
-enum TokenKind token_kind_from_str(const char* s);
+/// @returns the first token that matches the spelling.
+/// TK_INVALID on no match.
+enum TokenKind token_kind_from_spelling(const char* s);
 bool token_kind_is_kw(enum TokenKind tok_kind);
 bool token_kind_is_punct(enum TokenKind tok_kind);
 

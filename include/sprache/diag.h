@@ -14,6 +14,8 @@ enum DiagCode {
 #undef DIAG
 };
 
+/// @returns the diag code as a string.
+/// On invalid diag code (not DIAG_INVALID), return NULL.
 const char* diag_code_str(enum DiagCode code);
 
 struct SourceLoc {

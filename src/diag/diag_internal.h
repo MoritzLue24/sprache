@@ -15,7 +15,7 @@ void diag_add(
 );
 
 /// @brief Like diag_add, but with an already started argument list.
-/// @note Does not end 'args' -- that stays the caller's job.
+/// @note Does not end 'args', that stays the caller's job.
 void diag_vadd(
     struct Arena* a, struct DiagList* dl, enum DiagCode code,
     struct SourceLoc loc, va_list args

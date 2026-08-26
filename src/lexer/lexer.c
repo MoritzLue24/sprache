@@ -142,7 +142,7 @@ static struct Token lex_ident_kw(
     strncpy(value, start_ptr, len);
     value[len] = '\0';
 
-    enum TokenKind kw_kind = token_kind_from_str(value);
+    enum TokenKind kw_kind = token_kind_from_spelling(value);
     if (token_kind_is_kw(kw_kind)) {
         return (struct Token){ .kind = kw_kind, .value = NULL, .loc = start };
     }
