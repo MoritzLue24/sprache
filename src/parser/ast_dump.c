@@ -1,4 +1,5 @@
 #include "parser/ast.h"
+#include "sema/symbols.h"   // exception, just for symbol_dump
 
 #define TABSIZE 4
 
@@ -40,6 +41,14 @@ static void node_dump_depth(
 
     fprintf(out, "%*s", fd * TABSIZE, "");
     fprintf(out, "value: %s\n", n->value);
+    
+    fprintf(out, "%*s", fd * TABSIZE, "");
+    fprintf(out, "type: %s\n", type_kind_str(n->type));
+    
+    if (n->symbol == NULL) {
+        fprintf(out, "%*ssymbol: <unresolved>\n", fd * TABSIZE, "");
+    } 
+    else symbol_dump("symbol", n->symbol, out, fd);
 
     switch (n->kind) {
         case NODE_PROGRAM:

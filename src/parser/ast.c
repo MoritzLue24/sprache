@@ -78,4 +78,7 @@ void node_init(
     n->loc = loc;
     n->op = op;
     n->value = value;
+
+    n->type = TYPE_INVALID;
+    n->symbol = NULL;
 }
