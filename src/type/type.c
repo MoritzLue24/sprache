@@ -1,5 +1,7 @@
 #include "type/type.h"
 #include <string.h>
+#include <stdint.h>
+#include <errno.h>
 
 const char* type_kind_str(enum TypeKind type)
 {
@@ -45,6 +47,17 @@ bool type_is_signed(enum TypeKind type)
 
 bool type_fits(enum TypeKind type, const char* s)
 {
-    // TODO
-    return false;
+    size_t size = type_size(type);
+    if (size == 0 || size > sizeof(uint64_t))
+        return false;
+
+    errno = 0;
+    char* end;
+    unsigned long long v = strtoull(s, &end, 10);
+    if (errno == ERANGE || *end != '\0')
+        return false;
+
+    size_t bits = size * 8 - (type_is_signed(type) ? 1 : 0);
+    uint64_t max = bits >= 64 ? UINT64_MAX : ((uint64_t)1 << bits) - 1;
+    return v <= max;
 }
