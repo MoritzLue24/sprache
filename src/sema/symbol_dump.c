@@ -23,17 +23,16 @@ void symbol_dump(
     fprintf(out, "%*s", fd * TABSIZE, "");
     fprintf(out, "loc_decl: %u:%u\n", sym->loc_decl.line, sym->loc_decl.col);
 
-    fprintf(out, "%*s", fd * TABSIZE, "");
-    fprintf(out, "param_count: %zu\n", sym->param_count);
-    
+    // @claude-begin
     fprintf(out, "%*sparams: [", fd * TABSIZE, "");
-    for (size_t i = 0; i < sym->param_count; i++) {
-        if (i == sym->param_count - 1) {
-            fprintf(out, "%s", type_kind_str(sym->params[i]));
+    for (size_t i = 0; i < sym->paramlist.count; i++) {
+        if (i == sym->paramlist.count - 1) {
+            fprintf(out, "%s", type_kind_str(sym->paramlist.items[i]));
         }
-        else fprintf(out, "%s, ", type_kind_str(sym->params[i]));
+        else fprintf(out, "%s, ", type_kind_str(sym->paramlist.items[i]));
     }
     fprintf(out, "]\n");
+    // @claude-end
     
     fprintf(out, "%*s", fd * TABSIZE, "");
     fprintf(out, "builtin_kind: %s\n", builtin_kind_str(sym->builtin_kind));

@@ -3,6 +3,9 @@
 #include "utils/darray.h"
 #include "lexer/lexer.h"
 #include "parser/parser.h"
+// @claude-begin
+#include "sema/sema.h"
+// @claude-end
 
 struct CompileResult sprache_compile(
     struct Arena* a, struct CompileOptions options
@@ -21,6 +24,16 @@ struct CompileResult sprache_compile(
         node_dump(&root, options.out);
         goto done;
     }
+
+    // @claude-begin
+    // sema on a broken tree only produces follow-up diagnostics
+    if (diag_has_errors(&res.diags)) goto done;
+    sema_check(a, &root, &res.diags);
+    if (options.stop_after == SPRACHE_STAGE_SEMA) {
+        node_dump(&root, options.out);
+        goto done;
+    }
+    // @claude-end
 
 done:
     if (diag_has_errors(&res.diags)) {

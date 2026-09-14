@@ -8,6 +8,7 @@
 #include <stdio.h>
 
 #define SYMBOLLIST_INIT_CAPACITY 10
+#define PARAMTYPELIST_INIT_CAPACITY 10
 
 enum SymbolKind {
     SYM_INVALID,
@@ -21,6 +22,12 @@ enum SymbolKind {
 /// On invalid kind (not SYM_INVALID), returns NULL.
 const char* symbol_kind_str(enum SymbolKind sym_kind);
 
+struct ParamTypeList {
+    enum TypeKind* items;
+    size_t count;
+    size_t capacity;
+};
+
 struct Symbol {
     enum SymbolKind kind;
     const char* name;
@@ -29,9 +36,7 @@ struct Symbol {
     struct SourceLoc loc_decl;
 
     /// @brief For SYM_BUILTIN and SYM_FUNC
-    size_t param_count;
-    /// @brief For SYM_BUILTIN and SYM_FUNC
-    const enum TypeKind* params;
+    struct ParamTypeList paramlist;
     /// @brief For SYM_BUILTIN
     enum BuiltinKind builtin_kind;
 };

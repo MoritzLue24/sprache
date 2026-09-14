@@ -2,3 +2,19 @@
 DIAG(DIAG_UNEXPECTED_TOKEN, "unexpected token: '%s'")
 DIAG(DIAG_DIFFERENT_TOKEN_EXPECTED, "expected: '%s', got: '%s'")
 DIAG(DIAG_EXPRESSION_EXPECTED, "expected an expression, got: '%s'")
+
+DIAG(DIAG_INVALID_TYPE, "type '%s' does not exist")
+DIAG(DIAG_REDECLARATION, "symbol '%s' already declared")
+DIAG(DIAG_TYPE_MISMATCH, "type '%s' expected, got '%s'")
+DIAG(DIAG_INVALID_TYPE_USAGE, "type '%s' cannot be used in this context")
+DIAG(DIAG_ILLEGAL_OPERATION_ON_TYPE, "operation not allowed on type %s")
+// @claude-begin
+DIAG(DIAG_UNDECLARED, "symbol '%s' is not declared")
+DIAG(DIAG_NOT_A_VARIABLE, "symbol '%s' is not a variable")
+DIAG(DIAG_NOT_A_FUNCTION, "symbol '%s' is not a function")
+DIAG(DIAG_UNKNOWN_BUILTIN, "builtin '@%s' does not exist")
+DIAG(DIAG_ARG_COUNT_MISMATCH, "'%s' expects %zu arguments, got %zu")
+DIAG(DIAG_NOT_ASSIGNABLE, "expression is not assignable")
+DIAG(DIAG_LITERAL_OUT_OF_RANGE, "literal '%s' does not fit into type '%s'")
+DIAG(DIAG_MISSING_RETURN, "function '%s' does not return on every path")
+// @claude-end

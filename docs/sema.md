@@ -6,17 +6,19 @@ document covers the decisions behind them.
 
 ## Status
 
+<!-- @claude-begin -->
 | Part | State |
 | --- | --- |
-| `type/` — `enum TypeKind` and its queries | done, except `type_fits` (TODO) |
+| `type/` — `enum TypeKind` and its queries | done |
 | `builtin/` — `enum BuiltinKind` and its queries | done |
 | `sema/symbols.h`, `symtable.c`, `symbol.c`, `symbol_dump.c` | done |
-| `sema/sema.c` — the checker itself | **stub**, only builds `struct Sema` |
-| Wiring in `compile/compile.c` | **not done**, `-s SEMA` produces nothing |
+| `sema/sema.c` — the checker itself | done, no unit tests yet |
+| Wiring in `compile/compile.c` | done, sema only runs if parsing succeeded |
 | AST annotation fields + dump | done |
 
 Everything under [Design contracts](#design-contracts-for-semac) is
-decided but **not yet implemented**.
+implemented in `sema.c`.
+<!-- @claude-end -->
 
 ---
 
@@ -220,6 +222,10 @@ scope.
 yielding a variable of size 0. `fn f() -> none` is presumably wanted;
 the other two are not. Rejecting them needs an explicit check — nothing
 prevents it automatically.
+<!-- @claude-begin -->
+That check is `resolve_type(..., is_ret_type)`. An operand of type
+`none` is rejected by `check_operand()`.
+<!-- @claude-end -->
 
 **There is no `bool`.** Comparison operators (`==`, `<`, …) are lexed but
 not in `binop.def` yet. When they arrive they need a result type, and
@@ -266,8 +272,9 @@ read, so the padding is never looked at.
 
 ## Design contracts for `sema.c`
 
-Not implemented yet. Recorded here so the stub is finished the way it was
-designed.
+<!-- @claude-begin -->
+The rules `sema.c` is built on. Change them here first.
+<!-- @claude-end -->
 
 ### Two passes
 
@@ -320,13 +327,32 @@ the diagnostic was issued at the declaration.
 
 ### Literals have no type of their own
 
-A literal adopts the expected type. With no expectation it falls back to
-`uint8` — the lexer only ever produces non-negative literals. Unary `-`
-asks its operand for `int8` when nothing above asked for anything.
+<!-- @claude-begin -->
+A literal adopts the expected type. With no expectation — or an
+expectation of `none`, which cannot hold one — it falls back to `uint8`;
+the lexer only ever produces non-negative literals. Unary `-` asks its
+operand for `int8` when nothing above asked for anything **and** the
+operand has no type of its own, and it rejects unsigned operands, so
+`var a: uint8 = -1;` is an error.
 
-In a binary expression with no context, the **non-literal** operand is
-checked first and its type becomes the expectation for the literal, so
-`1 + a` behaves like `a + 1`.
+"No type of its own" (`expr_is_untyped()`) means built from literals
+only: a literal, a unary over one, or a non-assignment binary over two.
+In a binary expression with no context, the operand that **has** a type
+is checked first and its type becomes the expectation for the other, so
+`1 + a` behaves like `a + 1`, and so does `-1 + a`.
+
+Known gap: `-128` does not fit `int8`, because `128` is checked against
+`int8` before the negation is applied.
+
+### Assignment targets
+
+`check_assign()` checks the target without an expectation, then asks
+`expr_is_modifiable_lvalue()`, which today accepts only an identifier
+resolving to a `SYM_VAR`. The test is skipped when the target already
+came back `TYPE_INVALID`, so `x = 1` with an undeclared or non-variable
+`x` yields exactly one diagnostic. The assignment's type is the target's
+type; `check_expr()` compares it against the context like any other.
+<!-- @claude-end -->
 
 ### A function must return on every path
 
@@ -340,12 +366,12 @@ will need.
 
 ## Open items
 
-- `type_fits()` is a stub returning `false`.
-- No unit tests for `type/`, `builtin/` or `sema/`. The symbol table is
-  finished and testable today, independently of `sema.c`.
-- `sema_check()` is undocumented; it mutates the AST in place, only
-  appends to the `DiagList`, and must only run on a tree that parsed
-  without errors — a broken tree produces cascades of bogus type errors.
+<!-- @claude-begin -->
+- No unit tests for `type/`, `builtin/` or `sema/`.
+- A `-> none` function is exempt from the return-path check, but
+  `return` always takes an expression, so it can only return the result
+  of another `none` call.
+<!-- @claude-end -->
 - Warnings (e.g. unreachable code after `return`) are impossible until
   `struct Diag` gains a severity field; `diag_has_errors()` counts every
   diagnostic as an error.

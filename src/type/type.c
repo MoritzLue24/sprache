@@ -1,5 +1,8 @@
 #include "type/type.h"
 #include <string.h>
+// @claude-begin
+#include <stdlib.h>
+// @claude-end
 #include <stdint.h>
 #include <errno.h>
 
@@ -8,6 +11,17 @@ const char* type_kind_str(enum TypeKind type)
     switch (type) {
         case TYPE_INVALID: return "TYPE_INVALID";
 #define TYPE(kind, ...) case kind: return #kind;
+#include "type/type.def"
+#undef TYPE
+    }
+    return NULL;
+}
+
+const char* type_kind_spelling(enum TypeKind type)
+{
+    switch (type) {
+        case TYPE_INVALID: return NULL;
+#define TYPE(kind, spelling, ...) case kind: return spelling;
 #include "type/type.def"
 #undef TYPE
     }
