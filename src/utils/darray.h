@@ -4,6 +4,8 @@
 #include "utils/arena.h"
 #include <string.h>
 
+#define DARRAY_INIT_BACKUP_CAPACITY 10
+
 #define DARRAY_INIT(arena, list, init_cap) do { \
     (list)->items = ARENA_CALLOC_LIST( \
         (arena), (init_cap), __typeof__(*(list)->items) \
@@ -14,7 +16,8 @@
 
 #define DARRAY_ENSURE(arena, list) do { \
     if ((list)->count >= (list)->capacity) { \
-        size_t new_cap_ = (list)->capacity * 2; \
+        size_t new_cap_ = (list)->capacity != 0 \
+            ? (list)->capacity * 2 : DARRAY_INIT_BACKUP_CAPACITY; \
         __typeof__(*(list)->items)* new_items_ = ARENA_CALLOC_LIST( \
             (arena), new_cap_, __typeof__(*(list)->items) \
         ); \
