@@ -17,7 +17,7 @@
 <expression-statement>              ::= <expression> ;
 <variable-declaration-statement>    ::= var <ident>: <type> ;
 <variable-definition-statement>     ::= var <ident>: <type> = <expression> ;
-<return-statement>                  ::= return <expression> ;
+<return-statement>                  ::= return { <expression> }? ;
 
 <type>  ::= <ident> // uint8, int8 are pre-declared, and the only valid types
 

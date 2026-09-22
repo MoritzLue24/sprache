@@ -340,8 +340,13 @@ static struct Node* parse_return(struct Parser* p)
     struct Node* n = ARENA_CALLOC(p->a, struct Node);
     node_init(n, NODE_RETURN, tk_return.loc, OP_INVALID, NULL);
 
-    n->ret.expr = parse_expr(p);
-    if (n->ret.expr == NULL) return NULL;
+    if (!check(p, TK_SEMICOLON)) {
+        n->ret.expr = parse_expr(p);
+        if (n->ret.expr == NULL) return NULL;
+    }
+    else {
+        n->ret.expr = NULL;
+    }
 
     expect(p, TK_SEMICOLON);
     return n;

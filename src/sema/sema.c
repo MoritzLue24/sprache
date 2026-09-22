@@ -42,10 +42,11 @@ static void check_block(struct Sema* s, struct Node* n);
 static void check_var_decl(struct Sema* s, struct Node* n);
 static void check_var_def(struct Sema* s, struct Node* n);
 static void check_return(struct Sema* s, struct Node* n);
-/// @returns true if control can never reach the end of the statement.
-/// @note Switches over the statement kind, so 'if' and 'while' slot in as
-/// further cases once they exist.
-static bool stmt_always_returns(const struct Node* n);
+/// @brief iterates through all child nodes (if NODE_BLOCK),
+/// til a return is found.
+/// @param out_ret_node the return node, set by callee
+/// @returns True if a return statement has been found.
+static bool find_stmt_return(const struct Node* n, struct Node* out_ret_node);
 
 /// @brief Checks an expression against the expected type, and annotates the
 /// whole subtree. The only place where two types are compared.
@@ -228,8 +229,20 @@ static void check_func_def(struct Sema* s, struct Node* n)
     for (size_t i = 0; i < n->func_def.body->block.nl.count; i++) {
         check_statement(s, n->func_def.body->block.nl.items[i]);
     }
-    if (n->type != TYPE_NONE && !stmt_always_returns(n->func_def.body)) {
-        diag_add(s->a, s->dl, DIAG_MISSING_RETURN, n->loc, n->value);
+
+    struct Node ret_node;
+
+    if (!find_stmt_return(n->func_def.body, &ret_node)) {
+        if (n->type != TYPE_NONE) {
+            diag_add(s->a, s->dl, DIAG_MISSING_RETURN, n->loc, n->value);
+        }
+    }
+    else if (ret_node.ret.expr == NULL && n->type != TYPE_NONE) {
+        diag_add(
+            s->a, s->dl, DIAG_TYPE_MISMATCH, ret_node.loc,
+            type_kind_spelling(n->type), 
+            type_kind_spelling(TYPE_NONE)
+        );
     }
 
     symtable_exit_scope(&s->st);
@@ -290,18 +303,27 @@ static void check_var_def(struct Sema* s, struct Node* n)
 static void check_return(struct Sema* s, struct Node* n)
 {
     assert(n->kind == NODE_RETURN);
-    check_expr(s, n->ret.expr, s->cur_func->type);
+    // not all return statements must return something
+    if (n->ret.expr != NULL) {
+        check_expr(s, n->ret.expr, s->cur_func->type);
+    }
 }
 
-static bool stmt_always_returns(const struct Node* n)
+static bool find_stmt_return(const struct Node* n, struct Node* out_ret_node)
 {
     switch (n->kind) {
-        case NODE_RETURN: return true;
+        case NODE_RETURN:
+            *out_ret_node = *n;
+            return true;
+
         case NODE_BLOCK:
             for (size_t i = 0; i < n->block.nl.count; i++) {
-                if (stmt_always_returns(n->block.nl.items[i])) return true;
+                if (find_stmt_return(n->block.nl.items[i], out_ret_node)) {
+                    return true;
+                }
             }
             return false;
+
         default: return false;
     }
 }
